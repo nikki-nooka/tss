@@ -1,0 +1,135 @@
+{
+  "candidates": [
+    {
+      "id": "cand-1",
+      "fullName": "Rahul Sharma",
+      "gender": "Male",
+      "dob": "2001-08-15",
+      "mobile": "9876543210",
+      "email": "rahul.sharma@example.com",
+      "city": "Hyderabad",
+      "state": "Telangana",
+      "country": "India",
+      "highestQualification": "Undergraduate",
+      "currentStatus": "Pursuing",
+      "college": "IIIT Hyderabad",
+      "graduationYear": 2026,
+      "currentRole": "Student / Frontend Intern",
+      "preferredRoles": [
+        "Software Engineer",
+        "UI UX Designer"
+      ],
+      "skills": [
+        "React",
+        "TypeScript",
+        "HTML",
+        "CSS",
+        "JavaScript",
+        "Next.js"
+      ],
+      "experienceLevel": "Fresher",
+      "linkedin": "https://linkedin.com/in/rahul-sharma-demo",
+      "github": "https://github.com/rahul-sharma-demo",
+      "resumePath": "mock-resume.pdf",
+      "resumeName": "Rahul_Sharma_Resume.pdf",
+      "status": "Verified",
+      "memberId": "TSS260601001",
+      "notes": "Strong frontend development skills. Portfolio looks excellent.",
+      "registrationDate": "2026-06-01T10:30:00.000Z"
+    },
+    {
+      "id": "cand-2",
+      "fullName": "Priya Patel",
+      "gender": "Female",
+      "dob": "1999-04-22",
+      "mobile": "8765432109",
+      "email": "priya.patel@example.com",
+      "city": "Mumbai",
+      "state": "Maharashtra",
+      "country": "India",
+      "highestQualification": "Postgraduate",
+      "currentStatus": "Working Professional",
+      "graduationYear": 2021,
+      "currentRole": "Junior Data Analyst",
+      "preferredRoles": [
+        "Data Analyst",
+        "Product Manager"
+      ],
+      "skills": [
+        "Python",
+        "SQL",
+        "Tableau",
+        "Excel",
+        "Data Visualization"
+      ],
+      "experienceLevel": "1-3 Years",
+      "linkedin": "https://linkedin.com/in/priya-patel-demo",
+      "portfolio": "https://priyapatel-demo.dev",
+      "resumePath": "mock-resume.pdf",
+      "resumeName": "Priya_Patel_Resume.pdf",
+      "status": "Pending",
+      "registrationDate": "2026-06-21T08:15:00.000Z"
+    },
+    {
+      "id": "cand-3",
+      "fullName": "Aravind Swamy",
+      "gender": "Male",
+      "dob": "2000-11-05",
+      "mobile": "7654321098",
+      "email": "aravind.swamy@example.com",
+      "city": "Bengaluru",
+      "state": "Karnataka",
+      "country": "India",
+      "highestQualification": "Undergraduate",
+      "currentStatus": "Graduated",
+      "college": "VTU Bengaluru",
+      "graduationYear": 2024,
+      "currentRole": "Unemployed Graduate",
+      "preferredRoles": [
+        "Software Engineer",
+        "Operations"
+      ],
+      "skills": [
+        "Java",
+        "C++",
+        "SQL",
+        "Git",
+        "Linux"
+      ],
+      "experienceLevel": "Fresher",
+      "linkedin": "https://linkedin.com/in/aravind-swamy-demo",
+      "github": "https://github.com/aravindswamy-demo",
+      "resumePath": "mock-resume.pdf",
+      "resumeName": "Aravind_Resume.pdf",
+      "status": "Under Review",
+      "notes": "Academic details verified. Checking resume project links.",
+      "registrationDate": "2026-06-20T14:45:00.000Z"
+    }
+  ],
+  "forwards": [],
+  "messages": [
+    {
+      "id": "msg-1",
+      "name": "Anjali Gupta",
+      "email": "anjali@startup.com",
+      "phone": "9000000001",
+      "message": "Looking to hire software engineering interns from your network. How do we proceed?",
+      "submittedAt": "2026-06-20T12:00:00.000Z"
+    }
+  ],
+  "activityLogs": [
+    {
+      "id": "log-1",
+      "adminUser": "System",
+      "action": "DB_INITIALIZATION",
+      "details": "Database initialized with initial configuration and mock candidates.",
+      "timestamp": "2026-06-21T15:58:36.479Z"
+    }
+  ],
+  "settings": {
+    "communityMembers": 12500,
+    "recruiterNetwork": 350,
+    "opportunitiesShared": 850,
+    "eventsConducted": 45
+  }
+}

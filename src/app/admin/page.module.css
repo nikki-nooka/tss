@@ -1,0 +1,109 @@
+.loginPage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 9rem); /* Account for navbar/footer */
+  background-color: var(--bg-main);
+  padding: 2rem 1.5rem;
+}
+
+.loginBox {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-xl);
+  padding: 3rem 2.5rem;
+  width: 100%;
+  max-width: 460px;
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+.logoHeader {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+.logoIcon {
+  color: var(--primary);
+  margin-bottom: 0.75rem;
+}
+
+.logoHeader h2 {
+  font-family: var(--font-heading);
+  font-size: 1.75rem;
+  color: var(--secondary);
+  margin-bottom: 0.25rem;
+}
+
+.logoHeader p {
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.inputWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.inputIcon {
+  position: absolute;
+  left: 0.875rem;
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.eyeBtn {
+  position: absolute;
+  right: 0.875rem;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.eyeBtn:hover {
+  color: var(--secondary);
+}
+
+.roleTip {
+  background-color: var(--primary-light);
+  border: 1px solid var(--border-focus);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  margin-top: 1.5rem;
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  color: #312e81;
+}
+
+.roleTip span {
+  font-weight: 700;
+  display: block;
+  margin-bottom: 0.35rem;
+}
+
+.roleTip ul {
+  padding-left: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+  margin-right: 0.5rem;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (max-width: 480px) {
+  .loginBox {
+    padding: 2rem 1.5rem;
+  }
+}

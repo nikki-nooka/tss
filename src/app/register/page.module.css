@@ -1,0 +1,482 @@
+.registerPage {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.registerHeader {
+  background: linear-gradient(135deg, #0b0f19 0%, #1e1b4b 100%);
+  color: var(--text-inverse);
+  padding: 4rem 0;
+  text-align: center;
+}
+
+.registerHeader h1 {
+  font-family: var(--font-heading);
+  font-size: 2.5rem;
+  color: var(--text-inverse);
+  margin-bottom: 0.5rem;
+}
+
+.registerHeader p {
+  font-family: var(--font-body);
+  font-size: 1rem;
+  color: #94a3b8;
+}
+
+.formContainer {
+  padding: 4rem 0;
+  background-color: var(--bg-main);
+  flex: 1;
+}
+
+.formCard {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
+  padding: 3.5rem 3rem;
+  max-width: 850px;
+  margin: 0 auto;
+}
+
+/* Stepper styling */
+.stepper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 3.5rem;
+  position: relative;
+}
+
+.stepIndicator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  z-index: 2;
+  position: relative;
+  background-color: var(--bg-card);
+  padding: 0 0.5rem;
+}
+
+.stepNum {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: var(--radius-full);
+  background-color: var(--bg-main);
+  border: 2px solid var(--border-color);
+  color: var(--text-muted);
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 0.875rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition);
+}
+
+.stepName {
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.stepLine {
+  flex: 1;
+  height: 2px;
+  background-color: var(--border-color);
+  margin-top: -1.25rem;
+  z-index: 1;
+}
+
+.active .stepNum {
+  border-color: var(--primary);
+  background-color: var(--primary);
+  color: var(--text-inverse);
+  box-shadow: 0 0 0 4px var(--primary-light);
+}
+
+.active .stepName {
+  color: var(--primary);
+  font-weight: 700;
+}
+
+.completed .stepNum {
+  border-color: var(--success);
+  background-color: var(--success);
+  color: var(--text-inverse);
+}
+
+.completed .stepName {
+  color: var(--success);
+}
+
+/* Step Header */
+.stepHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.stepIcon {
+  color: var(--primary);
+}
+
+.stepHeader h2 {
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  color: var(--secondary);
+}
+
+/* Layout helpers */
+.formRow {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.25rem;
+}
+
+.inputHelp {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 0.25rem;
+}
+
+/* Inline verification inputs */
+.inputWithBtn {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.inputWithBtn input {
+  flex: 1;
+}
+
+.inputWithBtn button {
+  white-space: nowrap;
+  padding: 0 1rem;
+}
+
+.otpGrid {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 1.5rem;
+  align-items: end;
+  background-color: var(--bg-main);
+  padding: 1.25rem;
+  border-radius: var(--radius-lg);
+  margin-bottom: 1.25rem;
+  border: 1px dashed var(--border-color);
+}
+
+.verifiedText {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--success);
+  font-weight: 600;
+  font-size: 0.875rem;
+  padding-bottom: 1.25rem;
+}
+
+/* Roles grid (checkbox select) */
+.rolesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.roleCheckbox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background-color: var(--bg-main);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--secondary-light);
+  transition: var(--transition);
+}
+
+.roleCheckbox input {
+  display: none;
+}
+
+.roleCheckbox:hover {
+  border-color: var(--border-focus);
+  background-color: var(--primary-light);
+}
+
+.checked {
+  background-color: var(--primary-light);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+/* Skills Chip input styling */
+.skillInputBox {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.skillsContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  min-height: 40px;
+  background-color: var(--bg-main);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+}
+
+.skillChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background-color: var(--primary);
+  color: var(--text-inverse);
+  padding: 0.25rem 0.625rem;
+  border-radius: var(--radius-full);
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.removeSkillBtn {
+  background: none;
+  border: none;
+  color: var(--text-inverse);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  opacity: 0.8;
+}
+
+.removeSkillBtn:hover {
+  opacity: 1;
+}
+
+/* File Upload drag area */
+.uploadArea {
+  position: relative;
+  width: 100%;
+}
+
+.fileInputHidden {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.uploadLabel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 2.5rem 2rem;
+  border: 2px dashed var(--border-color);
+  background-color: var(--bg-main);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  text-align: center;
+  transition: var(--transition);
+}
+
+.uploadArea:hover .uploadLabel {
+  border-color: var(--primary);
+  background-color: var(--primary-light);
+}
+
+.uploadIcon {
+  color: var(--text-muted);
+}
+
+.uploadArea:hover .uploadIcon {
+  color: var(--primary);
+}
+
+.uploadedName {
+  font-family: var(--font-heading);
+  font-size: 1rem;
+  color: var(--secondary);
+}
+
+.uploadedSize {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+/* Review data card */
+.reviewCard {
+  background-color: var(--bg-main);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+  margin-bottom: 2rem;
+}
+
+.reviewCard h3 {
+  font-family: var(--font-heading);
+  font-size: 1.15rem;
+  margin-bottom: 1.25rem;
+}
+
+.reviewGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+}
+
+.reviewGrid span {
+  color: var(--text-muted);
+  display: block;
+}
+
+.reviewGrid strong {
+  color: var(--secondary);
+}
+
+.declarationBox {
+  margin: 1.5rem 0;
+}
+
+.declarationLabel {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  color: var(--secondary-light);
+  line-height: 1.5;
+  cursor: pointer;
+}
+
+.declarationLabel input {
+  margin-top: 0.2rem;
+}
+
+/* Form Actions row */
+.actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 2.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border-color);
+}
+
+/* Success step page styling */
+.successContent {
+  text-align: center;
+  padding: 2rem 1rem;
+}
+
+.successIconCircle {
+  width: 5rem;
+  height: 5rem;
+  border-radius: var(--radius-full);
+  background-color: var(--success-light);
+  color: var(--success);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+.successContent h2 {
+  font-family: var(--font-heading);
+  font-size: 1.85rem;
+  color: var(--secondary);
+  margin-bottom: 0.75rem;
+}
+
+.successContent p {
+  color: var(--text-muted);
+  max-width: 500px;
+  margin: 0 auto 2.5rem auto;
+}
+
+.nextStepsCard {
+  background-color: var(--bg-main);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+  text-align: left;
+  max-width: 600px;
+  margin: 0 auto 2.5rem auto;
+}
+
+.nextStepsCard h4 {
+  font-family: var(--font-heading);
+  font-size: 1.05rem;
+  margin-bottom: 1rem;
+  color: var(--secondary);
+}
+
+.nextStepsCard ul {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding-left: 1.25rem;
+}
+
+.nextStepsCard li {
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  color: var(--secondary-light);
+  line-height: 1.5;
+}
+
+.successActions {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+@media (max-width: 768px) {
+  .formCard {
+    padding: 2.5rem 1.5rem;
+  }
+  
+  .stepper {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .stepLine {
+    display: none;
+  }
+  
+  .stepIndicator {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  
+  .otpGrid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .reviewGrid {
+    grid-template-columns: 1fr;
+  }
+}

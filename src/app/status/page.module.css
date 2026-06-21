@@ -1,0 +1,470 @@
+.statusPage {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.statusHeader {
+  background: linear-gradient(135deg, #0b0f19 0%, #1e1b4b 100%);
+  color: var(--text-inverse);
+  padding: 4rem 0;
+  text-align: center;
+}
+
+.statusHeader h1 {
+  font-family: var(--font-heading);
+  font-size: 2.5rem;
+  color: var(--text-inverse);
+  margin-bottom: 0.5rem;
+}
+
+.statusHeader p {
+  font-family: var(--font-body);
+  font-size: 1rem;
+  color: #94a3b8;
+}
+
+.subTitle {
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.tagline {
+  font-family: var(--font-body);
+  font-size: 1rem;
+  color: #94a3b8;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* Content */
+.statusContent {
+  padding: 4rem 0;
+  background-color: var(--bg-main);
+  flex: 1;
+}
+
+.statusCard {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
+  padding: 3rem;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* Search Form */
+.searchForm {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2.5rem;
+}
+
+.searchInputWrapper {
+  position: relative;
+  flex: 1;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+}
+
+.statusSearchInput {
+  width: 100%;
+  padding: 0.875rem 1rem 0.875rem 3rem;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  color: var(--text-main);
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  outline: none;
+  transition: var(--transition);
+}
+
+.statusSearchInput:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+}
+
+/* Help instruction */
+.searchInstructions {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 1.25rem;
+  background-color: var(--bg-main);
+  border-radius: var(--radius-md);
+  font-family: var(--font-body);
+  font-size: 0.825rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.helpIcon {
+  color: var(--primary);
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+}
+
+/* Results */
+.loadingState {
+  text-align: center;
+  padding: 3rem 0;
+}
+
+.spinner {
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 4px solid var(--border-color);
+  border-top-color: var(--primary);
+  border-radius: var(--radius-full);
+  animation: spin 1s linear infinite;
+  display: inline-block;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.noResultCard {
+  text-align: center;
+  padding: 2.5rem 1.5rem;
+  background-color: var(--danger-light);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: var(--radius-lg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.noResultCard h3 {
+  color: #b91c1c;
+}
+
+.noResultCard p {
+  max-width: 480px;
+  font-size: 0.875rem;
+  color: #7f1d1d;
+  margin-bottom: 0.5rem;
+}
+
+.alertIconRed {
+  color: var(--danger);
+}
+
+/* Status alerts */
+.statusAlert {
+  display: flex;
+  gap: 1.25rem;
+  align-items: flex-start;
+  padding: 1.75rem;
+  border-radius: var(--radius-lg);
+  margin-bottom: 2.5rem;
+}
+
+.alertIcon {
+  flex-shrink: 0;
+  margin-top: 0.15rem;
+}
+
+.statusAlert h3 {
+  font-family: var(--font-heading);
+  font-size: 1.15rem;
+  margin-bottom: 0.5rem;
+  font-weight: 700;
+}
+
+.statusAlert p {
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+.pendingAlert {
+  background-color: var(--warning-light);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  color: #78350f;
+}
+.pendingAlert .alertIcon {
+  color: var(--warning);
+}
+
+.reviewAlert {
+  background-color: var(--primary-light);
+  border: 1px solid rgba(79, 70, 229, 0.2);
+  color: #312e81;
+}
+.reviewAlert .alertIcon {
+  color: var(--primary);
+}
+
+.rejectedAlert {
+  background-color: var(--danger-light);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  color: #7f1d1d;
+}
+.rejectedAlert .alertIcon {
+  color: var(--danger);
+}
+
+.verifiedAlert {
+  background-color: var(--success-light);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  color: #064e3b;
+}
+.verifiedAlert .alertIcon {
+  color: var(--success);
+}
+
+.contactSupportText {
+  margin-top: 0.5rem;
+  font-weight: 600;
+}
+
+.contactSupportText a {
+  text-decoration: underline;
+  color: #b91c1c;
+}
+
+/* Membership Card Wrapper */
+.membershipCardWrapper {
+  display: flex;
+  justify-content: center;
+  margin: 2rem 0;
+}
+
+/* VIRTUAL MEMBER CARD DESIGN */
+.memberCardVirtual {
+  width: 100%;
+  max-width: 440px;
+  height: 270px;
+  background: linear-gradient(135deg, #0b0f19 0%, #1e1b4b 50%, #0f172a 100%);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: var(--radius-xl);
+  padding: 1.5rem;
+  color: #f1f5f9;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: var(--shadow-xl), 0 10px 40px -10px rgba(79, 70, 229, 0.5);
+  position: relative;
+  overflow: hidden;
+}
+
+.meshBg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: 
+    radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 0),
+    radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 0);
+  background-size: 16px 16px;
+  background-position: 0 0, 8px 8px;
+  opacity: 0.6;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 2;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 0.75rem;
+}
+
+.cardLogo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.cardLogoIcon {
+  color: var(--accent);
+}
+
+.cardLogo h4 {
+  font-family: var(--font-heading);
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: 0.05em;
+  line-height: 1.1;
+}
+
+.cardLogo span {
+  font-size: 0.55rem;
+  color: #94a3b8;
+  letter-spacing: 0.08em;
+}
+
+.cardBadge {
+  font-size: 0.75rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--primary) 100%);
+  color: #ffffff;
+  padding: 0.2rem 0.5rem;
+  border-radius: var(--radius-sm);
+}
+
+.cardBody {
+  z-index: 2;
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.candidateDetails {
+  display: flex;
+  flex-direction: column;
+}
+
+.detailsLabel {
+  font-size: 0.55rem;
+  font-weight: 600;
+  color: #94a3b8;
+  letter-spacing: 0.08em;
+}
+
+.detailsValue {
+  font-family: var(--font-heading);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: -0.01em;
+}
+
+.detailsValueShort {
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #e2e8f0;
+}
+
+.memberIdCode {
+  font-family: monospace;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 0.1em;
+}
+
+.cardRow {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 0.5rem;
+}
+
+.cardFooter {
+  z-index: 2;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 0.75rem;
+}
+
+.barcodeLines {
+  display: flex;
+  align-items: flex-end;
+  height: 20px;
+  gap: 1px;
+}
+
+.barcodeLine {
+  background-color: #ffffff;
+  height: 100%;
+}
+
+.securityCheckText {
+  font-size: 0.55rem;
+  font-weight: 700;
+  color: var(--success);
+  letter-spacing: 0.08em;
+  background-color: rgba(16, 185, 129, 0.15);
+  padding: 0.15rem 0.4rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.verifiedActions {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+/* Print Styling optimization */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  
+  .statusPage, .statusPage * {
+    visibility: hidden;
+  }
+
+  #print-area, #print-area * {
+    visibility: visible;
+  }
+  
+  #print-area {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%) scale(1.3);
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    box-shadow: none !important;
+  }
+  
+  .memberCardVirtual {
+    border: 1px solid #000000 !important;
+    box-shadow: none !important;
+    background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%) !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
+
+@media (max-width: 600px) {
+  .searchForm {
+    flex-direction: column;
+  }
+  
+  .statusCard {
+    padding: 2rem 1.25rem;
+  }
+  
+  .verifiedActions {
+    flex-direction: column;
+  }
+  
+  .memberCardVirtual {
+    height: auto;
+  }
+  
+  .cardRow {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+}

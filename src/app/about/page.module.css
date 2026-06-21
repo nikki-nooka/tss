@@ -1,0 +1,236 @@
+.aboutPage {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+/* Header Banner */
+.aboutHeader {
+  background: linear-gradient(135deg, #0b0f19 0%, #1e1b4b 100%);
+  color: var(--text-inverse);
+  padding: 5rem 0;
+  text-align: center;
+}
+
+.aboutHeader h1 {
+  font-family: var(--font-heading);
+  font-size: 2.75rem;
+  color: var(--text-inverse);
+  margin-top: 0.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.subTitle {
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.tagline {
+  font-family: var(--font-body);
+  font-size: 1.1rem;
+  line-height: 1.6;
+  color: #94a3b8;
+  max-width: 750px;
+  margin: 0 auto;
+}
+
+/* Intro Section */
+.introSection {
+  padding: 5rem 0;
+  background-color: #ffffff;
+}
+
+.introContainer {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  align-items: center;
+  gap: 4rem;
+}
+
+.introContent h2 {
+  font-family: var(--font-heading);
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+.introContent p {
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  line-height: 1.7;
+  margin-bottom: 1.25rem;
+}
+
+.introVisual {
+  display: flex;
+  justify-content: center;
+}
+
+.shieldBox {
+  background-color: var(--primary-light);
+  border: 1px solid var(--border-focus);
+  border-radius: var(--radius-xl);
+  padding: 3rem 2rem;
+  text-align: center;
+  max-width: 320px;
+  box-shadow: var(--shadow-premium);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.shieldIcon {
+  color: var(--primary);
+}
+
+.shieldBox h3 {
+  font-family: var(--font-heading);
+  color: var(--secondary);
+  font-size: 1.25rem;
+}
+
+.shieldBox p {
+  font-size: 0.825rem;
+  color: var(--secondary-light);
+  line-height: 1.5;
+}
+
+/* Mission & Vision */
+.missionVision {
+  padding: 5rem 0;
+  background-color: var(--bg-main);
+  border-top: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.mvContainer {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2.5rem;
+}
+
+.mvCard {
+  padding: 3rem 2.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.iconBg {
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: var(--radius-md);
+  background-color: var(--primary-light);
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mvCard h2 {
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  color: var(--secondary);
+}
+
+.mvCard p {
+  font-family: var(--font-body);
+  font-size: 0.925rem;
+  color: var(--text-muted);
+  line-height: 1.7;
+}
+
+/* Eligible Members */
+.membersSection {
+  padding: 5rem 0;
+  background-color: #ffffff;
+}
+
+.sectionHeader {
+  text-align: center;
+  max-width: 650px;
+  margin: 0 auto 4rem auto;
+}
+
+.sectionSub {
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--primary);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.membersGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.75rem;
+}
+
+.memberCard {
+  padding: 2rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.memberCardHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.checkIcon {
+  color: var(--success);
+  flex-shrink: 0;
+}
+
+.memberCard h3 {
+  font-family: var(--font-heading);
+  font-size: 1.125rem;
+  color: var(--secondary);
+}
+
+.memberCard p {
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+@media (max-width: 900px) {
+  .introContainer {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+  }
+  
+  .introVisual {
+    order: -1;
+  }
+  
+  .mvContainer {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+  
+  .membersGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .membersGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .aboutHeader h1 {
+    font-size: 2.25rem;
+  }
+}
