@@ -1,7 +1,5 @@
 import { NextResponse } from 'next/server';
 import { getCandidates, insertCandidate, Candidate } from '@/lib/db';
-import fs from 'fs';
-import path from 'path';
 
 export async function POST(request: Request) {
   try {
@@ -179,16 +177,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'File size exceeds 5MB limit.' }, { status: 400 });
     }
 
-    // Save File Securely in /uploads/resumes
+    // Convert PDF file buffer to Base64 to store in database (completely serverless persistent storage)
     const buffer = Buffer.from(await resume.arrayBuffer());
-    const cleanFileName = `${Date.now()}-${resume.name.replace(/[^a-zA-Z0-9.\-_]/g, '_')}`;
-    const uploadPath = path.join(process.cwd(), 'uploads', 'resumes');
-    
-    if (!fs.existsSync(uploadPath)) {
-      fs.mkdirSync(uploadPath, { recursive: true });
-    }
-
-    fs.writeFileSync(path.join(uploadPath, cleanFileName), buffer);
+    const base64Resume = buffer.toString('base64');
 
     // Create candidate record
     const newCandidate: Candidate = {
@@ -214,7 +205,7 @@ export async function POST(request: Request) {
       portfolio: portfolio || undefined,
       instagram: instagram || undefined,
       xTwitter: xTwitter || undefined,
-      resumePath: cleanFileName,
+      resumePath: base64Resume, // Store base64 string directly
       resumeName: resume.name,
       status: 'Pending',
       registrationDate: new Date().toISOString()
