@@ -60,6 +60,40 @@ export async function POST(request: Request) {
       }
     }
 
+    if (action === 'phone_email_verify') {
+      const { user_json_url } = body;
+      if (!user_json_url) {
+        return NextResponse.json({ error: 'user_json_url is required' }, { status: 400 });
+      }
+
+      // Fetch user details from phone.email secure url
+      const res = await fetch(user_json_url);
+      if (!res.ok) {
+        return NextResponse.json({ error: 'Failed to verify phone number via Phone.email API' }, { status: 400 });
+      }
+
+      const data = await res.json();
+      const phone = data.user_phone_number;
+
+      if (!phone) {
+        return NextResponse.json({ error: 'Phone number not found in verification payload' }, { status: 400 });
+      }
+
+      // Check duplicates
+      const phoneClean = phone.replace(/\D/g, '').slice(-10);
+      const exists = candidates.some(
+        (c) => c.mobile.replace(/\D/g, '') === phoneClean && (c.status === 'Verified' || c.status === 'Pending' || c.status === 'Under Review')
+      );
+      if (exists) {
+        return NextResponse.json({ error: 'This mobile number is already registered.' }, { status: 400 });
+      }
+
+      return NextResponse.json({
+        success: true,
+        phone: phoneClean
+      });
+    }
+
     return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
   } catch (error) {
     console.error('Failed in OTP handling:', error);

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import styles from './page.module.css';
 import { 
@@ -35,6 +35,51 @@ const QUALIFICATION_OPTIONS = [
 const STATUS_OPTIONS = [
   'Pursuing', 'Graduated', 'Working Professional', 'Founder', 'Freelancer', 'Recruiter'
 ];
+
+// Define global window type for Phone.email callback
+declare global {
+  interface Window {
+    phoneEmailListener?: (userObj: { user_json_url: string }) => void;
+  }
+}
+
+interface PhoneEmailWidgetProps {
+  onVerified: (userJsonUrl: string) => void;
+}
+
+const PhoneEmailWidget = React.memo(({ onVerified }: PhoneEmailWidgetProps) => {
+  useEffect(() => {
+    // Bind listener globally
+    window.phoneEmailListener = (userObj) => {
+      if (userObj && userObj.user_json_url) {
+        onVerified(userObj.user_json_url);
+      }
+    };
+
+    // Load widget script dynamically
+    const script = document.createElement('script');
+    script.src = 'https://www.phone.email/sign_in_button_v1.js';
+    script.async = true;
+    document.body.appendChild(script);
+
+    return () => {
+      // Cleanup script and global handler
+      if (document.body.contains(script)) {
+        document.body.removeChild(script);
+      }
+      delete window.phoneEmailListener;
+    };
+  }, [onVerified]);
+
+  return (
+    <div 
+      className="pe_signin_button" 
+      data-client-id="15242599291320279332"
+      style={{ display: 'inline-block', width: '100%' }}
+    ></div>
+  );
+});
+PhoneEmailWidget.displayName = 'PhoneEmailWidget';
 
 export default function Register() {
   const toast = useToast();
@@ -164,6 +209,41 @@ export default function Register() {
     setResumeFile(file);
     toast.success(`Resume uploaded: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`);
   };
+
+  // --- Phone.email Verification Callback ---
+  const handlePhoneEmailVerified = React.useCallback(async (user_json_url: string) => {
+    setPhoneOtpState(prev => ({ ...prev, loading: true }));
+    try {
+      const res = await fetch('/api/verify-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'phone_email_verify',
+          user_json_url
+        })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        const rawPhone = data.phone || '';
+        const tenDigitPhone = rawPhone.replace(/\D/g, '').slice(-10);
+        
+        setFormData(prev => ({ ...prev, mobile: tenDigitPhone }));
+        setPhoneOtpState(prev => ({
+          ...prev,
+          verified: true,
+          loading: false
+        }));
+        toast.success(`Phone verified successfully: ${tenDigitPhone}`);
+      } else {
+        toast.error(data.error || 'Failed to verify phone number.');
+        setPhoneOtpState(prev => ({ ...prev, loading: false }));
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error('Verification connection failed.');
+      setPhoneOtpState(prev => ({ ...prev, loading: false }));
+    }
+  }, [toast]);
 
   // --- OTP Verification Logic ---
   
@@ -507,56 +587,30 @@ export default function Register() {
                 </div>
 
                 {/* Mobile & OTP Block */}
-                <div className={styles.otpGrid}>
-                  <div className="form-group">
+                <div className={styles.otpGrid} style={{ gridTemplateColumns: '1fr' }}>
+                  <div className="form-group" style={{ marginBottom: 0 }}>
                     <label className="form-label">Mobile Number <span className="required">*</span></label>
                     <div className={styles.inputWithBtn}>
                       <input
                         type="tel"
                         name="mobile"
-                        disabled={phoneOtpState.verified}
+                        readOnly={true}
                         value={formData.mobile}
-                        onChange={handleChange}
-                        placeholder="10-digit Indian number"
+                        placeholder={phoneOtpState.verified ? formData.mobile : "Verified via Phone.email"}
                         className="form-input"
                         required
                       />
-                      <button
-                        type="button"
-                        disabled={phoneOtpState.verified || phoneOtpState.loading || formData.mobile.length !== 10}
-                        onClick={() => sendOtp('phone')}
-                        className="btn btn-secondary btn-sm"
-                      >
-                        {phoneOtpState.loading ? '...' : phoneOtpState.sent ? 'Resend' : 'Verify'}
-                      </button>
+                      {phoneOtpState.verified && (
+                        <div className={styles.verifiedText} style={{ paddingBottom: 0, display: 'flex', alignItems: 'center', whiteSpace: 'nowrap' }}>
+                          <Check size={16} /> Mobile Number Verified
+                        </div>
+                      )}
                     </div>
                   </div>
 
-                  {phoneOtpState.sent && !phoneOtpState.verified && (
-                    <div className="form-group">
-                      <label className="form-label">Enter Phone OTP <span className="required">*</span></label>
-                      <div className={styles.inputWithBtn}>
-                        <input
-                          type="text"
-                          value={phoneOtpState.inputCode}
-                          onChange={(e) => setPhoneOtpState({ ...phoneOtpState, inputCode: e.target.value })}
-                          placeholder="6-digit code"
-                          className="form-input"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => verifyOtp('phone')}
-                          className="btn btn-primary btn-sm"
-                        >
-                          Submit
-                        </button>
-                      </div>
-                    </div>
-                  )}
-
-                  {phoneOtpState.verified && (
-                    <div className={styles.verifiedText}>
-                      <Check size={16} /> Mobile Number Verified
+                  {!phoneOtpState.verified && (
+                    <div style={{ width: '100%', marginTop: '0.5rem' }}>
+                      <PhoneEmailWidget onVerified={handlePhoneEmailVerified} />
                     </div>
                   )}
                 </div>
