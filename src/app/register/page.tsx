@@ -657,58 +657,58 @@ export default function Register() {
 
                 {/* Mobile & OTP Block */}
                 <div className={styles.otpGrid} style={{ gridTemplateColumns: '1fr' }}>
-                  <div className="form-group" style={{ marginBottom: 0 }}>
-                    <label className="form-label">Mobile Number <span className="required">*</span></label>
-                    <div className={styles.inputWithBtn}>
-                      <input
-                        type="tel"
-                        name="mobile"
-                        readOnly={true}
-                        value={formData.mobile}
-                        placeholder={phoneOtpState.verified ? formData.mobile : "Verified via Phone.email"}
-                        className="form-input"
-                        required
-                      />
-                      {phoneOtpState.verified && (
+                  {phoneOtpState.verified ? (
+                    <div className="form-group" style={{ marginBottom: 0 }}>
+                      <label className="form-label">Mobile Number <span className="required">*</span></label>
+                      <div className={styles.inputWithBtn}>
+                        <input
+                          type="tel"
+                          name="mobile"
+                          readOnly={true}
+                          value={formData.mobile}
+                          className="form-input"
+                          required
+                        />
                         <div className={styles.verifiedText} style={{ paddingBottom: 0, display: 'flex', alignItems: 'center', whiteSpace: 'nowrap' }}>
                           <Check size={16} /> Mobile Number Verified
                         </div>
-                      )}
+                      </div>
                     </div>
-                  </div>
-
-                  {!phoneOtpState.verified && (
-                    <div style={{ width: '100%', marginTop: '0.5rem' }}>
-                      <PhoneEmailWidget onVerified={handlePhoneEmailVerified} />
+                  ) : (
+                    <div className="form-group" style={{ marginBottom: 0 }}>
+                      <label className="form-label">Mobile Number Verification <span className="required">*</span></label>
+                      <div style={{ width: '100%', marginTop: '0.5rem' }}>
+                        <PhoneEmailWidget onVerified={handlePhoneEmailVerified} />
+                      </div>
                     </div>
                   )}
                 </div>
 
                 {/* Email & OTP Block */}
                 <div className={styles.otpGrid} style={{ gridTemplateColumns: '1fr' }}>
-                  <div className="form-group" style={{ marginBottom: 0 }}>
-                    <label className="form-label">Email Address <span className="required">*</span></label>
-                    <div className={styles.inputWithBtn}>
-                      <input
-                        type="email"
-                        name="email"
-                        readOnly={true}
-                        value={formData.email}
-                        placeholder={emailOtpState.verified ? formData.email : "Verified via Phone.email"}
-                        className="form-input"
-                        required
-                      />
-                      {emailOtpState.verified && (
+                  {emailOtpState.verified ? (
+                    <div className="form-group" style={{ marginBottom: 0 }}>
+                      <label className="form-label">Email Address <span className="required">*</span></label>
+                      <div className={styles.inputWithBtn}>
+                        <input
+                          type="email"
+                          name="email"
+                          readOnly={true}
+                          value={formData.email}
+                          className="form-input"
+                          required
+                        />
                         <div className={styles.verifiedText} style={{ paddingBottom: 0, display: 'flex', alignItems: 'center', whiteSpace: 'nowrap' }}>
                           <Check size={16} /> Email Address Verified
                         </div>
-                      )}
+                      </div>
                     </div>
-                  </div>
-
-                  {!emailOtpState.verified && (
-                    <div style={{ width: '100%', marginTop: '0.5rem' }}>
-                      <PhoneEmailEmailWidget onVerified={handleEmailVerified} />
+                  ) : (
+                    <div className="form-group" style={{ marginBottom: 0 }}>
+                      <label className="form-label">Email Address Verification <span className="required">*</span></label>
+                      <div style={{ width: '100%', marginTop: '0.5rem' }}>
+                        <PhoneEmailEmailWidget onVerified={handleEmailVerified} />
+                      </div>
                     </div>
                   )}
                 </div>
