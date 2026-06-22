@@ -572,7 +572,7 @@ export default function AdminDashboard() {
               {/* Table Ledger */}
               <div className={styles.tableCard}>
                 <div className={styles.tableResponsive}>
-                  <table className={styles.cTable}>
+                  <table className={`${styles.cTable} ${styles.candidatesTab}`}>
                     <thead>
                       <tr>
                         <th>TSS ID</th>
@@ -842,7 +842,7 @@ export default function AdminDashboard() {
               <div className={styles.logsContainer}>
                 <div className={styles.tableCard}>
                   <div className={styles.tableResponsive}>
-                    <table className={styles.cTable}>
+                    <table className={`${styles.cTable} ${styles.logsTab}`}>
                       <thead>
                         <tr>
                           <th>Date / Time</th>
