@@ -40,6 +40,7 @@ const STATUS_OPTIONS = [
 declare global {
   interface Window {
     phoneEmailListener?: (userObj: { user_json_url: string }) => void;
+    phoneEmailReceiver?: (userObj: { user_json_url: string }) => void;
   }
 }
 
@@ -80,6 +81,40 @@ const PhoneEmailWidget = React.memo(({ onVerified }: PhoneEmailWidgetProps) => {
   );
 });
 PhoneEmailWidget.displayName = 'PhoneEmailWidget';
+
+const PhoneEmailEmailWidget = React.memo(({ onVerified }: PhoneEmailWidgetProps) => {
+  useEffect(() => {
+    // Bind receiver globally
+    window.phoneEmailReceiver = (userObj) => {
+      if (userObj && userObj.user_json_url) {
+        onVerified(userObj.user_json_url);
+      }
+    };
+
+    // Load widget script dynamically
+    const script = document.createElement('script');
+    script.src = 'https://www.phone.email/verify_email_v1.js';
+    script.async = true;
+    document.body.appendChild(script);
+
+    return () => {
+      // Cleanup script and global handler
+      if (document.body.contains(script)) {
+        document.body.removeChild(script);
+      }
+      delete window.phoneEmailReceiver;
+    };
+  }, [onVerified]);
+
+  return (
+    <div 
+      className="pe_verify_email" 
+      data-client-id="15242599291320279332"
+      style={{ display: 'inline-block', width: '100%' }}
+    ></div>
+  );
+});
+PhoneEmailEmailWidget.displayName = 'PhoneEmailEmailWidget';
 
 export default function Register() {
   const toast = useToast();
@@ -242,6 +277,40 @@ export default function Register() {
       console.error(err);
       toast.error('Verification connection failed.');
       setPhoneOtpState(prev => ({ ...prev, loading: false }));
+    }
+  }, [toast]);
+
+  // --- Phone.email Email Verification Callback ---
+  const handleEmailVerified = React.useCallback(async (user_json_url: string) => {
+    setEmailOtpState(prev => ({ ...prev, loading: true }));
+    try {
+      const res = await fetch('/api/verify-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'phone_email_email_verify',
+          user_json_url
+        })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        const verifiedEmail = data.email || '';
+        
+        setFormData(prev => ({ ...prev, email: verifiedEmail }));
+        setEmailOtpState(prev => ({
+          ...prev,
+          verified: true,
+          loading: false
+        }));
+        toast.success(`Email verified successfully: ${verifiedEmail}`);
+      } else {
+        toast.error(data.error || 'Failed to verify email address.');
+        setEmailOtpState(prev => ({ ...prev, loading: false }));
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error('Email verification connection failed.');
+      setEmailOtpState(prev => ({ ...prev, loading: false }));
     }
   }, [toast]);
 
@@ -616,56 +685,30 @@ export default function Register() {
                 </div>
 
                 {/* Email & OTP Block */}
-                <div className={styles.otpGrid}>
-                  <div className="form-group">
+                <div className={styles.otpGrid} style={{ gridTemplateColumns: '1fr' }}>
+                  <div className="form-group" style={{ marginBottom: 0 }}>
                     <label className="form-label">Email Address <span className="required">*</span></label>
                     <div className={styles.inputWithBtn}>
                       <input
                         type="email"
                         name="email"
-                        disabled={emailOtpState.verified}
+                        readOnly={true}
                         value={formData.email}
-                        onChange={handleChange}
-                        placeholder="email@domain.com"
+                        placeholder={emailOtpState.verified ? formData.email : "Verified via Phone.email"}
                         className="form-input"
                         required
                       />
-                      <button
-                        type="button"
-                        disabled={emailOtpState.verified || emailOtpState.loading || !formData.email.includes('@')}
-                        onClick={() => sendOtp('email')}
-                        className="btn btn-secondary btn-sm"
-                      >
-                        {emailOtpState.loading ? '...' : emailOtpState.sent ? 'Resend' : 'Verify'}
-                      </button>
+                      {emailOtpState.verified && (
+                        <div className={styles.verifiedText} style={{ paddingBottom: 0, display: 'flex', alignItems: 'center', whiteSpace: 'nowrap' }}>
+                          <Check size={16} /> Email Address Verified
+                        </div>
+                      )}
                     </div>
                   </div>
 
-                  {emailOtpState.sent && !emailOtpState.verified && (
-                    <div className="form-group">
-                      <label className="form-label">Enter Email OTP <span className="required">*</span></label>
-                      <div className={styles.inputWithBtn}>
-                        <input
-                          type="text"
-                          value={emailOtpState.inputCode}
-                          onChange={(e) => setEmailOtpState({ ...emailOtpState, inputCode: e.target.value })}
-                          placeholder="6-digit code"
-                          className="form-input"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => verifyOtp('email')}
-                          className="btn btn-primary btn-sm"
-                        >
-                          Submit
-                        </button>
-                      </div>
-                    </div>
-                  )}
-
-                  {emailOtpState.verified && (
-                    <div className={styles.verifiedText}>
-                      <Check size={16} /> Email Address Verified
+                  {!emailOtpState.verified && (
+                    <div style={{ width: '100%', marginTop: '0.5rem' }}>
+                      <PhoneEmailEmailWidget onVerified={handleEmailVerified} />
                     </div>
                   )}
                 </div>

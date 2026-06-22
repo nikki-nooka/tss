@@ -94,6 +94,40 @@ export async function POST(request: Request) {
       });
     }
 
+    if (action === 'phone_email_email_verify') {
+      const { user_json_url } = body;
+      if (!user_json_url) {
+        return NextResponse.json({ error: 'user_json_url is required' }, { status: 400 });
+      }
+
+      // Fetch user details from phone.email secure url
+      const res = await fetch(user_json_url);
+      if (!res.ok) {
+        return NextResponse.json({ error: 'Failed to verify email via Phone.email API' }, { status: 400 });
+      }
+
+      const data = await res.json();
+      const email = data.user_email_id || data.user_email || data.email;
+
+      if (!email) {
+        return NextResponse.json({ error: 'Email address not found in verification payload' }, { status: 400 });
+      }
+
+      // Check duplicates
+      const emailLower = email.trim().toLowerCase();
+      const exists = candidates.some(
+        (c) => c.email.toLowerCase() === emailLower && (c.status === 'Verified' || c.status === 'Pending' || c.status === 'Under Review')
+      );
+      if (exists) {
+        return NextResponse.json({ error: 'This email address is already registered.' }, { status: 400 });
+      }
+
+      return NextResponse.json({
+        success: true,
+        email: emailLower
+      });
+    }
+
     return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
   } catch (error) {
     console.error('Failed in OTP handling:', error);
