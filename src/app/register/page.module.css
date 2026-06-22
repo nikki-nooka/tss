@@ -451,24 +451,38 @@
 }
 
 @media (max-width: 768px) {
+  .formContainer {
+    padding: 2.5rem 0;
+  }
+
   .formCard {
-    padding: 2.5rem 1.5rem;
+    padding: 2.25rem 1.25rem;
   }
   
   .stepper {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1rem;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.25rem;
+    margin-bottom: 2.5rem;
   }
   
   .stepLine {
-    display: none;
+    display: block;
+    margin-top: -0.75rem; /* align line with circle center */
   }
   
   .stepIndicator {
-    flex-direction: row;
-    align-items: center;
-    gap: 0.75rem;
+    padding: 0 0.25rem;
+  }
+
+  .stepNum {
+    width: 2rem;
+    height: 2rem;
+    font-size: 0.8rem;
+  }
+  
+  .stepName {
+    display: none; /* Hide names on mobile for clean circles stepper */
   }
   
   .otpGrid {
@@ -478,5 +492,14 @@
   
   .reviewGrid {
     grid-template-columns: 1fr;
+  }
+
+  .actions {
+    flex-direction: column-reverse;
+    gap: 0.75rem;
+  }
+
+  .actions button {
+    width: 100%;
   }
 }

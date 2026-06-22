@@ -72,6 +72,7 @@
   display: flex;
   gap: 1.5rem;
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   scrollbar-width: none; /* Hide scrollbar Firefox */
 }
 
@@ -346,6 +347,7 @@
 
 .tableResponsive {
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .cTable {

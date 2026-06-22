@@ -6,7 +6,7 @@
 
 /* Header Banner */
 .aboutHeader {
-  background: linear-gradient(135deg, #0b0f19 0%, #1e1b4b 100%);
+  background: linear-gradient(135deg, #0b0f19 0%, #17153b 50%, #0f172a 100%);
   color: var(--text-inverse);
   padding: 5rem 0;
   text-align: center;
@@ -208,7 +208,7 @@
 @media (max-width: 900px) {
   .introContainer {
     grid-template-columns: 1fr;
-    gap: 3rem;
+    gap: 2.5rem;
   }
   
   .introVisual {
@@ -217,20 +217,34 @@
   
   .mvContainer {
     grid-template-columns: 1fr;
-    gap: 2rem;
+    gap: 1.5rem;
+  }
+  
+  .mvCard {
+    padding: 2.25rem 1.75rem;
   }
   
   .membersGrid {
     grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
   }
 }
 
 @media (max-width: 600px) {
+  .introSection, .missionVision, .membersSection {
+    padding: 3.5rem 0;
+  }
+
   .membersGrid {
     grid-template-columns: 1fr;
+    gap: 1rem;
   }
   
   .aboutHeader h1 {
-    font-size: 2.25rem;
+    font-size: 2.15rem;
+  }
+  
+  .aboutHeader {
+    padding: 4rem 0;
   }
 }

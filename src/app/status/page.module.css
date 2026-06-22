@@ -447,8 +447,13 @@
 }
 
 @media (max-width: 600px) {
+  .statusContent {
+    padding: 2.5rem 0;
+  }
+
   .searchForm {
     flex-direction: column;
+    gap: 0.75rem;
   }
   
   .statusCard {
@@ -457,14 +462,40 @@
   
   .verifiedActions {
     flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .verifiedActions :global(.btn) {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .membershipCardWrapper {
+    height: 202px; /* 270px * 0.75 */
+    align-items: center;
+    overflow: visible;
+    margin: 1.5rem 0;
   }
   
   .memberCardVirtual {
-    height: auto;
+    transform: scale(0.75);
+    transform-origin: center center;
+    flex-shrink: 0;
+  }
+}
+
+@media (max-width: 380px) {
+  .membershipCardWrapper {
+    height: 162px; /* 270px * 0.6 */
+    align-items: center;
+    overflow: visible;
+    margin: 1.5rem 0;
   }
   
-  .cardRow {
-    grid-template-columns: 1fr;
-    gap: 0.5rem;
+  .memberCardVirtual {
+    transform: scale(0.6);
+    transform-origin: center center;
+    flex-shrink: 0;
   }
 }

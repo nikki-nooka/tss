@@ -6,7 +6,7 @@
 
 /* Header */
 .contactHeader {
-  background: linear-gradient(135deg, #0b0f19 0%, #1e1b4b 100%);
+  background: linear-gradient(135deg, #0b0f19 0%, #17153b 50%, #0f172a 100%);
   color: var(--text-inverse);
   padding: 5rem 0;
   text-align: center;
@@ -161,6 +161,7 @@
   padding: 0.5rem 1rem;
   border-radius: var(--radius-md);
   border: 1px solid var(--border-color);
+  flex-wrap: wrap;
 }
 
 .captchaMath {
@@ -178,26 +179,35 @@
   font-size: 1rem;
   font-weight: 700;
   background-color: var(--bg-card);
+  flex-grow: 1;
 }
 
 @media (max-width: 900px) {
   .contactContainer {
     grid-template-columns: 1fr;
-    gap: 3rem;
+    gap: 2.5rem;
   }
 }
 
 @media (max-width: 600px) {
+  .contactContent {
+    padding: 3.5rem 0;
+  }
+
   .formRow {
     grid-template-columns: 1fr;
     gap: 0;
   }
   
   .contactHeader h1 {
-    font-size: 2.25rem;
+    font-size: 2.15rem;
+  }
+  
+  .contactHeader {
+    padding: 4rem 0;
   }
   
   .formCard, .infoCard {
-    padding: 2rem 1.5rem;
+    padding: 2.25rem 1.5rem;
   }
 }
