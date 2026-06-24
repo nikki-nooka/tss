@@ -24,14 +24,24 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Candidate not found' }, { status: 404 });
     }
 
-    // 3. Handle Mock PDF or Real file
+    if (!candidate.resumePath) {
+      return NextResponse.json({ error: 'No resume file uploaded for this candidate' }, { status: 404 });
+    }
+
+    const fileName = candidate.resumeName || 'resume.pdf';
+
+    // 3. Handle External URL, Mock PDF, or Real file
+    if (candidate.resumePath.startsWith('http://') || candidate.resumePath.startsWith('https://')) {
+      return NextResponse.redirect(candidate.resumePath);
+    }
+
     // If it's the initial mock candidate, serve a mock PDF buffer dynamically
     if (candidate.resumePath === 'mock-resume.pdf') {
       const mockPdfContent = `%PDF-1.4\n1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << >> /Contents 4 0 R >>\nendobj\n4 0 obj\n<< /Length 44 >>\nstream\nBT\n/F1 12 Tf\n72 712 Td\n(TSS Mock Candidate Resume Document) Tj\nET\nendstream\nendobj\nxref\n0 5\n0000000000 65535 f\n0000000009 00000 n\n0000000056 00000 n\n0000000111 00000 n\n0000000212 00000 n\ntrailer\n<< /Size 5 /Root 1 0 R >>\nstartxref\n307\n%%EOF`;
       
       const response = new NextResponse(Buffer.from(mockPdfContent, 'utf-8'));
       response.headers.set('Content-Type', 'application/pdf');
-      response.headers.set('Content-Disposition', `inline; filename="${candidate.resumeName}"`);
+      response.headers.set('Content-Disposition', `inline; filename="${fileName}"`);
       return response;
     }
 
@@ -41,7 +51,7 @@ export async function GET(request: Request) {
     // Stream back to client
     const response = new NextResponse(fileBuffer);
     response.headers.set('Content-Type', 'application/pdf');
-    response.headers.set('Content-Disposition', `inline; filename="${candidate.resumeName}"`);
+    response.headers.set('Content-Disposition', `inline; filename="${fileName}"`);
     return response;
 
   } catch (error) {

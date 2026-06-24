@@ -70,13 +70,13 @@ TSS Admin has forwarded a candidate profile that matches your organization's cri
 Candidate Details:
 - Name: ${candidate.fullName}
 - Member ID: ${candidate.memberId || 'Pending Verification'}
-- Highest Qualification: ${candidate.highestQualification}
-- Experience: ${candidate.experienceLevel}
-- Preferred Roles: ${candidate.preferredRoles.join(', ')}
-- Skills: ${candidate.skills.join(', ')}
+- Highest Qualification: ${candidate.highestQualification || 'N/A'}
+- Experience: ${candidate.experienceLevel || 'N/A'}
+- Preferred Roles: ${(candidate.preferredRoles || []).join(', ')}
+- Skills: ${(candidate.skills || []).join(', ')}
 - LinkedIn: ${candidate.linkedin}
 
-Resume PDF is attached/referenced: ${candidate.resumeName}
+Resume Link/File: ${candidate.resumeName || 'N/A'} (Link: http://localhost:3000/api/download/resume?id=${candidate.id})
 Notes: ${notes || 'No extra notes.'}
 
 Best regards,

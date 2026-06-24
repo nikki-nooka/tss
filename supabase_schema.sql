@@ -1,9 +1,28 @@
 -- TSS (The Student Spot) Supabase Database Initializer SQL Schema
 -- Copy and run this script in your Supabase SQL Editor (https://supabase.com)
 
+-- =========================================================================
+-- MIGRATION SCRIPT (For existing databases - run this if table already exists)
+-- =========================================================================
+-- ALTER TABLE candidates ADD COLUMN IF NOT EXISTS role TEXT NOT NULL DEFAULT 'Student';
+-- ALTER TABLE candidates ADD COLUMN IF NOT EXISTS "roleDetails" JSONB;
+-- ALTER TABLE candidates ADD COLUMN IF NOT EXISTS "photoPath" TEXT;
+-- ALTER TABLE candidates ADD COLUMN IF NOT EXISTS "photoName" TEXT;
+-- ALTER TABLE candidates ALTER COLUMN "highestQualification" DROP NOT NULL;
+-- ALTER TABLE candidates ALTER COLUMN "currentStatus" DROP NOT NULL;
+-- ALTER TABLE candidates ALTER COLUMN "graduationYear" DROP NOT NULL;
+-- ALTER TABLE candidates ALTER COLUMN "currentRole" DROP NOT NULL;
+-- ALTER TABLE candidates ALTER COLUMN "preferredRoles" DROP NOT NULL;
+-- ALTER TABLE candidates ALTER COLUMN "skills" DROP NOT NULL;
+-- ALTER TABLE candidates ALTER COLUMN "experienceLevel" DROP NOT NULL;
+-- ALTER TABLE candidates ALTER COLUMN "resumePath" DROP NOT NULL;
+-- ALTER TABLE candidates ALTER COLUMN "resumeName" DROP NOT NULL;
+-- =========================================================================
+
 -- 1. Candidates Table
 CREATE TABLE IF NOT EXISTS candidates (
   id TEXT PRIMARY KEY,
+  role TEXT NOT NULL DEFAULT 'Student',
   "fullName" TEXT NOT NULL,
   gender TEXT NOT NULL,
   dob TEXT NOT NULL,
@@ -12,21 +31,31 @@ CREATE TABLE IF NOT EXISTS candidates (
   city TEXT NOT NULL,
   state TEXT NOT NULL,
   country TEXT NOT NULL,
-  "highestQualification" TEXT NOT NULL,
-  "currentStatus" TEXT NOT NULL,
+  
+  -- Student specific fields (now nullable)
+  "highestQualification" TEXT,
+  "currentStatus" TEXT,
   college TEXT,
-  "graduationYear" INTEGER NOT NULL,
-  "currentRole" TEXT NOT NULL,
-  "preferredRoles" JSONB NOT NULL,
-  skills JSONB NOT NULL,
-  "experienceLevel" TEXT NOT NULL,
+  "graduationYear" INTEGER,
+  "currentRole" TEXT,
+  "preferredRoles" JSONB,
+  skills JSONB,
+  "experienceLevel" TEXT,
+  "resumePath" TEXT,
+  "resumeName" TEXT,
+  
+  -- Photo upload
+  "photoPath" TEXT,
+  "photoName" TEXT,
+  
+  -- Role details for Founder, Recruiter, Mentor, Investor, Professional
+  "roleDetails" JSONB,
+  
   linkedin TEXT NOT NULL,
   github TEXT,
   portfolio TEXT,
   instagram TEXT,
   "xTwitter" TEXT,
-  "resumePath" TEXT NOT NULL,
-  "resumeName" TEXT NOT NULL,
   status TEXT NOT NULL DEFAULT 'Pending',
   "memberId" TEXT,
   notes TEXT,

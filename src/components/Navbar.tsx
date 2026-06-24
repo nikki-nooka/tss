@@ -19,10 +19,11 @@ export const Navbar: React.FC = () => {
 
   const navLinks = [
     { name: 'Home', path: '/' },
-    { name: 'About Network', path: '/about' },
-    { name: 'Register Now', path: '/register' },
-    { name: 'Check Status', path: '/status' },
-    { name: 'Contact Us', path: '/contact' }
+    { name: 'About', path: '/about' },
+    { name: 'BuildX', path: '/buildx' },
+    { name: 'Status', path: '/status' },
+    { name: 'Contact', path: '/contact' },
+    { name: 'Register', path: '/register' }
   ];
 
   const closeMenu = () => setIsOpen(false);

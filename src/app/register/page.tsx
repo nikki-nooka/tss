@@ -17,14 +17,20 @@ import {
   ArrowRight,
   ShieldAlert,
   Smartphone,
-  Mail
+  Mail,
+  Camera,
+  Layers
 } from 'lucide-react';
 import { useToast } from '@/components/Toast';
 
-const PREFERRED_ROLE_OPTIONS = [
-  'Software Engineer', 'Data Analyst', 'Product Manager', 
-  'UI UX Designer', 'Marketing', 'Sales', 
-  'HR', 'Finance', 'Founder', 'Operations'
+// Role-based list
+const ROLE_OPTIONS = [
+  'Student',
+  'Founder',
+  'Recruiter',
+  'Mentor',
+  'Investor',
+  'Working Professional'
 ];
 
 const QUALIFICATION_OPTIONS = [
@@ -32,8 +38,16 @@ const QUALIFICATION_OPTIONS = [
   'Undergraduate', 'Postgraduate', 'MBA', 'MTech', 'PhD', 'Other'
 ];
 
-const STATUS_OPTIONS = [
-  'Pursuing', 'Graduated', 'Working Professional', 'Founder', 'Freelancer', 'Recruiter'
+const STARTUP_STAGES = [
+  'Ideation', 'MVP', 'Early Traction', 'Scaling'
+];
+
+const TEAM_SIZES = [
+  '1-5', '6-20', '21-50', '50+'
+];
+
+const EXPERIENCE_LEVELS = [
+  'Fresher', '0-1 Years', '1-3 Years', '3-5 Years', '5+ Years'
 ];
 
 // Define global window type for Phone.email callback
@@ -123,7 +137,7 @@ export default function Register() {
 
   // Form State
   const [formData, setFormData] = useState({
-    // Step 1: Personal Info
+    role: 'Student',
     fullName: '',
     gender: 'Prefer Not To Say',
     dob: '',
@@ -132,62 +146,74 @@ export default function Register() {
     city: '',
     state: '',
     country: 'India',
-    
-    // Step 2: Education
-    highestQualification: 'Undergraduate',
-    currentStatus: 'Pursuing',
-    college: '',
-    graduationYear: new Date().getFullYear(),
-
-    // Step 3: Professional Info
-    currentRole: '',
-    preferredRoles: [] as string[],
-    skills: [] as string[],
-    experienceLevel: 'Fresher',
-
-    // Step 4: Socials & Resume
     linkedin: '',
     github: '',
     portfolio: '',
-    instagram: '',
-    xTwitter: '',
-    declaration: false
+    declaration: false,
+
+    // Student fields
+    highestQualification: 'Undergraduate',
+    college: '',
+    degree: '',
+    specialization: '',
+    graduationYear: new Date().getFullYear(),
+    skills: [] as string[],
+    preferredDomain: 'Software Engineering',
+    internshipInterested: 'No',
+    jobInterested: 'No',
+    startupInterested: 'No',
+    buildxInterested: 'No',
+    resumeLink: '',
+
+    // Founder fields
+    startupName: '',
+    startupStage: 'Ideation',
+    industry: '',
+    website: '',
+    startupDescription: '',
+    teamSize: '1-5',
+
+    // Recruiter fields
+    companyName: '',
+    designation: '',
+    hiringDomains: '',
+    companyWebsite: '',
+
+    // Mentor fields
+    currentCompany: '',
+    mentorRole: '',
+    experience: 'Fresher',
+    expertiseAreas: '',
+
+    // Investor fields
+    fundName: '',
+    investmentFocus: '',
+
+    // Working Professional fields
+    company: '',
+    professionalRole: '',
+    professionalExperience: 'Fresher'
   });
 
-  const [resumeFile, setResumeFile] = useState<File | null>(null);
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [skillInput, setSkillInput] = useState('');
+  const [isDevBypass, setIsDevBypass] = useState(false);
 
   // OTP Verification States
   const [phoneOtpState, setPhoneOtpState] = useState({
-    sent: false,
     verified: false,
-    loading: false,
-    inputCode: '',
-    sentCode: ''
+    loading: false
   });
 
   const [emailOtpState, setEmailOtpState] = useState({
-    sent: false,
     verified: false,
-    loading: false,
-    inputCode: '',
-    sentCode: ''
+    loading: false
   });
 
   // Handle standard input changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  // Add/Remove Preferred Roles (Multi select checkbox)
-  const handleRoleToggle = (role: string) => {
-    setFormData((prev) => {
-      const preferredRoles = prev.preferredRoles.includes(role)
-        ? prev.preferredRoles.filter((r) => r !== role)
-        : [...prev.preferredRoles, role];
-      return { ...prev, preferredRoles };
-    });
   };
 
   // Add skill chip
@@ -221,28 +247,29 @@ export default function Register() {
     }));
   };
 
-  // Handle Resume File Selection & Client-Side Scan
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Handle Profile Photo Selection
+  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
     if (!file) return;
 
-    // Validate type (PDF only)
-    if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
-      toast.error('Invalid format. Only PDF resumes are accepted.');
+    const validExts = ['.jpg', '.jpeg', '.png'];
+    const nameLower = file.name.toLowerCase();
+    const isValid = validExts.some(ext => nameLower.endsWith(ext));
+    if (!isValid) {
+      toast.error('Invalid image format. Only JPG, JPEG, and PNG are allowed.');
       e.target.value = '';
       return;
     }
 
-    // Validate size (5MB max)
-    const MAX_SIZE = 5 * 1024 * 1024;
+    const MAX_SIZE = 2 * 1024 * 1024;
     if (file.size > MAX_SIZE) {
-      toast.error('File size exceeds the 5MB limit.');
+      toast.error('Photo size exceeds the 2MB limit.');
       e.target.value = '';
       return;
     }
 
-    setResumeFile(file);
-    toast.success(`Resume uploaded: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`);
+    setPhotoFile(file);
+    toast.success(`Photo attached: ${file.name}`);
   };
 
   // --- Phone.email Verification Callback ---
@@ -263,11 +290,10 @@ export default function Register() {
         const tenDigitPhone = rawPhone.replace(/\D/g, '').slice(-10);
         
         setFormData(prev => ({ ...prev, mobile: tenDigitPhone }));
-        setPhoneOtpState(prev => ({
-          ...prev,
+        setPhoneOtpState({
           verified: true,
           loading: false
-        }));
+        });
         toast.success(`Phone verified successfully: ${tenDigitPhone}`);
       } else {
         toast.error(data.error || 'Failed to verify phone number.');
@@ -297,11 +323,10 @@ export default function Register() {
         const verifiedEmail = data.email || '';
         
         setFormData(prev => ({ ...prev, email: verifiedEmail }));
-        setEmailOtpState(prev => ({
-          ...prev,
+        setEmailOtpState({
           verified: true,
           loading: false
-        }));
+        });
         toast.success(`Email verified successfully: ${verifiedEmail}`);
       } else {
         toast.error(data.error || 'Failed to verify email address.');
@@ -314,103 +339,38 @@ export default function Register() {
     }
   }, [toast]);
 
-  // --- OTP Verification Logic ---
-  
-  const sendOtp = async (type: 'phone' | 'email') => {
-    const target = type === 'phone' ? formData.mobile : formData.email;
-    if (!target) {
-      toast.error(`Please enter your ${type === 'phone' ? 'mobile number' : 'email address'} first.`);
-      return;
-    }
-
-    if (type === 'phone' && formData.mobile.length !== 10) {
-      toast.error('Please enter a valid 10-digit mobile number.');
-      return;
-    }
-
-    if (type === 'email' && !formData.email.includes('@')) {
-      toast.error('Please enter a valid email address.');
-      return;
-    }
-
-    const stateSetter = type === 'phone' ? setPhoneOtpState : setEmailOtpState;
-    
-    stateSetter(prev => ({ ...prev, loading: true }));
-    try {
-      const res = await fetch('/api/verify-otp', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'send', type, target })
-      });
-      const data = await res.json();
-
-      if (res.ok && data.success) {
-        stateSetter(prev => ({
-          ...prev,
-          sent: true,
-          sentCode: data.otp, // In production this is NOT returned, it's sent via SMS/Email
-          loading: false
-        }));
-        
-        // Popup Toast containing the Mock OTP
-        toast.warning(`[MOCK OTP] Verification code for ${target} is: ${data.otp}`, 15000);
-      } else {
-        toast.error(data.error || 'Failed to send verification code.');
-        stateSetter(prev => ({ ...prev, loading: false }));
-      }
-    } catch (err) {
-      console.error(err);
-      toast.error('Connection error.');
-      stateSetter(prev => ({ ...prev, loading: false }));
-    }
-  };
-
-  const verifyOtp = async (type: 'phone' | 'email') => {
-    const otpState = type === 'phone' ? phoneOtpState : emailOtpState;
-    const target = type === 'phone' ? formData.mobile : formData.email;
-    const stateSetter = type === 'phone' ? setPhoneOtpState : setEmailOtpState;
-
-    if (!otpState.inputCode) {
-      toast.error('Please enter the verification code.');
-      return;
-    }
-
-    stateSetter(prev => ({ ...prev, loading: true }));
-    try {
-      const res = await fetch('/api/verify-otp', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'verify',
-          target,
-          code: otpState.inputCode,
-          expectedCode: otpState.sentCode
-        })
-      });
-      const data = await res.json();
-
-      if (res.ok && data.success) {
-        stateSetter(prev => ({
-          ...prev,
-          verified: true,
-          loading: false
-        }));
-        toast.success(`${type === 'phone' ? 'Phone' : 'Email'} verified successfully!`);
-      } else {
-        toast.error(data.error || 'Invalid OTP code.');
-        stateSetter(prev => ({ ...prev, loading: false }));
-      }
-    } catch (err) {
-      console.error(err);
-      toast.error('Verification failed.');
-      stateSetter(prev => ({ ...prev, loading: false }));
-    }
-  };
-
   // --- Step Navigation & Validations ---
 
   const validateStep = () => {
     if (step === 1) {
+      if (!formData.role) {
+        toast.error('Please select your membership role.');
+        return false;
+      }
+      if (isDevBypass) {
+        if (!formData.mobile.trim() || formData.mobile.replace(/\D/g, '').length !== 10) {
+          toast.error('Please enter a valid 10-digit mobile number.');
+          return false;
+        }
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!formData.email.trim() || !emailRegex.test(formData.email.trim())) {
+          toast.error('Please enter a valid email address.');
+          return false;
+        }
+      } else {
+        if (!phoneOtpState.verified) {
+          toast.error('Please verify your Mobile Number using OTP.');
+          return false;
+        }
+        if (!emailOtpState.verified) {
+          toast.error('Please verify your Email Address using OTP.');
+          return false;
+        }
+      }
+    }
+
+    if (step === 2) {
+      // 1. Validate common personal fields
       const nameRegex = /^[A-Za-z\s]+$/;
       if (formData.fullName.trim().length < 3 || formData.fullName.trim().length > 60) {
         toast.error('Full Name must be between 3 and 60 characters.');
@@ -425,7 +385,6 @@ export default function Register() {
         return false;
       }
       
-      // DOB Age check
       const dobDate = new Date(formData.dob);
       const today = new Date();
       let age = today.getFullYear() - dobDate.getFullYear();
@@ -443,51 +402,88 @@ export default function Register() {
         return false;
       }
 
-      // Check OTP verification
-      if (!phoneOtpState.verified) {
-        toast.error('Please verify your Mobile Number using OTP.');
-        return false;
-      }
-      if (!emailOtpState.verified) {
-        toast.error('Please verify your Email Address using OTP.');
-        return false;
-      }
-    }
-
-    if (step === 2) {
-      if (formData.currentStatus === 'Pursuing' && !formData.college.trim()) {
-        toast.error('College / University is required for students.');
-        return false;
-      }
-      const year = parseInt(formData.graduationYear as any, 10);
-      if (isNaN(year) || year < 2000 || year > 2045) {
-        toast.error('Graduation Year must be between 2000 and 2045.');
-        return false;
+      // 2. Validate role specific fields
+      if (formData.role === 'Student') {
+        if (!formData.college.trim()) {
+          toast.error('College Name is required.');
+          return false;
+        }
+        if (!formData.degree.trim()) {
+          toast.error('Degree selection is required.');
+          return false;
+        }
+        if (!formData.specialization.trim()) {
+          toast.error('Specialization is required.');
+          return false;
+        }
+        const year = parseInt(formData.graduationYear as any, 10);
+        if (isNaN(year) || year < 2000 || year > 2045) {
+          toast.error('Graduation Year must be between 2000 and 2045.');
+          return false;
+        }
+        if (formData.skills.length === 0) {
+          toast.error('Please add at least one skill.');
+          return false;
+        }
+      } 
+      else if (formData.role === 'Founder') {
+        if (!formData.startupName.trim() || !formData.industry.trim() || !formData.startupDescription.trim()) {
+          toast.error('Startup Name, Industry, and Description are required.');
+          return false;
+        }
+      } 
+      else if (formData.role === 'Recruiter') {
+        if (!formData.companyName.trim() || !formData.designation.trim() || !formData.hiringDomains.trim()) {
+          toast.error('Company Name, Designation, and Hiring Domains are required.');
+          return false;
+        }
+      } 
+      else if (formData.role === 'Mentor') {
+        if (!formData.currentCompany.trim() || !formData.mentorRole.trim() || !formData.expertiseAreas.trim()) {
+          toast.error('Current Company, Role, and Expertise Areas are required.');
+          return false;
+        }
+      } 
+      else if (formData.role === 'Investor') {
+        if (!formData.fundName.trim() || !formData.investmentFocus.trim()) {
+          toast.error('Fund Name and Investment Focus are required.');
+          return false;
+        }
+      } 
+      else if (formData.role === 'Working Professional') {
+        if (!formData.company.trim() || !formData.professionalRole.trim()) {
+          toast.error('Company Name and Designation are required.');
+          return false;
+        }
+        if (formData.skills.length === 0) {
+          toast.error('Please add at least one skill.');
+          return false;
+        }
       }
     }
 
     if (step === 3) {
-      if (!formData.currentRole.trim()) {
-        toast.error('Current Role is required.');
-        return false;
-      }
-      if (formData.preferredRoles.length === 0) {
-        toast.error('Select at least one Preferred Role.');
-        return false;
-      }
-      if (formData.skills.length === 0) {
-        toast.error('Add at least one skill.');
-        return false;
-      }
-    }
-
-    if (step === 4) {
       if (!formData.linkedin.trim() || !formData.linkedin.toLowerCase().includes('linkedin.com/')) {
         toast.error('A valid LinkedIn URL is required.');
         return false;
       }
-      if (!resumeFile) {
-        toast.error('Resume upload is required.');
+      if (formData.role === 'Student') {
+        if (!formData.resumeLink.trim()) {
+          toast.error('Resume URL link is required.');
+          return false;
+        }
+        const urlPattern = /^https?:\/\/.+/i;
+        if (!urlPattern.test(formData.resumeLink.trim())) {
+          toast.error('Please enter a valid URL (e.g., https://drive.google.com/...)');
+          return false;
+        }
+      }
+      if (!photoFile) {
+        toast.error('Profile Photo upload is required.');
+        return false;
+      }
+      if (!formData.declaration) {
+        toast.error('You must accept the terms and declaration.');
         return false;
       }
     }
@@ -510,51 +506,48 @@ export default function Register() {
   // Submit Form
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.declaration) {
-      toast.error('You must accept the declaration to submit.');
-      return;
-    }
+    if (!validateStep()) return;
 
     setIsSubmitting(true);
     try {
-      // Assemble Multipart FormData
       const data = new FormData();
       
       // Append text fields
       Object.entries(formData).forEach(([key, value]) => {
-        if (Array.isArray(value)) {
+        if (key === 'skills') {
           data.append(key, JSON.stringify(value));
         } else {
           data.append(key, value.toString());
         }
       });
 
-      // Append file
-      if (resumeFile) {
-        data.append('resume', resumeFile);
+      // Append files
+      if (photoFile) {
+        data.append('photo', photoFile);
       }
+      // resumeLink is part of formData and is already appended above.
 
       const res = await fetch('/api/register', {
         method: 'POST',
-        body: data // Fetch handles multipart encoding automatically for FormData
+        body: data
       });
 
       const result = await res.json();
       if (res.ok && result.success) {
-        toast.success('Registration submitted! Redirecting to status check...');
+        toast.success('Registration submitted! Verification pending.');
         
-        // Save candidate email to localStorage for status check ease
+        // Save to ease status checking
         localStorage.setItem('tss_registered_email', formData.email);
         localStorage.setItem('tss_registered_mobile', formData.mobile);
 
-        // Advance to a custom success step (step 6)
-        setStep(6);
+        // Advance to success page (step 4)
+        setStep(4);
       } else {
         toast.error(result.error || 'Registration failed.');
       }
     } catch (err) {
       console.error(err);
-      toast.error('Connection failed. Please check backend.');
+      toast.error('Connection failed. Please check your network.');
     } finally {
       setIsSubmitting(false);
     }
@@ -564,8 +557,8 @@ export default function Register() {
     <div className={styles.registerPage}>
       <section className={styles.registerHeader}>
         <div className="container">
-          <h1>TSS Member Registration</h1>
-          <p>India's verified startup and talent network. Phase 1 credentials vetting.</p>
+          <h1>TSS Network Verification</h1>
+          <p>Phase 1 credential vetting. Register to receive your unique verified identity card.</p>
         </div>
       </section>
 
@@ -573,597 +566,938 @@ export default function Register() {
         <div className="container">
           <div className={styles.formCard}>
             
-            {/* Step Indicators */}
-            {step <= 5 && (
+            {/* Horizontal 3-Step Stepper */}
+            {step < 4 && (
               <div className={styles.stepper}>
-                <div className={`${styles.stepIndicator} ${step >= 1 ? styles.active : ''} ${step > 1 ? styles.completed : ''}`}>
-                  <span className={styles.stepNum}>{step > 1 ? <Check size={16} /> : '1'}</span>
-                  <span className={styles.stepName}>Personal</span>
+                <div className={`${styles.stepIndicator} ${step === 1 ? styles.active : ''} ${step > 1 ? styles.completed : ''}`}>
+                  <span className={styles.stepNum}>1</span>
+                  <span className={styles.stepName}>Verification</span>
                 </div>
                 <div className={styles.stepLine}></div>
-                <div className={`${styles.stepIndicator} ${step >= 2 ? styles.active : ''} ${step > 2 ? styles.completed : ''}`}>
-                  <span className={styles.stepNum}>{step > 2 ? <Check size={16} /> : '2'}</span>
-                  <span className={styles.stepName}>Education</span>
+                <div className={`${styles.stepIndicator} ${step === 2 ? styles.active : ''} ${step > 2 ? styles.completed : ''}`}>
+                  <span className={styles.stepNum}>2</span>
+                  <span className={styles.stepName}>Profile Info</span>
                 </div>
                 <div className={styles.stepLine}></div>
-                <div className={`${styles.stepIndicator} ${step >= 3 ? styles.active : ''} ${step > 3 ? styles.completed : ''}`}>
-                  <span className={styles.stepNum}>{step > 3 ? <Check size={16} /> : '3'}</span>
-                  <span className={styles.stepName}>Professional</span>
-                </div>
-                <div className={styles.stepLine}></div>
-                <div className={`${styles.stepIndicator} ${step >= 4 ? styles.active : ''} ${step > 4 ? styles.completed : ''}`}>
-                  <span className={styles.stepNum}>{step > 4 ? <Check size={16} /> : '4'}</span>
-                  <span className={styles.stepName}>Credentials</span>
-                </div>
-                <div className={styles.stepLine}></div>
-                <div className={`${styles.stepIndicator} ${step >= 5 ? styles.active : ''}`}>
-                  <span className={styles.stepNum}>5</span>
-                  <span className={styles.stepName}>Declaration</span>
+                <div className={`${styles.stepIndicator} ${step === 3 ? styles.active : ''}`}>
+                  <span className={styles.stepNum}>3</span>
+                  <span className={styles.stepName}>Socials & Photo</span>
                 </div>
               </div>
             )}
 
-            {/* STEP 1: Personal Information */}
-            {step === 1 && (
-              <div className="fade-in">
-                <div className={styles.stepHeader}>
-                  <User size={24} className={styles.stepIcon} />
-                  <h2>Personal Information</h2>
-                </div>
+            <form onSubmit={(e) => e.preventDefault()}>
+              
+              {/* STEP 1: ROLE SELECTION & OTP VERIFICATION */}
+              {step === 1 && (
+                <div className="fade-in">
+                  <div className={styles.stepHeader}>
+                    <Layers className={styles.stepIcon} size={24} />
+                    <h2>Select Role & Verify Contacts</h2>
+                  </div>
 
-                <div className="form-group">
-                  <label className="form-label">Full Name <span className="required">*</span></label>
-                  <input
-                    type="text"
-                    name="fullName"
-                    value={formData.fullName}
-                    onChange={handleChange}
-                    placeholder="Enter your name (letters and spaces only)"
-                    className="form-input"
-                    required
-                  />
-                  <small className={styles.inputHelp}>3 to 60 characters. Must match your official documents.</small>
-                </div>
-
-                <div className={styles.formRow}>
-                  <div className="form-group">
-                    <label className="form-label">Gender <span className="required">*</span></label>
+                  <div className="form-group" style={{ marginBottom: '2.5rem' }}>
+                    <label className="form-label">I am registering as a: <span className="required">*</span></label>
                     <select
-                      name="gender"
-                      value={formData.gender}
+                      name="role"
+                      value={formData.role}
                       onChange={handleChange}
                       className="form-select"
-                      required
+                      style={{ fontSize: '1.05rem', padding: '0.85rem 1.15rem' }}
                     >
-                      <option value="Male">Male</option>
-                      <option value="Female">Female</option>
-                      <option value="Prefer Not To Say">Prefer Not To Say</option>
-                    </select>
-                  </div>
-
-                  <div className="form-group">
-                    <label className="form-label">Date of Birth <span className="required">*</span></label>
-                    <input
-                      type="date"
-                      name="dob"
-                      value={formData.dob}
-                      onChange={handleChange}
-                      className="form-input"
-                      required
-                    />
-                    <small className={styles.inputHelp}>Age limit: 16 to 60 years.</small>
-                  </div>
-                </div>
-
-                {/* Mobile & OTP Block */}
-                <div className={styles.otpGrid} style={{ gridTemplateColumns: '1fr' }}>
-                  {phoneOtpState.verified ? (
-                    <div className="form-group" style={{ marginBottom: 0 }}>
-                      <label className="form-label">Mobile Number <span className="required">*</span></label>
-                      <div className={styles.inputWithBtn}>
-                        <input
-                          type="tel"
-                          name="mobile"
-                          readOnly={true}
-                          value={formData.mobile}
-                          className="form-input"
-                          required
-                        />
-                        <div className={styles.verifiedText} style={{ paddingBottom: 0, display: 'flex', alignItems: 'center', whiteSpace: 'nowrap' }}>
-                          <Check size={16} /> Mobile Number Verified
-                        </div>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="form-group" style={{ marginBottom: 0 }}>
-                      <label className="form-label">Mobile Number Verification <span className="required">*</span></label>
-                      <div style={{ width: '100%', marginTop: '0.5rem' }}>
-                        <PhoneEmailWidget onVerified={handlePhoneEmailVerified} />
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* Email & OTP Block */}
-                <div className={styles.otpGrid} style={{ gridTemplateColumns: '1fr' }}>
-                  {emailOtpState.verified ? (
-                    <div className="form-group" style={{ marginBottom: 0 }}>
-                      <label className="form-label">Email Address <span className="required">*</span></label>
-                      <div className={styles.inputWithBtn}>
-                        <input
-                          type="email"
-                          name="email"
-                          readOnly={true}
-                          value={formData.email}
-                          className="form-input"
-                          required
-                        />
-                        <div className={styles.verifiedText} style={{ paddingBottom: 0, display: 'flex', alignItems: 'center', whiteSpace: 'nowrap' }}>
-                          <Check size={16} /> Email Address Verified
-                        </div>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="form-group" style={{ marginBottom: 0 }}>
-                      <label className="form-label">Email Address Verification <span className="required">*</span></label>
-                      <div style={{ width: '100%', marginTop: '0.5rem' }}>
-                        <PhoneEmailEmailWidget onVerified={handleEmailVerified} />
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* Location Block */}
-                <div className={styles.formRow}>
-                  <div className="form-group">
-                    <label className="form-label">City <span className="required">*</span></label>
-                    <input
-                      type="text"
-                      name="city"
-                      value={formData.city}
-                      onChange={handleChange}
-                      placeholder="e.g. Hyderabad"
-                      className="form-input"
-                      required
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label className="form-label">State <span className="required">*</span></label>
-                    <input
-                      type="text"
-                      name="state"
-                      value={formData.state}
-                      onChange={handleChange}
-                      placeholder="e.g. Telangana"
-                      className="form-input"
-                      required
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label className="form-label">Country <span className="required">*</span></label>
-                    <input
-                      type="text"
-                      name="country"
-                      value={formData.country}
-                      onChange={handleChange}
-                      className="form-input"
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div className={styles.actions}>
-                  <div></div>
-                  <button type="button" onClick={handleNext} className="btn btn-primary">
-                    Next Section <ArrowRight size={16} />
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* STEP 2: Education Details */}
-            {step === 2 && (
-              <div className="fade-in">
-                <div className={styles.stepHeader}>
-                  <BookOpen size={24} className={styles.stepIcon} />
-                  <h2>Education Details</h2>
-                </div>
-
-                <div className={styles.formRow}>
-                  <div className="form-group">
-                    <label className="form-label">Highest Qualification <span className="required">*</span></label>
-                    <select
-                      name="highestQualification"
-                      value={formData.highestQualification}
-                      onChange={handleChange}
-                      className="form-select"
-                      required
-                    >
-                      {QUALIFICATION_OPTIONS.map((opt) => (
+                      {ROLE_OPTIONS.map(opt => (
                         <option key={opt} value={opt}>{opt}</option>
                       ))}
                     </select>
+                    <small className={styles.inputHelp}>Your profile fields and TSS ID will adapt dynamically to this selection.</small>
                   </div>
 
-                  <div className="form-group">
-                    <label className="form-label">Current Status <span className="required">*</span></label>
-                    <select
-                      name="currentStatus"
-                      value={formData.currentStatus}
-                      onChange={handleChange}
-                      className="form-select"
-                      required
-                    >
-                      {STATUS_OPTIONS.map((opt) => (
-                        <option key={opt} value={opt}>{opt}</option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-
-                {formData.currentStatus === 'Pursuing' && (
-                  <div className="form-group">
-                    <label className="form-label">College / University Name <span className="required">*</span></label>
-                    <input
-                      type="text"
-                      name="college"
-                      value={formData.college}
-                      onChange={handleChange}
-                      placeholder="Enter your college name in full"
-                      className="form-input"
-                      required
-                    />
-                  </div>
-                )}
-
-                <div className="form-group" style={{ maxWidth: '300px' }}>
-                  <label className="form-label">Graduation Year <span className="required">*</span></label>
-                  <input
-                    type="number"
-                    name="graduationYear"
-                    value={formData.graduationYear}
-                    onChange={handleChange}
-                    min="2000"
-                    max="2045"
-                    className="form-input"
-                    required
-                  />
-                  <small className={styles.inputHelp}>Valid range: 2000 to 2045.</small>
-                </div>
-
-                <div className={styles.actions}>
-                  <button type="button" onClick={handleBack} className="btn btn-outline">
-                    <ArrowLeft size={16} /> Back
-                  </button>
-                  <button type="button" onClick={handleNext} className="btn btn-primary">
-                    Next Section <ArrowRight size={16} />
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* STEP 3: Professional Info */}
-            {step === 3 && (
-              <div className="fade-in">
-                <div className={styles.stepHeader}>
-                  <Briefcase size={24} className={styles.stepIcon} />
-                  <h2>Professional Details</h2>
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">Current Role / Tagline <span className="required">*</span></label>
-                  <input
-                    type="text"
-                    name="currentRole"
-                    value={formData.currentRole}
-                    onChange={handleChange}
-                    placeholder="e.g. Student at IIIT / Junior React Dev / Aspiring Designer"
-                    className="form-input"
-                    required
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">Preferred Roles <span className="required">*</span></label>
-                  <div className={styles.rolesGrid}>
-                    {PREFERRED_ROLE_OPTIONS.map((role) => (
-                      <label key={role} className={`${styles.roleCheckbox} ${formData.preferredRoles.includes(role) ? styles.checked : ''}`}>
-                        <input
-                          type="checkbox"
-                          checked={formData.preferredRoles.includes(role)}
-                          onChange={() => handleRoleToggle(role)}
-                        />
-                        <span>{role}</span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Skills Chip Input */}
-                <div className="form-group">
-                  <label className="form-label">Skills (Max 20) <span className="required">*</span></label>
-                  <div className={styles.skillInputBox}>
-                    <input
-                      type="text"
-                      placeholder="Type a skill and click Add (e.g. React, Figma, Python)"
-                      value={skillInput}
-                      onChange={(e) => setSkillInput(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                          e.preventDefault();
-                          handleAddSkill();
-                        }
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    padding: '0.75rem 1rem',
+                    background: '#f8fafc',
+                    border: '1px dashed var(--border-color)',
+                    borderRadius: 'var(--radius-md)',
+                    marginBottom: '1.5rem',
+                    fontSize: '0.85rem',
+                    color: 'var(--text-muted)'
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#64748b' }}></span>
+                      <span><strong>Testing Mode:</strong> Skip WhatsApp / Email OTP verification</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setIsDevBypass(!isDevBypass)}
+                      style={{
+                        background: isDevBypass ? 'var(--primary)' : 'var(--border-color)',
+                        color: isDevBypass ? 'var(--text-inverse)' : 'var(--text-main)',
+                        border: 'none',
+                        padding: '0.35rem 0.75rem',
+                        borderRadius: 'var(--radius-sm)',
+                        fontSize: '0.75rem',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        transition: 'var(--transition)'
                       }}
-                      className="form-input"
-                    />
-                    <button type="button" onClick={() => handleAddSkill()} className="btn btn-secondary btn-sm">
-                      <Plus size={16} /> Add
+                    >
+                      {isDevBypass ? 'Enabled' : 'Enable Bypass'}
                     </button>
                   </div>
 
-                  <div className={styles.skillsContainer}>
-                    {formData.skills.map((skill) => (
-                      <span key={skill} className={styles.skillChip}>
-                        {skill}
-                        <button type="button" onClick={() => handleRemoveSkill(skill)} className={styles.removeSkillBtn}>
-                          <X size={12} />
-                        </button>
-                      </span>
-                    ))}
+                  {isDevBypass ? (
+                    <div className="fade-in" style={{ padding: '1.5rem', background: '#fff', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', marginBottom: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                      <div className="form-group" style={{ marginBottom: 0 }}>
+                        <label className="form-label">WhatsApp/Mobile Number <span className="required">*</span></label>
+                        <input
+                          type="tel"
+                          name="mobile"
+                          placeholder="e.g., 9876543210"
+                          value={formData.mobile}
+                          onChange={handleChange}
+                          className="form-input"
+                          maxLength={10}
+                        />
+                        <small className={styles.inputHelp}>Enter a 10-digit number for mock testing.</small>
+                      </div>
+
+                      <div className="form-group" style={{ marginBottom: 0 }}>
+                        <label className="form-label">Email Address <span className="required">*</span></label>
+                        <input
+                          type="email"
+                          name="email"
+                          placeholder="e.g., candidate@example.com"
+                          value={formData.email}
+                          onChange={handleChange}
+                          className="form-input"
+                        />
+                        <small className={styles.inputHelp}>Enter an email address for mock testing.</small>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      {/* Mobile & OTP Block */}
+                      <div className={styles.otpGrid} style={{ gridTemplateColumns: '1fr', padding: '1.5rem', background: '#fff', border: '1px solid var(--border-color)', marginBottom: '1.5rem' }}>
+                        {phoneOtpState.verified ? (
+                          <div className="form-group" style={{ marginBottom: 0 }}>
+                            <label className="form-label">Verified Mobile Number <span className="required">*</span></label>
+                            <div className={styles.inputWithBtn}>
+                              <input
+                                type="tel"
+                                name="mobile"
+                                readOnly={true}
+                                value={formData.mobile}
+                                className="form-input"
+                              />
+                              <div className={styles.verifiedText} style={{ paddingBottom: 0, display: 'flex', alignItems: 'center', whiteSpace: 'nowrap' }}>
+                                <Check size={16} /> Verified
+                              </div>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="form-group" style={{ marginBottom: 0 }}>
+                            <label className="form-label">WhatsApp/Mobile Verification <span className="required">*</span></label>
+                            <div style={{ width: '100%', marginTop: '0.5rem' }}>
+                              <PhoneEmailWidget onVerified={handlePhoneEmailVerified} />
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Email & OTP Block */}
+                      <div className={styles.otpGrid} style={{ gridTemplateColumns: '1fr', padding: '1.5rem', background: '#fff', border: '1px solid var(--border-color)' }}>
+                        {emailOtpState.verified ? (
+                          <div className="form-group" style={{ marginBottom: 0 }}>
+                            <label className="form-label">Verified Email Address <span className="required">*</span></label>
+                            <div className={styles.inputWithBtn}>
+                              <input
+                                type="email"
+                                name="email"
+                                readOnly={true}
+                                value={formData.email}
+                                className="form-input"
+                              />
+                              <div className={styles.verifiedText} style={{ paddingBottom: 0, display: 'flex', alignItems: 'center', whiteSpace: 'nowrap' }}>
+                                <Check size={16} /> Verified
+                              </div>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="form-group" style={{ marginBottom: 0 }}>
+                            <label className="form-label">Email Address Verification <span className="required">*</span></label>
+                            <div style={{ width: '100%', marginTop: '0.5rem' }}>
+                              <PhoneEmailEmailWidget onVerified={handleEmailVerified} />
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
+
+              {/* STEP 2: PROFILE DETAILS (DYNAMIC BY ROLE) */}
+              {step === 2 && (
+                <div className="fade-in">
+                  <div className={styles.stepHeader}>
+                    <User className={styles.stepIcon} size={24} />
+                    <h2>{formData.role} Profile Information</h2>
                   </div>
-                  <small className={styles.inputHelp}>{formData.skills.length}/20 skills added.</small>
-                </div>
 
-                <div className="form-group" style={{ maxWidth: '300px' }}>
-                  <label className="form-label">Experience Level <span className="required">*</span></label>
-                  <select
-                    name="experienceLevel"
-                    value={formData.experienceLevel}
-                    onChange={handleChange}
-                    className="form-select"
-                    required
-                  >
-                    <option value="Fresher">Fresher</option>
-                    <option value="0-1 Years">0-1 Years</option>
-                    <option value="1-3 Years">1-3 Years</option>
-                    <option value="3-5 Years">3-5 Years</option>
-                    <option value="5+ Years">5+ Years</option>
-                  </select>
-                </div>
+                  {/* Common Personal Fields */}
+                  <div className={styles.formRow}>
+                    <div className="form-group">
+                      <label className="form-label">Full Name <span className="required">*</span></label>
+                      <input
+                        type="text"
+                        name="fullName"
+                        value={formData.fullName}
+                        onChange={handleChange}
+                        placeholder="As shown in credentials"
+                        className="form-input"
+                        required
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">Gender <span className="required">*</span></label>
+                      <select
+                        name="gender"
+                        value={formData.gender}
+                        onChange={handleChange}
+                        className="form-select"
+                        required
+                      >
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Prefer Not To Say">Prefer Not To Say</option>
+                      </select>
+                    </div>
+                  </div>
 
-                <div className={styles.actions}>
-                  <button type="button" onClick={handleBack} className="btn btn-outline">
-                    <ArrowLeft size={16} /> Back
-                  </button>
-                  <button type="button" onClick={handleNext} className="btn btn-primary">
-                    Next Section <ArrowRight size={16} />
-                  </button>
-                </div>
-              </div>
-            )}
+                  <div className={styles.formRow}>
+                    <div className="form-group">
+                      <label className="form-label">Date of Birth <span className="required">*</span></label>
+                      <input
+                        type="date"
+                        name="dob"
+                        value={formData.dob}
+                        onChange={handleChange}
+                        className="form-input"
+                        required
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">City <span className="required">*</span></label>
+                      <input
+                        type="text"
+                        name="city"
+                        value={formData.city}
+                        onChange={handleChange}
+                        placeholder="e.g. Hyderabad"
+                        className="form-input"
+                        required
+                      />
+                    </div>
+                  </div>
 
-            {/* STEP 4: Socials & Resume */}
-            {step === 4 && (
-              <div className="fade-in">
-                <div className={styles.stepHeader}>
-                  <FileText size={24} className={styles.stepIcon} />
-                  <h2>Socials & Resume</h2>
-                </div>
+                  <div className={styles.formRow}>
+                    <div className="form-group">
+                      <label className="form-label">State <span className="required">*</span></label>
+                      <input
+                        type="text"
+                        name="state"
+                        value={formData.state}
+                        onChange={handleChange}
+                        placeholder="e.g. Telangana"
+                        className="form-input"
+                        required
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">Country <span className="required">*</span></label>
+                      <input
+                        type="text"
+                        name="country"
+                        value={formData.country}
+                        onChange={handleChange}
+                        className="form-input"
+                        required
+                      />
+                    </div>
+                  </div>
 
-                <div className="form-group">
-                  <label className="form-label">LinkedIn URL <span className="required">*</span></label>
-                  <input
-                    type="url"
-                    name="linkedin"
-                    value={formData.linkedin}
-                    onChange={handleChange}
-                    placeholder="https://linkedin.com/in/yourprofile"
-                    className="form-input"
-                    required
-                  />
-                  <small className={styles.inputHelp}>Must be a valid LinkedIn profile link.</small>
-                </div>
+                  {/* DYNAMIC FIELD SECTIONS BY ROLE */}
 
-                <div className={styles.formRow}>
+                  {/* 1. STUDENT FIELDS */}
+                  {formData.role === 'Student' && (
+                    <div style={{ marginTop: '1.5rem', borderTop: '1px solid var(--border-color)', paddingTop: '1.5rem' }}>
+                      <div className={styles.formRow}>
+                        <div className="form-group">
+                          <label className="form-label">College / University Name <span className="required">*</span></label>
+                          <input
+                            type="text"
+                            name="college"
+                            value={formData.college}
+                            onChange={handleChange}
+                            placeholder="Full College Name"
+                            className="form-input"
+                            required
+                          />
+                        </div>
+                        <div className="form-group">
+                          <label className="form-label">Degree <span className="required">*</span></label>
+                          <select
+                            name="degree"
+                            value={formData.degree}
+                            onChange={handleChange}
+                            className="form-select"
+                            required
+                          >
+                            <option value="">Select Degree</option>
+                            <option value="BTech">B.Tech</option>
+                            <option value="MTech">M.Tech</option>
+                            <option value="BCA">BCA</option>
+                            <option value="MCA">MCA</option>
+                            <option value="BSc">B.Sc</option>
+                            <option value="BCom">B.Com</option>
+                            <option value="MBA">MBA</option>
+                            <option value="Other">Other</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div className={styles.formRow}>
+                        <div className="form-group">
+                          <label className="form-label">Specialization <span className="required">*</span></label>
+                          <input
+                            type="text"
+                            name="specialization"
+                            value={formData.specialization}
+                            onChange={handleChange}
+                            placeholder="e.g. Computer Science"
+                            className="form-input"
+                            required
+                          />
+                        </div>
+                        <div className="form-group">
+                          <label className="form-label">Graduation Year <span className="required">*</span></label>
+                          <input
+                            type="number"
+                            name="graduationYear"
+                            value={formData.graduationYear}
+                            onChange={handleChange}
+                            className="form-input"
+                            min="2000"
+                            max="2045"
+                            required
+                          />
+                        </div>
+                      </div>
+
+                      <div className="form-group">
+                        <label className="form-label">Skills (Max 20) <span className="required">*</span></label>
+                        <div className={styles.skillInputBox}>
+                          <input
+                            type="text"
+                            placeholder="Type a skill and click Add"
+                            value={skillInput}
+                            onChange={(e) => setSkillInput(e.target.value)}
+                            onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddSkill(); } }}
+                            className="form-input"
+                          />
+                          <button type="button" onClick={() => handleAddSkill()} className="btn btn-secondary">Add</button>
+                        </div>
+                        <div className={styles.skillsContainer}>
+                          {formData.skills.length === 0 && <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem', padding: '0.25rem' }}>No skills added yet.</span>}
+                          {formData.skills.map((skill) => (
+                            <span key={skill} className={styles.skillChip}>
+                              {skill}
+                              <button type="button" onClick={() => handleRemoveSkill(skill)} className={styles.removeSkillBtn}>
+                                <X size={10} />
+                              </button>
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className={styles.formRow}>
+                        <div className="form-group">
+                          <label className="form-label">Preferred Domain <span className="required">*</span></label>
+                          <select
+                            name="preferredDomain"
+                            value={formData.preferredDomain}
+                            onChange={handleChange}
+                            className="form-select"
+                            required
+                          >
+                            <option value="Software Engineering">Software Engineering</option>
+                            <option value="Frontend Development">Frontend Development</option>
+                            <option value="Backend Development">Backend Development</option>
+                            <option value="UI UX Design">UI UX Design</option>
+                            <option value="Data & AI">Data & AI</option>
+                            <option value="Product Management">Product Management</option>
+                            <option value="Marketing & Sales">Marketing & Sales</option>
+                            <option value="Operations">Operations</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      {/* Checkbox interests */}
+                      <div className="form-group" style={{ marginTop: '1rem' }}>
+                        <label className="form-label">Opportunities I am interested in:</label>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem', marginTop: '0.5rem' }}>
+                          <label className={styles.declarationLabel}>
+                            <input
+                              type="checkbox"
+                              checked={formData.internshipInterested === 'Yes'}
+                              onChange={(e) => setFormData(prev => ({ ...prev, internshipInterested: e.target.checked ? 'Yes' : 'No' }))}
+                            />
+                            <span>Internships</span>
+                          </label>
+                          <label className={styles.declarationLabel}>
+                            <input
+                              type="checkbox"
+                              checked={formData.jobInterested === 'Yes'}
+                              onChange={(e) => setFormData(prev => ({ ...prev, jobInterested: e.target.checked ? 'Yes' : 'No' }))}
+                            />
+                            <span>Full-Time Jobs</span>
+                          </label>
+                          <label className={styles.declarationLabel}>
+                            <input
+                              type="checkbox"
+                              checked={formData.startupInterested === 'Yes'}
+                              onChange={(e) => setFormData(prev => ({ ...prev, startupInterested: e.target.checked ? 'Yes' : 'No' }))}
+                            />
+                            <span>Startup Vetting</span>
+                          </label>
+                          <label className={styles.declarationLabel}>
+                            <input
+                              type="checkbox"
+                              checked={formData.buildxInterested === 'Yes'}
+                              onChange={(e) => setFormData(prev => ({ ...prev, buildxInterested: e.target.checked ? 'Yes' : 'No' }))}
+                            />
+                            <span>BuildX Program</span>
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 2. FOUNDER FIELDS */}
+                  {formData.role === 'Founder' && (
+                    <div style={{ marginTop: '1.5rem', borderTop: '1px solid var(--border-color)', paddingTop: '1.5rem' }}>
+                      <div className={styles.formRow}>
+                        <div className="form-group">
+                          <label className="form-label">Startup / Company Name <span className="required">*</span></label>
+                          <input
+                            type="text"
+                            name="startupName"
+                            value={formData.startupName}
+                            onChange={handleChange}
+                            placeholder="Startup Legal or Brand Name"
+                            className="form-input"
+                            required
+                          />
+                        </div>
+                        <div className="form-group">
+                          <label className="form-label">Startup Stage <span className="required">*</span></label>
+                          <select
+                            name="startupStage"
+                            value={formData.startupStage}
+                            onChange={handleChange}
+                            className="form-select"
+                            required
+                          >
+                            {STARTUP_STAGES.map(stage => (
+                              <option key={stage} value={stage}>{stage}</option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+
+                      <div className={styles.formRow}>
+                        <div className="form-group">
+                          <label className="form-label">Industry Sector <span className="required">*</span></label>
+                          <input
+                            type="text"
+                            name="industry"
+                            value={formData.industry}
+                            onChange={handleChange}
+                            placeholder="e.g. FinTech, SaaS, EdTech"
+                            className="form-input"
+                            required
+                          />
+                        </div>
+                        <div className="form-group">
+                          <label className="form-label">Startup Website URL</label>
+                          <input
+                            type="text"
+                            name="website"
+                            value={formData.website}
+                            onChange={handleChange}
+                            placeholder="https://company.com"
+                            className="form-input"
+                          />
+                        </div>
+                      </div>
+
+                      <div className={styles.formRow}>
+                        <div className="form-group">
+                          <label className="form-label">Team Size <span className="required">*</span></label>
+                          <select
+                            name="teamSize"
+                            value={formData.teamSize}
+                            onChange={handleChange}
+                            className="form-select"
+                            required
+                          >
+                            {TEAM_SIZES.map(sz => (
+                              <option key={sz} value={sz}>{sz} members</option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+
+                      <div className="form-group">
+                        <label className="form-label">Startup Description / Brief Pitch <span className="required">*</span></label>
+                        <textarea
+                          name="startupDescription"
+                          value={formData.startupDescription}
+                          onChange={handleChange}
+                          placeholder="Briefly describe what your startup builds and your current mission (Max 300 characters)..."
+                          className="form-textarea"
+                          rows={3}
+                          maxLength={300}
+                          required
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 3. RECRUITER FIELDS */}
+                  {formData.role === 'Recruiter' && (
+                    <div style={{ marginTop: '1.5rem', borderTop: '1px solid var(--border-color)', paddingTop: '1.5rem' }}>
+                      <div className={styles.formRow}>
+                        <div className="form-group">
+                          <label className="form-label">Company / Organization <span className="required">*</span></label>
+                          <input
+                            type="text"
+                            name="companyName"
+                            value={formData.companyName}
+                            onChange={handleChange}
+                            placeholder="e.g. Google, TCS, Startup Corp"
+                            className="form-input"
+                            required
+                          />
+                        </div>
+                        <div className="form-group">
+                          <label className="form-label">Designation <span className="required">*</span></label>
+                          <input
+                            type="text"
+                            name="designation"
+                            value={formData.designation}
+                            onChange={handleChange}
+                            placeholder="e.g. HR Manager, Talent Lead"
+                            className="form-input"
+                            required
+                          />
+                        </div>
+                      </div>
+
+                      <div className={styles.formRow}>
+                        <div className="form-group">
+                          <label className="form-label">Hiring Domains <span className="required">*</span></label>
+                          <input
+                            type="text"
+                            name="hiringDomains"
+                            value={formData.hiringDomains}
+                            onChange={handleChange}
+                            placeholder="e.g. Tech, Marketing, Sales"
+                            className="form-input"
+                            required
+                          />
+                        </div>
+                        <div className="form-group">
+                          <label className="form-label">Company Website URL</label>
+                          <input
+                            type="text"
+                            name="companyWebsite"
+                            value={formData.companyWebsite}
+                            onChange={handleChange}
+                            placeholder="https://company.com"
+                            className="form-input"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 4. MENTOR FIELDS */}
+                  {formData.role === 'Mentor' && (
+                    <div style={{ marginTop: '1.5rem', borderTop: '1px solid var(--border-color)', paddingTop: '1.5rem' }}>
+                      <div className={styles.formRow}>
+                        <div className="form-group">
+                          <label className="form-label">Current Company <span className="required">*</span></label>
+                          <input
+                            type="text"
+                            name="currentCompany"
+                            value={formData.currentCompany}
+                            onChange={handleChange}
+                            placeholder="Current organization name"
+                            className="form-input"
+                            required
+                          />
+                        </div>
+                        <div className="form-group">
+                          <label className="form-label">Role / Job Title <span className="required">*</span></label>
+                          <input
+                            type="text"
+                            name="mentorRole"
+                            value={formData.mentorRole}
+                            onChange={handleChange}
+                            placeholder="e.g. Principal Architect, Director"
+                            className="form-input"
+                            required
+                          />
+                        </div>
+                      </div>
+
+                      <div className={styles.formRow}>
+                        <div className="form-group">
+                          <label className="form-label">Mentoring Experience Level <span className="required">*</span></label>
+                          <select
+                            name="experience"
+                            value={formData.experience}
+                            onChange={handleChange}
+                            className="form-select"
+                            required
+                          >
+                            {EXPERIENCE_LEVELS.map(lvl => (
+                              <option key={lvl} value={lvl}>{lvl}</option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+
+                      <div className="form-group">
+                        <label className="form-label">Expertise Areas <span className="required">*</span></label>
+                        <textarea
+                          name="expertiseAreas"
+                          value={formData.expertiseAreas}
+                          onChange={handleChange}
+                          placeholder="e.g. System Design, Product Strategy, Interview Prep"
+                          className="form-textarea"
+                          rows={3}
+                          required
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 5. INVESTOR FIELDS */}
+                  {formData.role === 'Investor' && (
+                    <div style={{ marginTop: '1.5rem', borderTop: '1px solid var(--border-color)', paddingTop: '1.5rem' }}>
+                      <div className={styles.formRow}>
+                        <div className="form-group">
+                          <label className="form-label">Fund / Venture Capital Name <span className="required">*</span></label>
+                          <input
+                            type="text"
+                            name="fundName"
+                            value={formData.fundName}
+                            onChange={handleChange}
+                            placeholder="e.g. Sequoia Capital, Angle Fund"
+                            className="form-input"
+                            required
+                          />
+                        </div>
+                        <div className="form-group">
+                          <label className="form-label">Investment Focus <span className="required">*</span></label>
+                          <input
+                            type="text"
+                            name="investmentFocus"
+                            value={formData.investmentFocus}
+                            onChange={handleChange}
+                            placeholder="e.g. Pre-seed Tech, Clean Energy, Web3"
+                            className="form-input"
+                            required
+                          />
+                        </div>
+                      </div>
+
+                      <div className={styles.formRow}>
+                        <div className="form-group">
+                          <label className="form-label">Fund Website URL</label>
+                          <input
+                            type="text"
+                            name="website"
+                            value={formData.website}
+                            onChange={handleChange}
+                            placeholder="https://fund.com"
+                            className="form-input"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 6. WORKING PROFESSIONAL FIELDS */}
+                  {formData.role === 'Working Professional' && (
+                    <div style={{ marginTop: '1.5rem', borderTop: '1px solid var(--border-color)', paddingTop: '1.5rem' }}>
+                      <div className={styles.formRow}>
+                        <div className="form-group">
+                          <label className="form-label">Company Name <span className="required">*</span></label>
+                          <input
+                            type="text"
+                            name="company"
+                            value={formData.company}
+                            onChange={handleChange}
+                            placeholder="Current employer name"
+                            className="form-input"
+                            required
+                          />
+                        </div>
+                        <div className="form-group">
+                          <label className="form-label">Professional Role / Designation <span className="required">*</span></label>
+                          <input
+                            type="text"
+                            name="professionalRole"
+                            value={formData.professionalRole}
+                            onChange={handleChange}
+                            placeholder="e.g. Senior Software Engineer"
+                            className="form-input"
+                            required
+                          />
+                        </div>
+                      </div>
+
+                      <div className={styles.formRow}>
+                        <div className="form-group">
+                          <label className="form-label">Work Experience <span className="required">*</span></label>
+                          <select
+                            name="professionalExperience"
+                            value={formData.professionalExperience}
+                            onChange={handleChange}
+                            className="form-select"
+                            required
+                          >
+                            {EXPERIENCE_LEVELS.map(lvl => (
+                              <option key={lvl} value={lvl}>{lvl}</option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+
+                      <div className="form-group">
+                        <label className="form-label">Skills (Max 20) <span className="required">*</span></label>
+                        <div className={styles.skillInputBox}>
+                          <input
+                            type="text"
+                            placeholder="Type a skill and click Add"
+                            value={skillInput}
+                            onChange={(e) => setSkillInput(e.target.value)}
+                            onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddSkill(); } }}
+                            className="form-input"
+                          />
+                          <button type="button" onClick={() => handleAddSkill()} className="btn btn-secondary">Add</button>
+                        </div>
+                        <div className={styles.skillsContainer}>
+                          {formData.skills.length === 0 && <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem', padding: '0.25rem' }}>No skills added yet.</span>}
+                          {formData.skills.map((skill) => (
+                            <span key={skill} className={styles.skillChip}>
+                              {skill}
+                              <button type="button" onClick={() => handleRemoveSkill(skill)} className={styles.removeSkillBtn}>
+                                <X size={10} />
+                              </button>
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                </div>
+              )}
+
+              {/* STEP 3: SOCIAL LINKS & CREDENTIAL UPLOADS */}
+              {step === 3 && (
+                <div className="fade-in">
+                  <div className={styles.stepHeader}>
+                    <FileText className={styles.stepIcon} size={24} />
+                    <h2>Credentials & Social Uploads</h2>
+                  </div>
+
                   <div className="form-group">
-                    <label className="form-label">GitHub URL <span className="input-optional">(Optional)</span></label>
+                    <label className="form-label">LinkedIn Profile URL <span className="required">*</span></label>
                     <input
                       type="url"
-                      name="github"
-                      value={formData.github}
+                      name="linkedin"
+                      value={formData.linkedin}
                       onChange={handleChange}
-                      placeholder="https://github.com/username"
+                      placeholder="https://linkedin.com/in/username"
                       className="form-input"
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label className="form-label">Portfolio Website <span className="input-optional">(Optional)</span></label>
-                    <input
-                      type="url"
-                      name="portfolio"
-                      value={formData.portfolio}
-                      onChange={handleChange}
-                      placeholder="https://yourwebsite.com"
-                      className="form-input"
-                    />
-                  </div>
-                </div>
-
-                <div className={styles.formRow}>
-                  <div className="form-group">
-                    <label className="form-label">Instagram Profile <span className="input-optional">(Optional)</span></label>
-                    <input
-                      type="url"
-                      name="instagram"
-                      value={formData.instagram}
-                      onChange={handleChange}
-                      placeholder="https://instagram.com/handle"
-                      className="form-input"
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label className="form-label">X / Twitter URL <span className="input-optional">(Optional)</span></label>
-                    <input
-                      type="url"
-                      name="xTwitter"
-                      value={formData.xTwitter}
-                      onChange={handleChange}
-                      placeholder="https://x.com/handle"
-                      className="form-input"
-                    />
-                  </div>
-                </div>
-
-                {/* File Upload Box */}
-                <div className="form-group">
-                  <label className="form-label">Resume Upload (PDF Only) <span className="required">*</span></label>
-                  <div className={styles.uploadArea}>
-                    <input
-                      type="file"
-                      id="resumeFile"
-                      accept=".pdf"
-                      onChange={handleFileChange}
-                      className={styles.fileInputHidden}
                       required
                     />
-                    <label htmlFor="resumeFile" className={styles.uploadLabel}>
-                      <Upload size={32} className={styles.uploadIcon} />
-                      {resumeFile ? (
+                  </div>
+
+                  {formData.role === 'Student' && (
+                    <div className={styles.formRow}>
+                      <div className="form-group">
+                        <label className="form-label">GitHub Profile URL</label>
+                        <input
+                          type="url"
+                          name="github"
+                          value={formData.github}
+                          onChange={handleChange}
+                          placeholder="https://github.com/username"
+                          className="form-input"
+                        />
+                      </div>
+                      <div className="form-group">
+                        <label className="form-label">Personal Portfolio URL</label>
+                        <input
+                          type="url"
+                          name="portfolio"
+                          value={formData.portfolio}
+                          onChange={handleChange}
+                          placeholder="https://mywebsite.dev"
+                          className="form-input"
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Photo Upload (Required for all roles) */}
+                  <div className="form-group" style={{ marginTop: '1.5rem' }}>
+                    <label className="form-label">Profile Photo (For digital ID card generation) <span className="required">*</span></label>
+                    <div className={styles.uploadArea}>
+                      <input
+                        type="file"
+                        accept="image/png, image/jpeg, image/jpg"
+                        onChange={handlePhotoChange}
+                        className={styles.fileInputHidden}
+                      />
+                      <div className={styles.uploadLabel}>
+                        <Camera className={styles.uploadIcon} size={28} />
+                        {photoFile ? (
+                          <div>
+                            <span className={styles.uploadedName}>{photoFile.name}</span>
+                            <span className={styles.uploadedSize}>{(photoFile.size / 1024).toFixed(0)} KB</span>
+                          </div>
+                        ) : (
+                          <div>
+                            <span className={styles.uploadedName}>Select Profile Photo</span>
+                            <span className={styles.uploadedSize}>Accepts JPG, JPEG, PNG (Max 2MB)</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Resume Link (Student Only) */}
+                  {formData.role === 'Student' && (
+                    <div className="form-group" style={{ marginTop: '1.5rem' }}>
+                      <label className="form-label">Resume Link (Google Drive, Dropbox, etc.) <span className="required">*</span></label>
+                      <input
+                        type="url"
+                        name="resumeLink"
+                        value={formData.resumeLink || ''}
+                        onChange={handleChange}
+                        placeholder="https://drive.google.com/file/d/... or public URL"
+                        className="form-input"
+                        required
+                      />
+                      <div className={styles.publicLinkAlert}>
+                        <ShieldAlert className={styles.alertIcon} size={18} />
                         <div>
-                          <strong className={styles.uploadedName}>{resumeFile.name}</strong>
-                          <p className={styles.uploadedSize}>Click to change resume (PDF, max 5MB)</p>
+                          <strong>Public Link Required:</strong> Make sure the link sharing setting is set to <strong>"Anyone with the link can view"</strong>. Private or restricted links cannot be verified and will result in your application being rejected.
                         </div>
-                      ) : (
-                        <div>
-                          <strong>Select Resume PDF</strong>
-                          <p>Only PDF format accepted. Maximum file size: 5MB.</p>
-                        </div>
-                      )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Terms & Declaration Checkbox */}
+                  <div className={styles.declarationBox}>
+                    <label className={styles.declarationLabel}>
+                      <input
+                        type="checkbox"
+                        checked={formData.declaration}
+                        onChange={(e) => setFormData((prev) => ({ ...prev, declaration: e.target.checked }))}
+                        required
+                      />
+                      <span>
+                        I declare that all credentials, files, and URLs uploaded here are authentic. 
+                        I understand that any fraudulent entries will lead to immediate rejection, 
+                        blacklisting, and cancellation of the TSS ID.
+                      </span>
                     </label>
                   </div>
-                  <small className={styles.inputHelp}>NOTE: DOC, DOCX, ZIP, or RAR packages will be rejected by security filter.</small>
                 </div>
+              )}
 
-                <div className={styles.actions}>
-                  <button type="button" onClick={handleBack} className="btn btn-outline">
-                    <ArrowLeft size={16} /> Back
-                  </button>
-                  <button type="button" onClick={handleNext} className="btn btn-primary">
-                    Next Section <ArrowRight size={16} />
-                  </button>
-                </div>
-              </div>
-            )}
+              {/* STEP 4: SUCCESS VIEW */}
+              {step === 4 && (
+                <div className={`${styles.successContent} fade-in`}>
+                  <div className={styles.successIconCircle}>
+                    <Check size={40} />
+                  </div>
+                  <h2>Registration Queued!</h2>
+                  <p>
+                    Hello <strong>{formData.fullName}</strong>. Your profile has been queued for verification.
+                    The admin reviews all social profile links, photos, and resumes manually.
+                  </p>
+                  
+                  <div className={styles.nextStepsCard}>
+                    <h4>Next Vetting Steps:</h4>
+                    <ul>
+                      <li>Our vetting team reviews profile details within 24-48 hours.</li>
+                      <li>Upon approval, your unique <strong>TSS Member ID</strong> will be generated.</li>
+                      <li>You will receive access to download your Digital Member ID Card.</li>
+                      <li>Use the Status Lookup tool at any time to check approval progression.</li>
+                    </ul>
+                  </div>
 
-            {/* STEP 5: Declaration & Review */}
-            {step === 5 && (
-              <div className="fade-in">
-                <div className={styles.stepHeader}>
-                  <CheckSquare size={24} className={styles.stepIcon} />
-                  <h2>Review & Declaration</h2>
-                </div>
-
-                {/* Review Data summary card */}
-                <div className={styles.reviewCard}>
-                  <h3>Review Profile Summary</h3>
-                  <div className={styles.reviewGrid}>
-                    <div>
-                      <span>Name:</span> <strong>{formData.fullName}</strong>
-                    </div>
-                    <div>
-                      <span>Contact:</span> <strong>{formData.email} | {formData.mobile}</strong>
-                    </div>
-                    <div>
-                      <span>Location:</span> <strong>{formData.city}, {formData.state}, {formData.country}</strong>
-                    </div>
-                    <div>
-                      <span>Status:</span> <strong>{formData.currentStatus} ({formData.highestQualification})</strong>
-                    </div>
-                    <div>
-                      <span>Current Role:</span> <strong>{formData.currentRole}</strong>
-                    </div>
-                    <div>
-                      <span>Preferred:</span> <strong>{formData.preferredRoles.join(', ')}</strong>
-                    </div>
-                    <div>
-                      <span>Skills ({formData.skills.length}):</span> <strong>{formData.skills.join(', ')}</strong>
-                    </div>
-                    <div>
-                      <span>Experience:</span> <strong>{formData.experienceLevel}</strong>
-                    </div>
-                    <div>
-                      <span>LinkedIn:</span> <strong>{formData.linkedin}</strong>
-                    </div>
-                    <div>
-                      <span>Resume File:</span> <strong>{resumeFile ? resumeFile.name : 'None'}</strong>
-                    </div>
+                  <div className={styles.successActions}>
+                    <Link href="/status" className="btn btn-primary">
+                      Lookup Membership Status
+                    </Link>
+                    <Link href="/" className="btn btn-outline">
+                      Go to Home
+                    </Link>
                   </div>
                 </div>
+              )}
 
-                <div className={styles.declarationBox}>
-                  <label className={styles.declarationLabel}>
-                    <input
-                      type="checkbox"
-                      checked={formData.declaration}
-                      onChange={(e) => setFormData((prev) => ({ ...prev, declaration: e.target.checked }))}
-                      required
-                    />
-                    <span>
-                      I confirm all information provided is accurate and understand that providing false information may result in rejection or removal from the TSS Network.
-                    </span>
-                  </label>
-                </div>
-
+              {/* Form Navigation Controls */}
+              {step < 4 && (
                 <div className={styles.actions}>
-                  <button type="button" onClick={handleBack} className="btn btn-outline" disabled={isSubmitting}>
-                    <ArrowLeft size={16} /> Back
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleSubmit}
-                    disabled={isSubmitting}
-                    className="btn btn-primary"
-                  >
-                    {isSubmitting ? 'Submitting...' : 'Submit Registration'} <Check size={16} />
-                  </button>
-                </div>
-              </div>
-            )}
+                  {step > 1 ? (
+                    <button type="button" onClick={handleBack} className="btn btn-outline">
+                      <ArrowLeft size={16} /> Back
+                    </button>
+                  ) : (
+                    <div></div> // Spacing placeholder
+                  )}
 
-            {/* STEP 6: Success Page */}
-            {step === 6 && (
-              <div className={`${styles.successContent} fade-in`}>
-                <div className={styles.successIconCircle}>
-                  <Check size={48} className={styles.successIconCheck} />
+                  {step < 3 ? (
+                    <button type="button" onClick={handleNext} className="btn btn-primary">
+                      Next Step <ArrowRight size={16} />
+                    </button>
+                  ) : (
+                    <button 
+                      type="button" 
+                      onClick={handleSubmit} 
+                      disabled={isSubmitting} 
+                      className="btn btn-secondary"
+                    >
+                      {isSubmitting ? 'Submitting Details...' : 'Request Vetting Approval'}
+                    </button>
+                  )}
                 </div>
-                <h2>Application Submitted Successfully!</h2>
-                <p>
-                  Thank you for registering at <strong>The Student Spot (TSS)</strong>. 
-                  Your profile has been queued for admin review.
-                </p>
-                <div className={styles.nextStepsCard}>
-                  <h4>What happens next?</h4>
-                  <ul>
-                    <li><strong>Vetting Process:</strong> TSS Administrators will check your details and verify your uploaded resume.</li>
-                    <li><strong>Status Updates:</strong> Verification can take up to 24-48 hours. You can check your progress anytime in the Status section.</li>
-                    <li><strong>Unlocking Memberships:</strong> Once approved, you will be assigned a unique TSS Member ID to access community circles and direct recruiter forwarding services.</li>
-                  </ul>
-                </div>
-                <div className={styles.successActions}>
-                  <Link href="/status" className="btn btn-primary">
-                    Check Vetting Status
-                  </Link>
-                  <Link href="/" className="btn btn-outline">
-                    Back to Homepage
-                  </Link>
-                </div>
-              </div>
-            )}
+              )}
 
+            </form>
           </div>
         </div>
       </section>

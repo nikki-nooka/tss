@@ -250,17 +250,31 @@
   width: 100%;
   max-width: 440px;
   height: 270px;
-  background: linear-gradient(135deg, #0b0f19 0%, #1e1b4b 50%, #0f172a 100%);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: var(--radius-xl);
+  background-color: #030305;
+  background: linear-gradient(135deg, #07070b 0%, #100f1c 50%, #030305 100%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 16px;
   padding: 1.5rem;
-  color: #f1f5f9;
+  color: #ffffff;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  box-shadow: var(--shadow-xl), 0 10px 40px -10px rgba(79, 70, 229, 0.5);
+  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.05);
   position: relative;
   overflow: hidden;
+  font-family: var(--font-body);
+}
+
+/* Background Glow Effects */
+.cardGlow {
+  position: absolute;
+  top: -50px;
+  right: -50px;
+  width: 150px;
+  height: 150px;
+  background: radial-gradient(circle, rgba(6, 182, 212, 0.15) 0%, transparent 70%);
+  z-index: 1;
+  pointer-events: none;
 }
 
 .meshBg {
@@ -269,140 +283,185 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background-image: 
-    radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 0),
-    radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 0);
-  background-size: 16px 16px;
-  background-position: 0 0, 8px 8px;
-  opacity: 0.6;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 0);
+  background-size: 20px 20px;
+  opacity: 0.8;
   z-index: 1;
   pointer-events: none;
 }
 
+/* Header */
 .cardHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
   z-index: 2;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   padding-bottom: 0.75rem;
 }
 
 .cardLogo {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.4rem;
+  font-family: var(--font-heading);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .cardLogoIcon {
   color: var(--accent);
 }
 
-.cardLogo h4 {
-  font-family: var(--font-heading);
-  font-size: 0.9rem;
-  font-weight: 800;
-  color: #ffffff;
+.cardStatusBadge {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--success);
+  background-color: rgba(16, 185, 129, 0.1);
+  padding: 0.25rem 0.6rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(16, 185, 129, 0.2);
   letter-spacing: 0.05em;
-  line-height: 1.1;
 }
 
-.cardLogo span {
-  font-size: 0.55rem;
-  color: #94a3b8;
-  letter-spacing: 0.08em;
+.statusDot {
+  width: 6px;
+  height: 6px;
+  background-color: var(--success);
+  border-radius: 50%;
+  display: inline-block;
+  box-shadow: 0 0 8px var(--success);
+  animation: pulseDot 2s infinite;
 }
 
-.cardBadge {
-  font-size: 0.75rem;
-  font-weight: 800;
-  background: linear-gradient(135deg, var(--accent) 0%, var(--primary) 100%);
-  color: #ffffff;
-  padding: 0.2rem 0.5rem;
-  border-radius: var(--radius-sm);
+@keyframes pulseDot {
+  0% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.3); opacity: 1; box-shadow: 0 0 12px var(--success); }
+  100% { transform: scale(1); opacity: 0.8; }
 }
 
-.cardBody {
+/* Profile Block */
+.cardProfileBlock {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
   z-index: 2;
-  margin-top: 1rem;
+  margin: 0.75rem 0;
+}
+
+.cardPhotoWrapper {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255, 255, 255, 0.25);
+  overflow: hidden;
+  background-color: rgba(255, 255, 255, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  flex-shrink: 0;
+}
+
+.cardPhoto {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cardPhotoPlaceholder {
+  color: rgba(255, 255, 255, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cardProfileMeta {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.15rem;
 }
 
-.candidateDetails {
-  display: flex;
-  flex-direction: column;
-}
-
-.detailsLabel {
-  font-size: 0.55rem;
-  font-weight: 600;
-  color: #94a3b8;
-  letter-spacing: 0.08em;
-}
-
-.detailsValue {
+.memberName {
   font-family: var(--font-heading);
   font-size: 1.25rem;
   font-weight: 700;
   color: #ffffff;
   letter-spacing: -0.01em;
+  margin: 0;
+  line-height: 1.1;
 }
 
-.detailsValueShort {
-  font-family: var(--font-body);
-  font-size: 0.75rem;
+.memberRoleTag {
+  font-size: 0.65rem;
   font-weight: 600;
-  color: #e2e8f0;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Bottom Grid & details */
+.cardFooterGrid {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr 0.9fr auto;
+  gap: 0.5rem;
+  align-items: flex-end;
+  z-index: 2;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 0.75rem;
+}
+
+.detailsColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.detailsLabel {
+  font-size: 0.5rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.45);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .memberIdCode {
   font-family: monospace;
-  font-size: 1.35rem;
+  font-size: 0.85rem;
   font-weight: 700;
-  color: var(--accent);
-  letter-spacing: 0.1em;
+  color: #ffffff;
+  letter-spacing: 0.05em;
 }
 
-.cardRow {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-  padding-top: 0.5rem;
+.detailsValue {
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.8);
 }
 
-.cardFooter {
-  z-index: 2;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  padding-top: 0.75rem;
-}
-
-.barcodeLines {
-  display: flex;
-  align-items: flex-end;
-  height: 20px;
-  gap: 1px;
-}
-
-.barcodeLine {
+.qrCodeWrapper {
+  width: 42px;
+  height: 42px;
   background-color: #ffffff;
-  height: 100%;
+  border-radius: 6px;
+  padding: 0.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  flex-shrink: 0;
 }
 
-.securityCheckText {
-  font-size: 0.55rem;
-  font-weight: 700;
-  color: var(--success);
-  letter-spacing: 0.08em;
-  background-color: rgba(16, 185, 129, 0.15);
-  padding: 0.15rem 0.4rem;
-  border-radius: var(--radius-sm);
-  border: 1px solid rgba(16, 185, 129, 0.2);
+.cardQrCode {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
 .verifiedActions {
@@ -443,6 +502,8 @@
     background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%) !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
+    transform: none !important;
+    transform-origin: center center !important;
   }
 }
 

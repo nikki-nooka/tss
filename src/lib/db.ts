@@ -1,8 +1,9 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Define TS Interfaces (kept identical to previous schema)
+// Define TS Interfaces (aligned with Phase 1 updates)
 export interface Candidate {
   id: string;
+  role: 'Student' | 'Founder' | 'Recruiter' | 'Mentor' | 'Investor' | 'Working Professional';
   fullName: string;
   gender: 'Male' | 'Female' | 'Prefer Not To Say';
   dob: string;
@@ -11,23 +12,33 @@ export interface Candidate {
   city: string;
   state: string;
   country: string;
-  highestQualification: string;
-  currentStatus: 'Pursuing' | 'Graduated' | 'Working Professional' | 'Founder' | 'Freelancer' | 'Recruiter';
+  
+  // Student specific fields (optional)
+  highestQualification?: string;
+  currentStatus?: string;
   college?: string;
-  graduationYear: number;
-  currentRole: string;
-  preferredRoles: string[];
-  skills: string[];
-  experienceLevel: 'Fresher' | '0-1 Years' | '1-3 Years' | '3-5 Years' | '5+ Years';
+  graduationYear?: number;
+  currentRole?: string;
+  preferredRoles?: string[];
+  skills?: string[];
+  experienceLevel?: string;
+  resumePath?: string;
+  resumeName?: string;
+  
+  // Photo upload
+  photoPath?: string;
+  photoName?: string;
+
+  // Role details JSON object
+  roleDetails?: Record<string, any>;
+
   linkedin: string;
   github?: string;
   portfolio?: string;
   instagram?: string;
   xTwitter?: string;
-  resumePath: string;
-  resumeName: string;
   status: 'Pending' | 'Under Review' | 'Verified' | 'Rejected';
-  memberId?: string; // Format: TSSYYMMDDXXX
+  memberId?: string; // Format: TSS-XX-DDMMYYXXX
   notes?: string;
   registrationDate: string; // ISO String
 }
@@ -77,6 +88,7 @@ const seedMockData = async () => {
   const initialCandidates: Candidate[] = [
     {
       id: 'cand-1',
+      role: 'Student',
       fullName: 'Rahul Sharma',
       gender: 'Male',
       dob: '2001-08-15',
@@ -98,12 +110,13 @@ const seedMockData = async () => {
       resumePath: 'mock-resume.pdf',
       resumeName: 'Rahul_Sharma_Resume.pdf',
       status: 'Verified',
-      memberId: 'TSS260601001',
+      memberId: 'TSS-ST-010626001',
       notes: 'Strong frontend development skills. Portfolio looks excellent.',
       registrationDate: '2026-06-01T10:30:00.000Z'
     },
     {
       id: 'cand-2',
+      role: 'Working Professional',
       fullName: 'Priya Patel',
       gender: 'Female',
       dob: '1999-04-22',
@@ -112,22 +125,20 @@ const seedMockData = async () => {
       city: 'Mumbai',
       state: 'Maharashtra',
       country: 'India',
-      highestQualification: 'Postgraduate',
-      currentStatus: 'Working Professional',
-      graduationYear: 2021,
-      currentRole: 'Junior Data Analyst',
-      preferredRoles: ['Data Analyst', 'Product Manager'],
-      skills: ['Python', 'SQL', 'Tableau', 'Excel', 'Data Visualization'],
-      experienceLevel: '1-3 Years',
       linkedin: 'https://linkedin.com/in/priya-patel-demo',
       portfolio: 'https://priyapatel-demo.dev',
-      resumePath: 'mock-resume.pdf',
-      resumeName: 'Priya_Patel_Resume.pdf',
       status: 'Pending',
-      registrationDate: '2026-06-21T08:15:00.000Z'
+      registrationDate: '2026-06-21T08:15:00.000Z',
+      roleDetails: {
+        company: 'DataTech Solutions',
+        role: 'Junior Data Analyst',
+        experience: '1-3 Years',
+        skills: ['Python', 'SQL', 'Tableau', 'Excel']
+      }
     },
     {
       id: 'cand-3',
+      role: 'Student',
       fullName: 'Aravind Swamy',
       gender: 'Male',
       dob: '2000-11-05',
@@ -204,8 +215,9 @@ export async function getCandidates(): Promise<Candidate[]> {
   // Format preferredRoles and skills back to normal arrays (Supabase pulls JSONB natively as arrays, but double-check)
   return (data || []).map(c => ({
     ...c,
-    preferredRoles: Array.isArray(c.preferredRoles) ? c.preferredRoles : JSON.parse(c.preferredRoles || '[]'),
-    skills: Array.isArray(c.skills) ? c.skills : JSON.parse(c.skills || '[]')
+    preferredRoles: c.preferredRoles ? (Array.isArray(c.preferredRoles) ? c.preferredRoles : JSON.parse(c.preferredRoles || '[]')) : [],
+    skills: c.skills ? (Array.isArray(c.skills) ? c.skills : JSON.parse(c.skills || '[]')) : [],
+    roleDetails: c.roleDetails ? (typeof c.roleDetails === 'object' ? c.roleDetails : JSON.parse(c.roleDetails || '{}')) : {}
   })) as Candidate[];
 }
 
@@ -223,8 +235,9 @@ export async function getCandidateById(id: string): Promise<Candidate | null> {
   
   return {
     ...data,
-    preferredRoles: Array.isArray(data.preferredRoles) ? data.preferredRoles : JSON.parse(data.preferredRoles || '[]'),
-    skills: Array.isArray(data.skills) ? data.skills : JSON.parse(data.skills || '[]')
+    preferredRoles: data.preferredRoles ? (Array.isArray(data.preferredRoles) ? data.preferredRoles : JSON.parse(data.preferredRoles || '[]')) : [],
+    skills: data.skills ? (Array.isArray(data.skills) ? data.skills : JSON.parse(data.skills || '[]')) : [],
+    roleDetails: data.roleDetails ? (typeof data.roleDetails === 'object' ? data.roleDetails : JSON.parse(data.roleDetails || '{}')) : {}
   } as Candidate;
 }
 
@@ -233,8 +246,9 @@ export async function insertCandidate(candidate: Candidate): Promise<void> {
     .from('candidates')
     .insert([{
       ...candidate,
-      preferredRoles: candidate.preferredRoles, // Supabase maps arrays directly inside jsonb
-      skills: candidate.skills
+      preferredRoles: candidate.preferredRoles || [],
+      skills: candidate.skills || [],
+      roleDetails: candidate.roleDetails || {}
     }]);
 
   if (error) throw error;
@@ -260,10 +274,10 @@ export async function getSettings(): Promise<SystemSettings> {
   if (error) {
     // If not found, return default settings
     return {
-      communityMembers: 12500,
-      recruiterNetwork: 350,
-      opportunitiesShared: 850,
-      eventsConducted: 45
+      communityMembers: 500,
+      recruiterNetwork: 100,
+      opportunitiesShared: 30,
+      eventsConducted: 20
     };
   }
   return data as SystemSettings;

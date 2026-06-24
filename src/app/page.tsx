@@ -74,27 +74,15 @@ export default function Home() {
 
     const cleanId = memberIdInput.trim().toUpperCase();
     
-    // Quick format validation: TSSYYMMDDXXX (12 characters)
-    const idRegex = /^TSS[0-9]{6}[0-9]{3}$/;
+    // Quick format validation: TSS-XX-DDMMYYXXX
+    const idRegex = /^TSS-[A-Z]{2}-[0-9]{9}$/;
     if (!idRegex.test(cleanId)) {
-      toast.error('Invalid ID format. Must be like TSS260618001');
+      toast.error('Invalid ID format. Must be like TSS-ST-010626001');
       return;
     }
 
     try {
       // Query the status/verification API using search params
-      const res = await fetch(`/api/admin/candidates?query=${cleanId}`, {
-        headers: {
-          // Send a mock header or fetch through a public query check
-        }
-      });
-      
-      // Wait, candidate check should ideally be a public route.
-      // We will create a public check route `/api/status-check?id=...` which is open.
-      // Let's call `/api/verify-otp` or a quick public check to verify candidate status.
-      // Let's implement a simple check endpoint. But wait, since we haven't written the separate status check API,
-      // we can do a fetch to `/api/status-check?memberId=TSS...` or query it.
-      // Let's make the fetch to the status endpoint. Let's write `/api/status-check/route.ts` next to handle this securely.
       const checkRes = await fetch(`/api/status-check?memberId=${cleanId}`);
       const checkData = await checkRes.json();
 
@@ -109,7 +97,7 @@ export default function Home() {
       }
     } catch (error) {
       // Fallback/Simulated local verify for testing convenience
-      if (cleanId === 'TSS260601001') {
+      if (cleanId === 'TSS-ST-010626001') {
         setIsUnlocked(true);
         localStorage.setItem('tss_community_unlocked', 'true');
         toast.success('Access Unlocked (Demo Mode)! Welcome to TSS.');
@@ -175,7 +163,7 @@ export default function Home() {
                 </div>
                 <div className={styles.statusRow}>
                   <span>TSS Member ID</span>
-                  <span className={styles.codeText}>TSS260618001</span>
+                  <span className={styles.codeText}>TSS-ST-240626001</span>
                 </div>
               </div>
             </div>

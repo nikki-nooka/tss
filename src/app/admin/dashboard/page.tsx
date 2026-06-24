@@ -13,6 +13,7 @@ import {
   AlertOctagon, 
   Search, 
   Download, 
+  ExternalLink,
   FileText, 
   Eye, 
   Settings, 
@@ -363,6 +364,47 @@ export default function AdminDashboard() {
     }
   };
 
+  // Helper to fetch Organization / College and Status / Title for all roles
+  const getCandidateOrgDetails = (c: Candidate) => {
+    switch (c.role) {
+      case 'Student':
+        return {
+          org: c.college || 'N/A',
+          sub: c.currentStatus || 'Student'
+        };
+      case 'Founder':
+        return {
+          org: c.roleDetails?.startupName || 'N/A',
+          sub: `Founder (Stage: ${c.roleDetails?.startupStage || 'N/A'})`
+        };
+      case 'Recruiter':
+        return {
+          org: c.roleDetails?.companyName || 'N/A',
+          sub: c.roleDetails?.designation || 'Recruiter'
+        };
+      case 'Mentor':
+        return {
+          org: c.roleDetails?.currentCompany || 'N/A',
+          sub: c.roleDetails?.mentorRole || 'Mentor'
+        };
+      case 'Investor':
+        return {
+          org: c.roleDetails?.fundName || 'N/A',
+          sub: `Investor (${c.roleDetails?.investmentFocus || 'N/A'})`
+        };
+      case 'Working Professional':
+        return {
+          org: c.roleDetails?.company || 'N/A',
+          sub: c.roleDetails?.professionalRole || 'Working Professional'
+        };
+      default:
+        return {
+          org: 'N/A',
+          sub: ''
+        };
+    }
+  };
+
   // --- Export Data to CSV ---
 
   const handleExportCSV = () => {
@@ -373,31 +415,33 @@ export default function AdminDashboard() {
 
     // Define CSV headers
     const headers = [
-      'Member ID', 'Full Name', 'Email', 'Phone', 'Gender', 'DOB', 
-      'City', 'State', 'Highest Qualification', 'Status', 
-      'Graduation Year', 'Experience Level', 'LinkedIn', 'Github', 
-      'Registration Date', 'Vetting Status'
+      'Member ID', 'Full Name', 'Role', 'Email', 'Phone', 'Gender', 'DOB', 
+      'City', 'State', 'Organization / College', 'Designation / Status', 
+      'Vetting Status', 'Registration Date', 'LinkedIn', 'Github', 'Role Details'
     ];
 
     // Map candidate rows
-    const rows = candidates.map(c => [
-      c.memberId || 'Pending',
-      c.fullName,
-      c.email,
-      c.mobile,
-      c.gender,
-      c.dob,
-      c.city,
-      c.state,
-      c.highestQualification,
-      c.currentStatus,
-      c.graduationYear,
-      c.experienceLevel,
-      c.linkedin,
-      c.github || '',
-      c.registrationDate,
-      c.status
-    ]);
+    const rows = candidates.map(c => {
+      const orgDetails = getCandidateOrgDetails(c);
+      return [
+        c.memberId || 'Pending',
+        c.fullName,
+        c.role || 'Student',
+        c.email,
+        c.mobile,
+        c.gender,
+        c.dob,
+        c.city,
+        c.state,
+        orgDetails.org,
+        orgDetails.sub,
+        c.status,
+        c.registrationDate,
+        c.linkedin,
+        c.github || '',
+        JSON.stringify(c.roleDetails || {})
+      ];
+    });
 
     // Construct CSV file string
     const csvContent = "data:text/csv;charset=utf-8," 
@@ -553,14 +597,20 @@ export default function AdminDashboard() {
                     />
                   </div>
                   <div className="form-group">
-                    <label className="form-label">Preferred Role</label>
-                    <input 
-                      type="text" 
-                      placeholder="e.g. Engineer" 
-                      value={roleFilter}
-                      onChange={e => setRoleFilter(e.target.value)}
-                      className="form-input" 
-                    />
+                    <label className="form-label">Candidate Role</label>
+                    <select 
+                      value={roleFilter} 
+                      onChange={e => setRoleFilter(e.target.value)} 
+                      className="form-select"
+                    >
+                      <option value="">All Roles</option>
+                      <option value="Student">Student</option>
+                      <option value="Founder">Founder</option>
+                      <option value="Recruiter">Recruiter</option>
+                      <option value="Mentor">Mentor</option>
+                      <option value="Investor">Investor</option>
+                      <option value="Working Professional">Working Professional</option>
+                    </select>
                   </div>
                 </div>
                 <div className={styles.filterActions}>
@@ -577,9 +627,10 @@ export default function AdminDashboard() {
                       <tr>
                         <th>TSS ID</th>
                         <th>Candidate Name</th>
+                        <th>Role</th>
                         <th>Contact Email</th>
                         <th>Phone</th>
-                        <th>College / Status</th>
+                        <th>Organization / Status</th>
                         <th>Vetting Status</th>
                         <th>Reg. Date</th>
                         <th style={{ textAlign: 'right' }}>Actions</th>
@@ -588,37 +639,45 @@ export default function AdminDashboard() {
                     <tbody>
                       {candidates.length === 0 ? (
                         <tr>
-                          <td colSpan={8} className={styles.noDataRow}>
+                          <td colSpan={9} className={styles.noDataRow}>
                             No candidate profiles found matching current filters.
                           </td>
                         </tr>
                       ) : (
-                        candidates.map((c) => (
-                          <tr key={c.id}>
-                            <td className={styles.idCol}>{c.memberId || <span style={{color:'var(--text-muted)'}}>Pending</span>}</td>
-                            <td>
-                              <div className={styles.nameLabel}>{c.fullName}</div>
-                              <small className={styles.expTag}>{c.experienceLevel}</small>
-                            </td>
-                            <td>{c.email}</td>
-                            <td>{c.mobile}</td>
-                            <td>
-                              <div className={styles.collegeName}>{c.college || 'N/A'}</div>
-                              <small className={styles.statusDesc}>{c.currentStatus}</small>
-                            </td>
-                            <td>{getStatusBadge(c.status)}</td>
-                            <td>{new Date(c.registrationDate).toLocaleDateString()}</td>
-                            <td style={{ textAlign: 'right' }}>
-                              <button 
-                                onClick={() => handleOpenCandidate(c)} 
-                                className="btn btn-light btn-sm"
-                                style={{ display: 'inline-flex', padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}
-                              >
-                                <Eye size={14} /> Assess Profile
-                              </button>
-                            </td>
-                          </tr>
-                        ))
+                        candidates.map((c) => {
+                          const orgDetails = getCandidateOrgDetails(c);
+                          return (
+                            <tr key={c.id}>
+                              <td className={styles.idCol}>{c.memberId || <span style={{color:'var(--text-muted)'}}>Pending</span>}</td>
+                              <td>
+                                <div className={styles.nameLabel}>{c.fullName}</div>
+                                <small className={styles.expTag}>{c.experienceLevel || 'N/A'}</small>
+                              </td>
+                              <td>
+                                <span className={styles.adminRole} style={{ backgroundColor: 'var(--primary-light)', color: 'var(--primary)' }}>
+                                  {c.role || 'Student'}
+                                </span>
+                              </td>
+                              <td>{c.email}</td>
+                              <td>{c.mobile}</td>
+                              <td>
+                                <div className={styles.collegeName}>{orgDetails.org}</div>
+                                <small className={styles.statusDesc}>{orgDetails.sub}</small>
+                              </td>
+                              <td>{getStatusBadge(c.status)}</td>
+                              <td>{new Date(c.registrationDate).toLocaleDateString()}</td>
+                              <td style={{ textAlign: 'right' }}>
+                                <button 
+                                  onClick={() => handleOpenCandidate(c)} 
+                                  className="btn btn-light btn-sm"
+                                  style={{ display: 'inline-flex', padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}
+                                >
+                                  <Eye size={14} /> Assess Profile
+                                </button>
+                              </td>
+                            </tr>
+                          );
+                        })
                       )}
                     </tbody>
                   </table>
@@ -673,6 +732,23 @@ export default function AdminDashboard() {
                   </div>
                   <div className={styles.mValue}>{metrics.rejectedProfiles}</div>
                   <small className={styles.mSubText}>Accounts non-compliant</small>
+                </div>
+              </div>
+
+              {/* Role Distribution Metrics */}
+              <div className={`${styles.statsCard} premium-card`} style={{ marginBottom: '2rem' }}>
+                <h3>Registration Breakdown by Role</h3>
+                <div className={styles.roleBreakdownGrid}>
+                  {Object.entries(metrics.registrationsByRole || {}).map(([roleName, count]) => {
+                    const verifiedCount = metrics.verifiedByRole?.[roleName] || 0;
+                    return (
+                      <div key={roleName} className={styles.roleBreakdownCard}>
+                        <span className={styles.roleBreakdownLabel}>{roleName}</span>
+                        <strong className={styles.roleBreakdownValue}>{count as number} Registered</strong>
+                        <span className={styles.roleBreakdownSub}>{verifiedCount} Verified</span>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
 
@@ -888,9 +964,25 @@ export default function AdminDashboard() {
             
             {/* Modal Header */}
             <div className={styles.modalHeader}>
-              <div>
-                <h2>{selectedCandidate.fullName}</h2>
-                <p>Status Vetting queue ID: {selectedCandidate.id}</p>
+              <div className={styles.modalHeaderFlex}>
+                {selectedCandidate.photoPath ? (
+                  <img 
+                    src={selectedCandidate.photoPath} 
+                    alt={selectedCandidate.fullName} 
+                    className={styles.modalProfilePhoto} 
+                  />
+                ) : (
+                  <div className={styles.modalProfilePhotoPlaceholder}>
+                    <User size={32} />
+                  </div>
+                )}
+                <div>
+                  <h2>{selectedCandidate.fullName}</h2>
+                  <span className={styles.modalRoleTag}>
+                    {selectedCandidate.role || 'Student'}
+                  </span>
+                  <p style={{ marginTop: '0.25rem' }}>Status Vetting queue ID: {selectedCandidate.id}</p>
+                </div>
               </div>
               <button onClick={() => setSelectedCandidate(null)} className={styles.closeModalBtn}>
                 <X size={24} />
@@ -913,30 +1005,138 @@ export default function AdminDashboard() {
                   </div>
                 </div>
 
-                <div className={styles.detailSection}>
-                  <h3>Education Parameters</h3>
-                  <div className={styles.detailGrid}>
-                    <div><span>Qualification:</span> {selectedCandidate.highestQualification}</div>
-                    <div><span>Status:</span> {selectedCandidate.currentStatus}</div>
-                    <div><span>Graduation Year:</span> {selectedCandidate.graduationYear}</div>
-                    {selectedCandidate.college && <div><span>College / Univ:</span> {selectedCandidate.college}</div>}
-                  </div>
-                </div>
+                {/* Dynamic Role-Based Parameters */}
+                {selectedCandidate.role === 'Student' && (
+                  <>
+                    <div className={styles.detailSection}>
+                      <h3>Education Parameters</h3>
+                      <div className={styles.detailGrid}>
+                        <div><span>Qualification:</span> {selectedCandidate.highestQualification}</div>
+                        <div><span>Status:</span> {selectedCandidate.currentStatus}</div>
+                        <div><span>Graduation Year:</span> {selectedCandidate.graduationYear}</div>
+                        {selectedCandidate.college && <div><span>College / Univ:</span> {selectedCandidate.college}</div>}
+                        <div><span>Degree:</span> {selectedCandidate.roleDetails?.degree || 'N/A'}</div>
+                        <div><span>Specialization:</span> {selectedCandidate.roleDetails?.specialization || 'N/A'}</div>
+                      </div>
+                    </div>
 
-                <div className={styles.detailSection}>
-                  <h3>Professional Parameters</h3>
-                  <div className={styles.detailGrid}>
-                    <div><span>Current Role:</span> {selectedCandidate.currentRole}</div>
-                    <div><span>Experience:</span> {selectedCandidate.experienceLevel}</div>
-                    <div><span>Roles Interested:</span> {selectedCandidate.preferredRoles.join(', ')}</div>
-                  </div>
-                  <div className={styles.skillsTagWrapper} style={{ marginTop: '0.75rem' }}>
-                    <span>Skills ({selectedCandidate.skills.length}):</span>
-                    <div className={styles.skillsTags}>
-                      {selectedCandidate.skills.map(sk => <span key={sk} className={styles.modalSkillTag}>{sk}</span>)}
+                    <div className={styles.detailSection}>
+                      <h3>Professional & Interest Parameters</h3>
+                      <div className={styles.detailGrid}>
+                        <div><span>Current Role:</span> {selectedCandidate.currentRole}</div>
+                        <div><span>Experience:</span> {selectedCandidate.experienceLevel}</div>
+                        <div><span>Preferred Domain:</span> {selectedCandidate.roleDetails?.preferredDomain || 'N/A'}</div>
+                        <div><span>Internships Interested:</span> {selectedCandidate.roleDetails?.internshipInterested || 'No'}</div>
+                        <div><span>Jobs Interested:</span> {selectedCandidate.roleDetails?.jobInterested || 'No'}</div>
+                        <div><span>Startups Interested:</span> {selectedCandidate.roleDetails?.startupInterested || 'No'}</div>
+                        <div><span>BuildX Sandbox:</span> {selectedCandidate.roleDetails?.buildxInterested || 'No'}</div>
+                        <div><span>Roles Interested:</span> {selectedCandidate.preferredRoles?.join(', ') || 'None'}</div>
+                      </div>
+                      {selectedCandidate.skills && selectedCandidate.skills.length > 0 && (
+                        <div className={styles.skillsTagWrapper} style={{ marginTop: '0.75rem' }}>
+                          <span>Skills ({selectedCandidate.skills.length}):</span>
+                          <div className={styles.skillsTags}>
+                            {selectedCandidate.skills.map(sk => <span key={sk} className={styles.modalSkillTag}>{sk}</span>)}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </>
+                )}
+
+                {selectedCandidate.role === 'Founder' && (
+                  <div className={styles.detailSection}>
+                    <h3>Startup Parameters</h3>
+                    <div className={styles.detailGrid}>
+                      <div><span>Startup Name:</span> {selectedCandidate.roleDetails?.startupName || 'N/A'}</div>
+                      <div><span>Startup Stage:</span> {selectedCandidate.roleDetails?.startupStage || 'N/A'}</div>
+                      <div><span>Industry Sector:</span> {selectedCandidate.roleDetails?.industry || 'N/A'}</div>
+                      <div><span>Team Size:</span> {selectedCandidate.roleDetails?.teamSize || 'N/A'}</div>
+                      {selectedCandidate.roleDetails?.website && (
+                        <div>
+                          <span>Startup Website:</span>{' '}
+                          <a href={selectedCandidate.roleDetails.website} target="_blank" rel="noreferrer" style={{ textDecoration: 'underline' }}>
+                            {selectedCandidate.roleDetails.website}
+                          </a>
+                        </div>
+                      )}
+                    </div>
+                    <div style={{ marginTop: '1rem', borderTop: '1px solid var(--border-color)', paddingTop: '1rem' }}>
+                      <h4 className={styles.modalRoleLabel}>Startup Pitch / Description:</h4>
+                      <p style={{ fontSize: '0.9rem', color: 'var(--text-main)', lineHeight: '1.4' }}>
+                        {selectedCandidate.roleDetails?.startupDescription || 'No description provided.'}
+                      </p>
                     </div>
                   </div>
-                </div>
+                )}
+
+                {selectedCandidate.role === 'Recruiter' && (
+                  <div className={styles.detailSection}>
+                    <h3>Corporate Recruitment Parameters</h3>
+                    <div className={styles.detailGrid}>
+                      <div><span>Company Name:</span> {selectedCandidate.roleDetails?.companyName || 'N/A'}</div>
+                      <div><span>Designation:</span> {selectedCandidate.roleDetails?.designation || 'N/A'}</div>
+                      <div><span>Hiring Domains:</span> {selectedCandidate.roleDetails?.hiringDomains || 'N/A'}</div>
+                      {selectedCandidate.roleDetails?.companyWebsite && (
+                        <div>
+                          <span>Company Website:</span>{' '}
+                          <a href={selectedCandidate.roleDetails.companyWebsite} target="_blank" rel="noreferrer" style={{ textDecoration: 'underline' }}>
+                            {selectedCandidate.roleDetails.companyWebsite}
+                          </a>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {selectedCandidate.role === 'Mentor' && (
+                  <div className={styles.detailSection}>
+                    <h3>Professional Mentorship Parameters</h3>
+                    <div className={styles.detailGrid}>
+                      <div><span>Current Company:</span> {selectedCandidate.roleDetails?.currentCompany || 'N/A'}</div>
+                      <div><span>Mentorship Role:</span> {selectedCandidate.roleDetails?.mentorRole || 'N/A'}</div>
+                      <div><span>Experience Level:</span> {selectedCandidate.roleDetails?.experience || 'N/A'}</div>
+                      <div><span>Expertise Areas:</span> {selectedCandidate.roleDetails?.expertiseAreas || 'N/A'}</div>
+                    </div>
+                  </div>
+                )}
+
+                {selectedCandidate.role === 'Investor' && (
+                  <div className={styles.detailSection}>
+                    <h3>Fund Investment Parameters</h3>
+                    <div className={styles.detailGrid}>
+                      <div><span>Investment Fund Name:</span> {selectedCandidate.roleDetails?.fundName || 'N/A'}</div>
+                      <div><span>Investment Focus:</span> {selectedCandidate.roleDetails?.investmentFocus || 'N/A'}</div>
+                      {selectedCandidate.roleDetails?.website && (
+                        <div>
+                          <span>Fund Website:</span>{' '}
+                          <a href={selectedCandidate.roleDetails.website} target="_blank" rel="noreferrer" style={{ textDecoration: 'underline' }}>
+                            {selectedCandidate.roleDetails.website}
+                          </a>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {selectedCandidate.role === 'Working Professional' && (
+                  <div className={styles.detailSection}>
+                    <h3>Professional Placement Parameters</h3>
+                    <div className={styles.detailGrid}>
+                      <div><span>Current Company:</span> {selectedCandidate.roleDetails?.company || 'N/A'}</div>
+                      <div><span>Designation:</span> {selectedCandidate.roleDetails?.professionalRole || 'N/A'}</div>
+                      <div><span>Total Experience:</span> {selectedCandidate.roleDetails?.professionalExperience || 'N/A'}</div>
+                    </div>
+                    {selectedCandidate.skills && selectedCandidate.skills.length > 0 && (
+                      <div className={styles.skillsTagWrapper} style={{ marginTop: '1rem' }}>
+                        <span>Skills ({selectedCandidate.skills.length}):</span>
+                        <div className={styles.skillsTags}>
+                          {selectedCandidate.skills.map(sk => <span key={sk} className={styles.modalSkillTag}>{sk}</span>)}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 {/* Social Profiles */}
                 <div className={styles.detailSection}>
@@ -968,25 +1168,43 @@ export default function AdminDashboard() {
                   </div>
                 </div>
 
-                {/* Resume Download Box */}
-                <div className={styles.detailSection}>
-                  <h3>Resume Document File</h3>
-                  <div className={styles.resumeDownloadBox}>
-                    <FileText size={28} className={styles.pdfIcon} />
-                    <div className={styles.resumeMeta}>
-                      <strong>{selectedCandidate.resumeName}</strong>
-                      <span>Secured PDF Storage</span>
+                {/* Resume Download/Link Box */}
+                {selectedCandidate.resumePath && (
+                  <div className={styles.detailSection}>
+                    <h3>Resume Document</h3>
+                    <div className={styles.resumeDownloadBox}>
+                      <FileText size={28} className={styles.pdfIcon} />
+                      <div className={styles.resumeMeta}>
+                        <strong>{selectedCandidate.resumeName || 'Resume'}</strong>
+                        <span>
+                          {selectedCandidate.resumePath.startsWith('http') 
+                            ? 'Public Resume Link' 
+                            : 'Secured PDF Storage'}
+                        </span>
+                      </div>
+                      {selectedCandidate.resumePath.startsWith('http') ? (
+                        <a 
+                          href={selectedCandidate.resumePath} 
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="btn btn-primary btn-sm"
+                          style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '0.25rem' }}
+                        >
+                          <ExternalLink size={16} /> Open Resume
+                        </a>
+                      ) : (
+                        <a 
+                          href={`/api/download/resume?id=${selectedCandidate.id}`} 
+                          target="_blank"
+                          className="btn btn-secondary btn-sm"
+                          style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '0.25rem' }}
+                        >
+                          <Download size={16} /> Download Resume
+                        </a>
+                      )}
                     </div>
-                    <a 
-                      href={`/api/download/resume?id=${selectedCandidate.id}`} 
-                      target="_blank"
-                      className="btn btn-secondary btn-sm"
-                      style={{ marginLeft: 'auto' }}
-                    >
-                      <Download size={16} /> Download Resume
-                    </a>
                   </div>
-                </div>
+                )}
               </div>
 
               {/* Right Column: Vetting controls & Recruiter Referral */}

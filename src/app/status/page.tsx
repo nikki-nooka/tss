@@ -3,19 +3,32 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import styles from './page.module.css';
-import { Search, Shield, Clock, CheckCircle2, AlertOctagon, HelpCircle, ArrowRight, Award, Printer } from 'lucide-react';
+import { 
+  Search, 
+  Shield, 
+  Clock, 
+  CheckCircle2, 
+  AlertOctagon, 
+  HelpCircle, 
+  ArrowRight, 
+  Award, 
+  User, 
+  Download 
+} from 'lucide-react';
 import { useToast } from '@/components/Toast';
 
 interface CandidateStatus {
   success: boolean;
   fullName: string;
+  role: 'Student' | 'Founder' | 'Recruiter' | 'Mentor' | 'Investor' | 'Working Professional';
   status: 'Pending' | 'Under Review' | 'Verified' | 'Rejected';
   memberId: string | null;
-  highestQualification: string;
-  preferredRoles: string[];
+  highestQualification?: string | null;
+  preferredRoles?: string[];
   registrationDate: string;
   city: string;
   state: string;
+  photoPath?: string | null;
 }
 
 export default function Status() {
@@ -25,8 +38,18 @@ export default function Status() {
   const [isLoading, setIsLoading] = useState(false);
   const [searched, setSearched] = useState(false);
 
-  // Auto check status if recent registration exists
+  // Auto check status if URL has memberId or if recent registration exists in localStorage
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const urlMemberId = params.get('memberId');
+
+    if (urlMemberId) {
+      const cleanId = urlMemberId.trim().toUpperCase();
+      setSearchInput(cleanId);
+      fetchStatus(cleanId);
+      return;
+    }
+
     const savedEmail = localStorage.getItem('tss_registered_email');
     const savedMobile = localStorage.getItem('tss_registered_mobile');
     const autoQuery = savedEmail || savedMobile;
@@ -40,7 +63,7 @@ export default function Status() {
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!searchInput.trim()) {
-      toast.error('Please enter your email address or mobile number');
+      toast.error('Please enter your email, mobile number, or Member ID');
       return;
     }
     fetchStatus(searchInput.trim());
@@ -50,8 +73,15 @@ export default function Status() {
     setIsLoading(true);
     setSearched(true);
     try {
-      const isEmail = queryVal.includes('@');
-      const param = isEmail ? `email=${encodeURIComponent(queryVal)}` : `mobile=${encodeURIComponent(queryVal)}`;
+      const val = queryVal.trim();
+      let param = '';
+      if (val.toUpperCase().startsWith('TSS-')) {
+        param = `memberId=${encodeURIComponent(val)}`;
+      } else if (val.includes('@')) {
+        param = `email=${encodeURIComponent(val)}`;
+      } else {
+        param = `mobile=${encodeURIComponent(val)}`;
+      }
       
       const res = await fetch(`/api/status-check?${param}`);
       const data = await res.json();
@@ -59,7 +89,6 @@ export default function Status() {
       if (data.success) {
         setCandidate(data);
         if (data.status === 'Verified') {
-          // Auto unlock community access
           localStorage.setItem('tss_community_unlocked', 'true');
         }
       } else {
@@ -74,8 +103,79 @@ export default function Status() {
     }
   };
 
-  const handlePrintCard = () => {
-    window.print();
+
+
+  // Dynamic script loader for html2pdf.js to save card as PDF
+  const handleDownloadPdf = () => {
+    if (!candidate || !candidate.memberId) return;
+    
+    toast.info('Preparing your Digital ID card PDF...');
+
+    const script = document.createElement('script');
+    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
+    script.onload = () => {
+      // @ts-ignore
+      const html2pdf = window.html2pdf;
+      const cardElement = document.getElementById('tss-id-card');
+      
+      if (!cardElement) {
+        toast.error('ID Card element not found.');
+        return;
+      }
+
+      // Create an unscaled clone of the card to bypass mobile responsive transforms
+      const clone = cardElement.cloneNode(true) as HTMLElement;
+      clone.style.transform = 'none';
+      clone.style.width = '440px';
+      clone.style.height = '270px';
+      clone.style.margin = '0';
+      clone.style.position = 'relative';
+
+      // Create a temporary container in the viewport but completely invisible (prevents scroll offset bugs)
+      const tempContainer = document.createElement('div');
+      tempContainer.style.position = 'fixed';
+      tempContainer.style.top = '0';
+      tempContainer.style.left = '0';
+      tempContainer.style.width = '440px';
+      tempContainer.style.height = '270px';
+      tempContainer.style.opacity = '0';
+      tempContainer.style.pointerEvents = 'none';
+      tempContainer.style.zIndex = '-9999';
+      tempContainer.appendChild(clone);
+      document.body.appendChild(tempContainer);
+      
+      const opt = {
+        margin: 0,
+        filename: `TSS_Member_Card_${candidate.memberId}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { 
+          scale: 3, 
+          useCORS: true, 
+          logging: false,
+          backgroundColor: '#0f172a',
+          scrollY: 0,
+          scrollX: 0
+        },
+        jsPDF: { unit: 'px', format: [440, 270], orientation: 'landscape' }
+      };
+      
+      html2pdf().from(clone).set(opt).save()
+        .then(() => {
+          document.body.removeChild(tempContainer);
+          toast.success('PDF Card Downloaded!');
+        })
+        .catch((err: any) => {
+          console.error(err);
+          if (document.body.contains(tempContainer)) {
+            document.body.removeChild(tempContainer);
+          }
+          toast.error('Failed to generate PDF download.');
+        });
+    };
+    script.onerror = () => {
+      toast.error('Failed to load PDF export library.');
+    };
+    document.body.appendChild(script);
   };
 
   const formatDate = (dateStr: string) => {
@@ -95,7 +195,7 @@ export default function Status() {
           <span className={styles.subTitle}>Vetting Lookup</span>
           <h1>Membership Status Check</h1>
           <p className={styles.tagline}>
-            Search your registration queue status. If approved, your verified Member Card and ID will be displayed below.
+            Search your registration queue status. If approved, your verified Member Card and ID will be unlocked below.
           </p>
         </div>
       </section>
@@ -155,7 +255,7 @@ export default function Status() {
                       <h3>Application Vetting Status: PENDING</h3>
                       <p>
                         Hello <strong>{candidate.fullName}</strong>. Your profile has been queued for documentation verification. 
-                        Our HR team manually reviews credentials within 24-48 hours. No actions are required at this time.
+                        Our vetting team reviews credentials within 24-48 hours. No actions are required at this time.
                       </p>
                     </div>
                   </div>
@@ -167,7 +267,7 @@ export default function Status() {
                     <div>
                       <h3>Application Vetting Status: UNDER REVIEW</h3>
                       <p>
-                        Hello <strong>{candidate.fullName}</strong>. An administrator is currently reviewing your resume PDF, 
+                        Hello <strong>{candidate.fullName}</strong>. An administrator is currently reviewing your resume link, 
                         education history, and social profile links. Check back shortly.
                       </p>
                     </div>
@@ -180,8 +280,8 @@ export default function Status() {
                     <div>
                       <h3>Application Vetting Status: NOT APPROVED</h3>
                       <p>
-                        Hello <strong>{candidate.fullName}</strong>. Your membership registration could not be verified by our HR vetting system. 
-                        Common reasons include: incomplete/unreadable resume PDF, false profile links, or invalid location inputs.
+                        Hello <strong>{candidate.fullName}</strong>. Your membership registration could not be verified by our vetting system. 
+                        Common reasons include: incomplete/restricted resume link, false profile links, or invalid location inputs.
                       </p>
                       <p className={styles.contactSupportText}>
                         Please <Link href="/contact">contact support</Link> or re-register with valid credentials.
@@ -205,76 +305,83 @@ export default function Status() {
 
                     {/* Digital Membership Card Mockup */}
                     <div id="print-area" className={styles.membershipCardWrapper}>
-                      <div className={styles.memberCardVirtual}>
-                        {/* Background mesh decoration */}
+                      <div id="tss-id-card" className={styles.memberCardVirtual}>
+                        {/* Background glowing gradients */}
+                        <div className={styles.cardGlow}></div>
                         <div className={styles.meshBg}></div>
                         
-                        {/* Card Header */}
+                        {/* Header */}
                         <div className={styles.cardHeader}>
                           <div className={styles.cardLogo}>
-                            <Award className={styles.cardLogoIcon} size={28} />
-                            <div>
-                              <h4>THE STUDENT SPOT</h4>
-                              <span>VERIFIED NETWORK MEMBER</span>
-                            </div>
+                            <Award className={styles.cardLogoIcon} size={18} />
+                            <span>THE STUDENT SPOT</span>
                           </div>
-                          <span className={styles.cardBadge}>TSS</span>
-                        </div>
-
-                        {/* Card Content */}
-                        <div className={styles.cardBody}>
-                          <div className={styles.candidateDetails}>
-                            <div className={styles.detailsLabel}>MEMBER NAME</div>
-                            <div className={styles.detailsValue}>{candidate.fullName}</div>
-                          </div>
-
-                          <div className={styles.candidateDetails}>
-                            <div className={styles.detailsLabel}>TSS MEMBER ID</div>
-                            <div className={styles.memberIdCode}>{candidate.memberId}</div>
-                          </div>
-
-                          <div className={styles.cardRow}>
-                            <div className={styles.candidateDetails}>
-                              <div className={styles.detailsLabel}>QUALIFICATION</div>
-                              <div className={styles.detailsValueShort}>{candidate.highestQualification}</div>
-                            </div>
-                            <div className={styles.candidateDetails}>
-                              <div className={styles.detailsLabel}>LOCATION</div>
-                              <div className={styles.detailsValueShort}>{candidate.city}, {candidate.state}</div>
-                            </div>
-                            <div className={styles.candidateDetails}>
-                              <div className={styles.detailsLabel}>JOINED DATE</div>
-                              <div className={styles.detailsValueShort}>{formatDate(candidate.registrationDate)}</div>
-                            </div>
+                          <div className={styles.cardStatusBadge}>
+                            <span className={styles.statusDot}></span> VERIFIED TALENT
                           </div>
                         </div>
 
-                        {/* Card Footer Barcode Sim */}
-                        <div className={styles.cardFooter}>
-                          <div className={styles.barcodeLines}>
-                            {Array.from({ length: 35 }).map((_, i) => (
-                              <div 
-                                key={i} 
-                                className={styles.barcodeLine} 
-                                style={{ 
-                                  width: `${(i % 3 === 0 ? 3 : i % 2 === 0 ? 1 : 2)}px`,
-                                  opacity: i % 5 === 0 ? 0.3 : 0.8
-                                }} 
+                        {/* Middle: Profile Header */}
+                        <div className={styles.cardProfileBlock}>
+                          <div className={styles.cardPhotoWrapper}>
+                            {candidate.photoPath ? (
+                              <img 
+                                src={`data:image/jpeg;base64,${candidate.photoPath}`} 
+                                className={styles.cardPhoto} 
+                                alt="Member" 
                               />
-                            ))}
+                            ) : (
+                              <div className={styles.cardPhotoPlaceholder}>
+                                <User size={24} />
+                              </div>
+                            )}
                           </div>
-                          <span className={styles.securityCheckText}>SECURE TSS VETTING PASSED</span>
+                          <div className={styles.cardProfileMeta}>
+                            <h3 className={styles.memberName}>{candidate.fullName}</h3>
+                            <span className={styles.memberRoleTag}>{candidate.role}</span>
+                          </div>
+                        </div>
+
+                        {/* Bottom details & QR code */}
+                        <div className={styles.cardFooterGrid}>
+                          <div className={styles.detailsColumn}>
+                            <span className={styles.detailsLabel}>TSS MEMBER ID</span>
+                            <span className={styles.memberIdCode}>{candidate.memberId}</span>
+                          </div>
+                          
+                          <div className={styles.detailsColumn}>
+                            <span className={styles.detailsLabel}>LOCATION</span>
+                            <span className={styles.detailsValue}>{candidate.city}, {candidate.state}</span>
+                          </div>
+
+                          <div className={styles.detailsColumn}>
+                            <span className={styles.detailsLabel}>VERIFIED ON</span>
+                            <span className={styles.detailsValue}>{formatDate(candidate.registrationDate)}</span>
+                          </div>
+
+                          <div className={styles.qrCodeWrapper}>
+                            <img 
+                              src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(
+                                typeof window !== 'undefined' 
+                                  ? `${window.location.origin}/status?memberId=${candidate.memberId}` 
+                                  : `https://thestudentspot.com/status?memberId=${candidate.memberId}`
+                              )}`} 
+                              crossOrigin="anonymous"
+                              className={styles.cardQrCode} 
+                              alt="QR Code" 
+                            />
+                          </div>
                         </div>
                       </div>
                     </div>
 
                     {/* Card Actions */}
                     <div className={styles.verifiedActions}>
-                      <button onClick={handlePrintCard} className="btn btn-secondary">
-                        <Printer size={16} /> Print Member ID Card
+                      <button onClick={handleDownloadPdf} className="btn btn-primary">
+                        <Download size={16} /> Download Card PDF
                       </button>
-                      <Link href="/#community-section" className="btn btn-primary">
-                        Access Community Circle <ArrowRight size={16} />
+                      <Link href="/#community-section" className="btn btn-outline">
+                        Access TSS Network <ArrowRight size={16} />
                       </Link>
                     </div>
 
@@ -289,7 +396,7 @@ export default function Status() {
                 <HelpCircle className={styles.helpIcon} size={20} />
                 <p>
                   Enter the email address or phone number you used during registration.
-                  If you have just registered, details will update here dynamically once reviewed by admins.
+                  If you have just registered, details will update here dynamically once reviewed and approved by admins.
                 </p>
               </div>
             )}

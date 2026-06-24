@@ -34,14 +34,16 @@ export async function GET(request: Request) {
     return NextResponse.json({
       success: true,
       id: candidate.id,
+      role: candidate.role,
       fullName: candidate.fullName,
       status: candidate.status,
       memberId: candidate.memberId || null,
-      highestQualification: candidate.highestQualification,
-      preferredRoles: candidate.preferredRoles,
+      highestQualification: candidate.highestQualification || null,
+      preferredRoles: candidate.preferredRoles || [],
       registrationDate: candidate.registrationDate,
       city: candidate.city,
-      state: candidate.state
+      state: candidate.state,
+      photoPath: candidate.photoPath || null
     });
 
   } catch (error) {

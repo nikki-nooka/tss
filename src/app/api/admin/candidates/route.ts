@@ -2,17 +2,34 @@ import { NextResponse } from 'next/server';
 import { getCandidates, getCandidateById, updateCandidate, logAdminAction, Candidate } from '@/lib/db';
 import { getSessionUser } from '@/lib/auth';
 
-// Helper to generate the unique Member ID: TSSYYMMDDXXX
+// Helper to convert role to its standard prefix abbreviation
+const getRoleAbbreviation = (role: string): string => {
+  switch (role) {
+    case 'Student': return 'ST';
+    case 'Founder': return 'FD';
+    case 'Recruiter': return 'HR';
+    case 'Mentor': return 'MT';
+    case 'Investor': return 'IN';
+    case 'Working Professional': return 'WP';
+    default: return 'ST';
+  }
+};
+
+// Helper to generate the unique Member ID: TSS-XX-DDMMYYXXX
 const generateMemberId = (candidate: Candidate, allCandidates: Candidate[]): string => {
   const regDate = new Date(candidate.registrationDate);
-  const yy = regDate.getFullYear().toString().slice(-2);
-  const mm = String(regDate.getMonth() + 1).padStart(2, '0');
   const dd = String(regDate.getDate()).padStart(2, '0');
-  const datePrefix = `TSS${yy}${mm}${dd}`; // e.g. TSS260618
+  const mm = String(regDate.getMonth() + 1).padStart(2, '0');
+  const yy = regDate.getFullYear().toString().slice(-2);
+  
+  const role = candidate.role || 'Student';
+  const roleAbbrev = getRoleAbbreviation(role);
+  const dateStr = `${dd}${mm}${yy}`; // e.g. 240626
+  const idPrefix = `TSS-${roleAbbrev}-${dateStr}`; // e.g. TSS-ST-240626
 
-  // Find all verified candidates on that exact date prefix
+  // Find all verified candidates on that exact date prefix across this role
   const dailyVerified = allCandidates.filter(
-    (c) => c.memberId && c.memberId.startsWith(datePrefix)
+    (c) => c.memberId && c.memberId.startsWith(idPrefix)
   );
 
   let nextSequence = 1;
@@ -26,7 +43,7 @@ const generateMemberId = (candidate: Candidate, allCandidates: Candidate[]): str
   }
 
   const xxx = String(nextSequence).padStart(3, '0');
-  return `${datePrefix}${xxx}`;
+  return `${idPrefix}${xxx}`;
 };
 
 // GET: List candidates with filter/search options
@@ -91,19 +108,20 @@ export async function GET(request: Request) {
       filtered = filtered.filter(c => c.city.toLowerCase().includes(loc) || c.state.toLowerCase().includes(loc));
     }
 
-    // Filter by Role (matches preferredRoles or currentRole)
+    // Filter by Role (matches top-level candidate role, preferredRoles, or currentRole)
     if (role) {
       const r = role.toLowerCase().trim();
       filtered = filtered.filter(c => 
-        c.preferredRoles.some(pr => pr.toLowerCase().includes(r)) || 
-        c.currentRole.toLowerCase().includes(r)
+        (c.role && c.role.toLowerCase() === r) ||
+        (c.preferredRoles && c.preferredRoles.some(pr => pr.toLowerCase().includes(r))) || 
+        (c.currentRole && c.currentRole.toLowerCase().includes(r))
       );
     }
 
     // Filter by Skill
     if (skill) {
       const s = skill.toLowerCase().trim();
-      filtered = filtered.filter(c => c.skills.some(sk => sk.toLowerCase().includes(s)));
+      filtered = filtered.filter(c => c.skills && c.skills.some(sk => sk.toLowerCase().includes(s)));
     }
 
     return NextResponse.json(filtered);

@@ -1,6 +1,6 @@
 import React from 'react';
 import styles from './page.module.css';
-import { Target, Eye, Users, ShieldCheck, CheckCircle2 } from 'lucide-react';
+import { Target, Eye, Users, ShieldCheck, CheckCircle2, Zap } from 'lucide-react';
 
 export default function About() {
   const eligibleMembers = [
@@ -93,6 +93,43 @@ export default function About() {
                 <p>{member.desc}</p>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Progression Pathway Section */}
+      <section className={styles.paradigmSection}>
+        <div className="container">
+          <div className={styles.sectionHeader}>
+            <span className={styles.sectionSub}>Our Ecosystem Structure</span>
+            <h2>The TSS Progression Pathway</h2>
+            <p>
+              How we connect talent validation with innovation and opportunity.
+            </p>
+          </div>
+
+          <div className={styles.paradigmGrid}>
+            <div className={styles.paradigmCard}>
+              <div className={styles.paradigmIcon}><ShieldCheck size={32} /></div>
+              <h3>1. TSS ID Verification</h3>
+              <p>
+                Apply for verification. Our team manually checks credentials, resumes, and profiles. Once approved, receive a secure, shareable TSS Digital ID.
+              </p>
+            </div>
+            <div className={styles.paradigmCard}>
+              <div className={styles.paradigmIcon}><Users size={32} /></div>
+              <h3>2. TSS Curated Network</h3>
+              <p>
+                Unlock access to verified circles. Connect with trusted founders, working professionals, mentors, recruiters, and investors in a spam-free zone.
+              </p>
+            </div>
+            <div className={styles.paradigmCard}>
+              <div className={styles.paradigmIcon}><Zap size={32} /></div>
+              <h3>3. BuildX Sandbox</h3>
+              <p>
+                Co-build, collaborate, and win. Work on high-impact sandbox challenges, team up with other verified members, and pitch to leading funds.
+              </p>
+            </div>
           </div>
         </div>
       </section>

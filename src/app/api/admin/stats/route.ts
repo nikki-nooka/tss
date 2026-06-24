@@ -35,6 +35,36 @@ export async function GET() {
       return (now - regTime) <= THIRTY_DAYS;
     }).length;
 
+    // Calculate Role Distributions
+    const registrationsByRole: Record<string, number> = {
+      'Student': 0,
+      'Founder': 0,
+      'Recruiter': 0,
+      'Mentor': 0,
+      'Investor': 0,
+      'Working Professional': 0
+    };
+    const verifiedByRole: Record<string, number> = {
+      'Student': 0,
+      'Founder': 0,
+      'Recruiter': 0,
+      'Mentor': 0,
+      'Investor': 0,
+      'Working Professional': 0
+    };
+
+    candidates.forEach(c => {
+      const r = c.role || 'Student';
+      if (r in registrationsByRole) {
+        registrationsByRole[r]++;
+      }
+      if (c.status === 'Verified') {
+        if (r in verifiedByRole) {
+          verifiedByRole[r]++;
+        }
+      }
+    });
+
     // Group registrations by date for a basic chart (e.g. last 7 days)
     const registrationsByDay: Record<string, number> = {};
     for (let i = 6; i >= 0; i--) {
@@ -65,6 +95,8 @@ export async function GET() {
       rejectedProfiles,
       dailyRegistrations,
       monthlyRegistrations,
+      registrationsByRole,
+      verifiedByRole,
       chartData,
       totalMessages: messages.length,
       totalLogs: logs.length
