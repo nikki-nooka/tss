@@ -6,7 +6,7 @@
 
 /* Hero Section */
 .hero {
-  background: linear-gradient(135deg, #0b0f19 0%, #17153b 50%, #0f172a 100%);
+  background: var(--gradient-header);
   color: var(--text-inverse);
   padding: 7rem 0 9rem 0;
   position: relative;
@@ -69,7 +69,7 @@
 }
 
 .accentText {
-  background: linear-gradient(135deg, var(--accent) 0%, #a5b4fc 100%);
+  background: var(--gradient-primary);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }

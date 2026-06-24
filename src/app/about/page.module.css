@@ -6,7 +6,7 @@
 
 /* Header Banner */
 .aboutHeader {
-  background: linear-gradient(135deg, #0b0f19 0%, #17153b 50%, #0f172a 100%);
+  background: var(--gradient-header);
   color: var(--text-inverse);
   padding: 5rem 0;
   text-align: center;

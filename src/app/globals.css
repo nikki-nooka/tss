@@ -37,6 +37,7 @@
   --gradient-accent: linear-gradient(135deg, hsl(350, 72%, 45%) 0%, hsl(350, 72%, 38%) 100%); /* Crimson CTA */
   --gradient-glow: radial-gradient(circle, rgba(var(--primary-rgb), 0.15) 0%, transparent 70%);
   --gradient-card: linear-gradient(135deg, hsl(0, 0%, 100%) 0%, hsl(40, 33%, 98%) 100%); /* White to Cream */
+  --gradient-header: linear-gradient(135deg, hsl(0, 0%, 7%) 0%, hsl(350, 72%, 12%) 50%, hsl(0, 0%, 7%) 100%); /* Elegant charcoal to dark crimson blend */
   
   /* Glassmorphism settings */
   --glass-bg: rgba(255, 255, 255, 0.7);
