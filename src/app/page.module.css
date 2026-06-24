@@ -537,7 +537,7 @@
 }
 
 .channelCard {
-  background-color: var(--bg-main);
+  background-color: var(--bg-card);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-lg);
   padding: 2rem 1.5rem;
@@ -548,7 +548,8 @@
   justify-content: space-between;
   gap: 1rem;
   transition: var(--transition);
-  color: var(--secondary);
+  color: var(--text-main);
+  box-shadow: var(--shadow-sm);
 }
 
 .channelCard:hover {
@@ -557,12 +558,18 @@
 }
 
 .channelCard h3 {
-  font-size: 1.1rem;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 1.15rem;
+  color: var(--text-main);
+  margin-top: 0.25rem;
   margin-bottom: 0.25rem;
 }
 
 .channelCard p {
-  font-size: 0.8rem;
+  font-family: var(--font-body);
+  color: var(--text-muted);
+  font-size: 0.85rem;
   margin-bottom: 0;
   line-height: 1.4;
 }

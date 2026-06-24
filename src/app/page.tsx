@@ -361,12 +361,12 @@ export default function Home() {
                 <div style={{
                   marginTop: '2rem',
                   padding: '1.5rem',
-                  background: '#f8fafc',
+                  background: 'var(--bg-main)',
                   border: '1px solid var(--border-color)',
                   borderRadius: 'var(--radius-lg)',
                   textAlign: 'left'
                 }}>
-                  <h4 style={{ fontFamily: 'var(--font-heading)', color: 'var(--secondary)', marginBottom: '0.75rem', fontSize: '1rem' }}>Additional Community Resources</h4>
+                  <h4 style={{ fontFamily: 'var(--font-heading)', color: 'var(--text-main)', marginBottom: '0.75rem', fontSize: '1rem' }}>Additional Community Resources</h4>
                   <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: '0.65rem', fontSize: '0.875rem' }}>
                     <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                       <span style={{ color: 'var(--success)' }}>🟢</span>
