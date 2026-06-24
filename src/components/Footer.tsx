@@ -81,6 +81,11 @@ const YouTubeIcon = (props: React.SVGProps<SVGSVGElement>) => (
 export const Footer: React.FC = () => {
   return (
     <footer className={styles.footer}>
+      {/* Background decorations for peaceful gradient */}
+      <div className={styles.bgDecoration1}></div>
+      <div className={styles.bgDecoration2}></div>
+      <div className={styles.topDividerLine}></div>
+      
       <div className={`${styles.container} container`}>
         {/* Brand Section */}
         <div className={styles.brandSection}>

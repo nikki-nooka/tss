@@ -6,8 +6,8 @@
 
 /* Hero Section */
 .hero {
-  background: var(--gradient-header);
-  color: var(--text-inverse);
+  background: var(--gradient-hero);
+  color: var(--text-main);
   padding: 7rem 0 9rem 0;
   position: relative;
   overflow: hidden;
@@ -22,8 +22,8 @@
   width: 100%;
   height: 100%;
   background-image: 
-    linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+    linear-gradient(rgba(245, 143, 29, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(245, 143, 29, 0.04) 1px, transparent 1px);
   background-size: 50px 50px;
   background-position: center;
   mask-image: radial-gradient(ellipse 60% 60% at 50% 50%, #000 50%, transparent 100%);
@@ -64,7 +64,7 @@
   font-weight: 800;
   line-height: 1.15;
   letter-spacing: -0.02em;
-  color: var(--text-inverse);
+  color: var(--text-main);
   margin-bottom: 1.5rem;
 }
 
@@ -78,7 +78,7 @@
   font-family: var(--font-body);
   font-size: 1.125rem;
   line-height: 1.6;
-  color: #cbd5e1; /* Increased contrast from #94a3b8 */
+  color: var(--text-muted);
   margin-bottom: 2.5rem;
   max-width: 600px;
 }
@@ -100,15 +100,15 @@
 }
 
 .heroActions :global(.btn-outline) {
-  border-color: rgba(255, 255, 255, 0.2);
-  color: var(--text-inverse);
+  border-color: var(--primary);
+  color: var(--primary);
   padding: 0.875rem 2rem;
   font-size: 1rem;
 }
 
 .heroActions :global(.btn-outline:hover) {
-  background-color: rgba(255, 255, 255, 0.05);
-  border-color: rgba(255, 255, 255, 0.4);
+  background-color: var(--primary-light);
+  border-color: var(--primary-hover);
 }
 
 .heroVisual {
@@ -138,37 +138,36 @@
 }
 
 .visualCard {
-  background-color: rgba(30, 41, 59, 0.65);
+  background-color: var(--bg-card);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid var(--border-color);
   border-radius: var(--radius-xl);
   padding: 2rem;
   width: 100%;
   max-width: 380px;
-  box-shadow: var(--shadow-xl), 0 20px 40px -20px rgba(0, 0, 0, 0.7);
+  box-shadow: var(--shadow-xl), 0 20px 40px -20px rgba(var(--primary-rgb), 0.1);
   z-index: 2;
   position: relative;
-  z-index: 2;
 }
 
 .cardHeader {
   display: flex;
   align-items: center;
   gap: 1rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid var(--border-color);
   padding-bottom: 1.25rem;
   margin-bottom: 1.25rem;
 }
 
 .cardHeader h4 {
-  color: var(--text-inverse);
+  color: var(--text-main);
   font-size: 1rem;
 }
 
 .cardHeader p {
   font-size: 0.75rem;
-  color: #94a3b8;
+  color: var(--text-muted);
 }
 
 .successIcon {
@@ -187,7 +186,7 @@
   align-items: center;
   font-family: var(--font-body);
   font-size: 0.875rem;
-  color: #cbd5e1;
+  color: var(--text-main);
 }
 
 .statusBadge {
@@ -199,17 +198,17 @@
 }
 
 .verified {
-  background-color: rgba(16, 185, 129, 0.2);
+  background-color: rgba(16, 185, 129, 0.15);
   color: var(--success);
-  border: 1px solid rgba(16, 185, 129, 0.3);
+  border: 1px solid rgba(16, 185, 129, 0.25);
 }
 
 .codeText {
   font-family: monospace;
-  background-color: rgba(15, 23, 42, 0.6);
+  background-color: var(--bg-main);
   padding: 0.2rem 0.4rem;
   border-radius: var(--radius-sm);
-  color: var(--accent);
+  color: var(--secondary);
 }
 
 .floatingTag1, .floatingTag2 {

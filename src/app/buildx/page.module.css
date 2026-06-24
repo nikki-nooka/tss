@@ -7,7 +7,7 @@
   padding: 5rem 0 3.5rem 0;
   text-align: center;
   border-bottom: 1px solid var(--border-color);
-  background-color: #ffffff;
+  background: var(--gradient-header);
 }
 
 .categoryLabel {
