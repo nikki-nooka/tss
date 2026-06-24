@@ -1,35 +1,42 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap');
 
 :root {
-  /* Color Palette */
-  --primary: #D62828;       /* Deep Red */
-  --primary-hover: #b31e1e;
-  --primary-light: #fde8e8;
-  --primary-rgb: 214, 40, 40;
-  --secondary: #111111;     /* Black */
-  --secondary-light: #222222;
-  --accent: #F77F00;        /* Orange */
-  --success: #10b981;       /* Emerald */
-  --success-light: #d1fae5;
-  --warning: #FDB833;       /* Golden Orange */
-  --warning-light: #fff9db;
-  --danger: #ef4444;        /* Rose/Red */
-  --danger-light: #fee2e2;
+  /* Color Palette (Extracted from thestudentspot.app) */
+  --primary: hsl(37, 91%, 55%);           /* Golden Orange / Primary Accent */
+  --primary-hover: hsl(37, 91%, 48%);
+  --primary-light: hsl(37, 91%, 95%);
+  --primary-rgb: 245, 143, 29;
+  
+  --secondary: hsl(350, 72%, 45%);         /* Deep Crimson Red */
+  --secondary-light: hsl(350, 72%, 38%);
+  --secondary-rgb: 214, 40, 40;
+  
+  --accent: hsl(37, 91%, 55%);
+  --accent-light: hsl(37, 30%, 95%);
+  
+  --success: hsl(145, 63%, 40%);
+  --success-light: hsl(145, 63%, 95%);
+  
+  --warning: hsl(37, 91%, 55%);
+  --warning-light: hsl(37, 20%, 96%);
+  
+  --danger: hsl(350, 72%, 45%);
+  --danger-light: hsl(350, 72%, 95%);
   
   /* Neutral Palette */
-  --bg-main: #f9f9f9;
-  --bg-card: #ffffff;
-  --text-main: #111111;
-  --text-muted: #666666;
-  --text-inverse: #ffffff;
-  --border-color: #e5e5e5;
-  --border-focus: #F77F00;
+  --bg-main: hsl(40, 33%, 98%);           /* Warm Off-White / Cream */
+  --bg-card: hsl(0, 0%, 100%);            /* Crisp White Cards */
+  --text-main: hsl(0, 0%, 12%);           /* Charcoal / Near Black */
+  --text-muted: hsl(0, 0%, 40%);          /* Medium Muted Gray */
+  --text-inverse: hsl(0, 0%, 100%);
+  --border-color: hsl(30, 15%, 88%);      /* Warm Light Gray */
+  --border-focus: hsl(37, 91%, 55%);
   
-  /* Premium Design Gradients */
-  --gradient-primary: linear-gradient(135deg, var(--primary) 0%, #111111 100%);
-  --gradient-accent: linear-gradient(135deg, var(--accent) 0%, var(--primary) 100%);
+  /* Premium Design Gradients (Mapped to thestudentspot.app positions) */
+  --gradient-primary: linear-gradient(135deg, hsl(37, 91%, 55%) 0%, hsl(37, 100%, 65%) 50%, hsl(350, 72%, 45%) 100%); /* Golden Orange to Crimson Red */
+  --gradient-accent: linear-gradient(135deg, hsl(350, 72%, 45%) 0%, hsl(350, 72%, 38%) 100%); /* Crimson CTA */
   --gradient-glow: radial-gradient(circle, rgba(var(--primary-rgb), 0.15) 0%, transparent 70%);
-  --gradient-card: linear-gradient(180deg, var(--bg-card) 0%, #f9f9f9 100%);
+  --gradient-card: linear-gradient(135deg, hsl(0, 0%, 100%) 0%, hsl(40, 33%, 98%) 100%); /* White to Cream */
   
   /* Glassmorphism settings */
   --glass-bg: rgba(255, 255, 255, 0.7);
