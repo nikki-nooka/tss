@@ -63,7 +63,7 @@ export default function AdminLogin() {
     <div className={styles.loginPage}>
       <div className={styles.loginBox}>
         <div className={styles.logoHeader}>
-          <ShieldCheck className={styles.logoIcon} size={48} />
+          <img src="/logo.png" alt="TSS Logo" style={{ height: '64px', width: '64px', objectFit: 'contain', borderRadius: '8px', marginBottom: '1rem' }} />
           <h2>TSS Admin Portal</h2>
           <p>Phase 1 Verification & Candidate Management</p>
         </div>

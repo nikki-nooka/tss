@@ -93,7 +93,7 @@
 
 .statusSearchInput:focus {
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+  box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.15);
 }
 
 /* Help instruction */
@@ -203,8 +203,8 @@
 
 .reviewAlert {
   background-color: var(--primary-light);
-  border: 1px solid rgba(79, 70, 229, 0.2);
-  color: #312e81;
+  border: 1px solid rgba(var(--primary-rgb), 0.2);
+  color: var(--secondary);
 }
 .reviewAlert .alertIcon {
   color: var(--primary);

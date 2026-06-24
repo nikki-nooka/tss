@@ -2,33 +2,34 @@
 
 :root {
   /* Color Palette */
-  --primary: #4f46e5;       /* Indigo */
-  --primary-hover: #4338ca;
-  --primary-light: #e0e7ff;
-  --secondary: #0f172a;     /* Deep Slate Navy */
-  --secondary-light: #1e293b;
-  --accent: #06b6d4;        /* Cyan */
+  --primary: #D62828;       /* Deep Red */
+  --primary-hover: #b31e1e;
+  --primary-light: #fde8e8;
+  --primary-rgb: 214, 40, 40;
+  --secondary: #111111;     /* Black */
+  --secondary-light: #222222;
+  --accent: #F77F00;        /* Orange */
   --success: #10b981;       /* Emerald */
   --success-light: #d1fae5;
-  --warning: #f59e0b;       /* Amber */
-  --warning-light: #fef3c7;
+  --warning: #FDB833;       /* Golden Orange */
+  --warning-light: #fff9db;
   --danger: #ef4444;        /* Rose/Red */
   --danger-light: #fee2e2;
   
   /* Neutral Palette */
-  --bg-main: #f8fafc;
+  --bg-main: #f9f9f9;
   --bg-card: #ffffff;
-  --text-main: #0f172a;
-  --text-muted: #64748b;
+  --text-main: #111111;
+  --text-muted: #666666;
   --text-inverse: #ffffff;
-  --border-color: #e2e8f0;
-  --border-focus: #a5b4fc;
+  --border-color: #e5e5e5;
+  --border-focus: #F77F00;
   
   /* Premium Design Gradients */
-  --gradient-primary: linear-gradient(135deg, var(--primary) 0%, #312e81 100%);
+  --gradient-primary: linear-gradient(135deg, var(--primary) 0%, #111111 100%);
   --gradient-accent: linear-gradient(135deg, var(--accent) 0%, var(--primary) 100%);
-  --gradient-glow: radial-gradient(circle, rgba(79, 70, 229, 0.15) 0%, transparent 70%);
-  --gradient-card: linear-gradient(180deg, var(--bg-card) 0%, #f1f5f9 100%);
+  --gradient-glow: radial-gradient(circle, rgba(var(--primary-rgb), 0.15) 0%, transparent 70%);
+  --gradient-card: linear-gradient(180deg, var(--bg-card) 0%, #f9f9f9 100%);
   
   /* Glassmorphism settings */
   --glass-bg: rgba(255, 255, 255, 0.7);
@@ -44,7 +45,7 @@
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-  --shadow-premium: 0 12px 40px -12px rgba(79, 70, 229, 0.2);
+  --shadow-premium: 0 12px 40px -12px rgba(var(--primary-rgb), 0.2);
 
   /* Layout */
   --radius-sm: 0.375rem;
@@ -139,7 +140,7 @@ a:hover {
 
 .form-input:focus, .form-select:focus, .form-textarea:focus {
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+  box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.15);
 }
 
 .form-input::placeholder, .form-textarea::placeholder {

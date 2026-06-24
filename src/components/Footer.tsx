@@ -10,7 +10,7 @@ export const Footer: React.FC = () => {
         {/* Brand Section */}
         <div className={styles.brandSection}>
           <Link href="/" className={styles.logo}>
-            <ShieldCheck size={24} className={styles.logoIcon} />
+            <img src="/logo.png" alt="TSS Logo" style={{ height: '32px', width: '32px', objectFit: 'contain', borderRadius: '4px' }} />
             <span className={styles.logoText}>THE STUDENT SPOT</span>
           </Link>
           <p className={styles.brandDesc}>
