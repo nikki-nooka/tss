@@ -139,8 +139,8 @@ export default function Contact() {
                 <div className={styles.infoLine}>
                   <Phone className={styles.infoIcon} size={20} />
                   <div>
-                    <h4>Helpline</h4>
-                    <p>+91 98765 43210 (10 AM - 6 PM)</p>
+                    <h4>Helpline & Collaboration</h4>
+                    <p>+91 95819 29676 (10 AM - 6 PM)</p>
                   </div>
                 </div>
 

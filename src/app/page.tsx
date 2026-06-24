@@ -337,25 +337,55 @@ export default function Home() {
                   Your membership is verified. Connect with peers and recruiters across our official channels below:
                 </p>
                 <div className={styles.channelsGrid}>
-                  <a href="https://whatsapp.com" target="_blank" rel="noopener noreferrer" className={`${styles.channelCard} ${styles.whatsapp}`}>
+                  <a href="https://chat.whatsapp.com/LxA5xaAdlKp3nvZmIGxLcp" target="_blank" rel="noopener noreferrer" className={`${styles.channelCard} ${styles.whatsapp}`}>
                     <MessageSquare size={32} />
                     <h3>WhatsApp Community</h3>
                     <p>Subgroups for Developers, Design, Founders & HRs.</p>
                     <span className={styles.channelLinkBtn}>Join Group <ChevronRight size={16} /></span>
                   </a>
-                  <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className={`${styles.channelCard} ${styles.linkedin}`}>
+                  <a href="https://www.linkedin.com/company/thestudentspot/" target="_blank" rel="noopener noreferrer" className={`${styles.channelCard} ${styles.linkedin}`}>
                     <Building2 size={32} />
                     <h3>LinkedIn Network</h3>
                     <p>Tag our page and connect with verified network alumni.</p>
                     <span className={styles.channelLinkBtn}>Follow Page <ChevronRight size={16} /></span>
                   </a>
-                  <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className={`${styles.channelCard} ${styles.instagram}`}>
+                  <a href="https://www.instagram.com/the_studentspot" target="_blank" rel="noopener noreferrer" className={`${styles.channelCard} ${styles.instagram}`}>
                     <Users size={32} />
                     <h3>Instagram Channel</h3>
                     <p>Daily updates on events, workshops, and startup mixers.</p>
                     <span className={styles.channelLinkBtn}>Follow Feed <ChevronRight size={16} /></span>
                   </a>
                 </div>
+
+                {/* Additional Community Links */}
+                <div style={{
+                  marginTop: '2rem',
+                  padding: '1.5rem',
+                  background: '#f8fafc',
+                  border: '1px solid var(--border-color)',
+                  borderRadius: 'var(--radius-lg)',
+                  textAlign: 'left'
+                }}>
+                  <h4 style={{ fontFamily: 'var(--font-heading)', color: 'var(--secondary)', marginBottom: '0.75rem', fontSize: '1rem' }}>Additional Community Resources</h4>
+                  <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: '0.65rem', fontSize: '0.875rem' }}>
+                    <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <span style={{ color: 'var(--success)' }}>🟢</span>
+                      <strong>Official WhatsApp Channel:</strong>&nbsp;
+                      <a href="https://www.whatsapp.com/channel/0029Vb6ft6072WTxJ5eMKA2I" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary)', textDecoration: 'underline' }}>Join WhatsApp Channel</a>
+                    </li>
+                    <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <span style={{ color: 'var(--danger)' }}>🚨</span>
+                      <strong>Health & Emergency Support:</strong>&nbsp;
+                      <a href="https://chat.whatsapp.com/I5OT95lbZeo1yraUKyPUjP" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary)', textDecoration: 'underline' }}>Access Support Chat</a>
+                    </li>
+                    <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <span style={{ color: 'var(--primary)' }}>💼</span>
+                      <strong>Founder Rajkamal:</strong>&nbsp;
+                      <a href="https://www.linkedin.com/in/rajkamalprls" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary)', textDecoration: 'underline' }}>Connect on LinkedIn</a>
+                    </li>
+                  </ul>
+                </div>
+
                 <div style={{ marginTop: '2rem' }}>
                   <button onClick={handleResetLock} className="btn btn-outline btn-sm">
                     Re-lock Links (Test)

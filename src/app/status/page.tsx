@@ -364,7 +364,7 @@ export default function Status() {
                               src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(
                                 typeof window !== 'undefined' 
                                   ? `${window.location.origin}/status?memberId=${candidate.memberId}` 
-                                  : `https://thestudentspot.com/status?memberId=${candidate.memberId}`
+                                  : `https://thestudentspot.app/status?memberId=${candidate.memberId}`
                               )}`} 
                               crossOrigin="anonymous"
                               className={styles.cardQrCode} 
