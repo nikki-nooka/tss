@@ -49,9 +49,6 @@ export const Navbar: React.FC = () => {
               {link.name}
             </Link>
           ))}
-          <Link href="/admin" className={`${styles.adminBtn} btn`}>
-            Admin Panel
-          </Link>
         </nav>
 
         {/* Mobile Navigation Toggle */}
@@ -78,9 +75,6 @@ export const Navbar: React.FC = () => {
                 {link.name}
               </Link>
             ))}
-            <Link href="/admin" className={`${styles.mobileAdminBtn} btn`} onClick={closeMenu}>
-              Admin Panel
-            </Link>
           </nav>
         </div>
       )}

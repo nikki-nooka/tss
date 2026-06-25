@@ -50,7 +50,6 @@ export const Footer: React.FC = () => {
           <div className={styles.linkList}>
             <Link href="/contact" className={styles.link}>Contact Us</Link>
             <Link href="/contact" className={styles.link}>Submit Feedback</Link>
-            <Link href="/admin" className={styles.link}>Admin Portal</Link>
           </div>
         </div>
 
