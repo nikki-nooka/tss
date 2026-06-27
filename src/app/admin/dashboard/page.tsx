@@ -380,7 +380,9 @@ export default function AdminDashboard() {
   }, [activeTab]);
 
   const parseJobText = (text: string) => {
-    const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+    const cleanText = text.trim();
+    const lines = cleanText.split('\n').map(l => l.trim()).filter(Boolean);
+    const lowerText = cleanText.toLowerCase();
     
     let title = '';
     let company = '';
@@ -388,35 +390,47 @@ export default function AdminDashboard() {
     let location = '';
     let salary = '';
     let requirements: string[] = [];
-    let description = '';
+    let description = cleanText;
 
-    const firstFewLines = lines.slice(0, 3);
-    
-    for (const line of firstFewLines) {
-      const atMatch = line.match(/(.+)\s+at\s+(.+)/i);
-      if (atMatch) {
-        title = atMatch[1].replace(/(hiring|looking for|we are hiring|position:)\s*/i, '').trim();
-        company = atMatch[2].trim();
-        break;
+    // 1. Title & Company Regex matches
+    const atMatch = cleanText.match(/(?:hiring|looking for|we are hiring|vacancy for|opening for)\s+([^.\n]+?)\s+at\s+([^.\n\-,]+)/i);
+    if (atMatch) {
+      title = atMatch[1].trim();
+      company = atMatch[2].trim();
+    } else {
+      for (const line of lines) {
+        const compMatch = line.match(/^(?:company|organization|firm|employer):\s*(.+)/i);
+        if (compMatch) company = compMatch[1].trim();
+        
+        const titleMatch = line.match(/^(?:job title|title|role|position|designation):\s*(.+)/i);
+        if (titleMatch) title = titleMatch[1].trim();
       }
-      const compMatch = line.match(/company:\s*(.+)/i);
-      if (compMatch) {
-        company = compMatch[1].trim();
-      }
-      const titleMatch = line.match(/(title|role|position):\s*(.+)/i);
-      if (titleMatch) {
-        title = titleMatch[2].trim();
+    }
+
+    if (!company) {
+      for (let i = 0; i < Math.min(lines.length, 3); i++) {
+        const line = lines[i];
+        const hiringMatch = line.match(/^([A-Z][A-Za-z0-9\s]+)\s+(?:is hiring|is looking for|announces|hiring for)/i);
+        if (hiringMatch) {
+          company = hiringMatch[1].trim();
+          break;
+        }
       }
     }
 
     if (!title && lines[0]) {
-      title = lines[0].replace(/(hiring|looking for|we are hiring|position:)\s*/i, '').trim();
+      title = lines[0]
+        .replace(/^(hiring|looking for|we are hiring|role|position|job description|jd|vacancy):\s*/i, '')
+        .trim();
     }
 
-    const lowerText = text.toLowerCase();
-    if (lowerText.includes('internship') || lowerText.includes('intern ')) {
+    if (title.length > 80) title = title.substring(0, 80) + '...';
+    if (company.length > 50) company = company.substring(0, 50);
+
+    // 2. Type Detector
+    if (lowerText.includes('internship') || lowerText.includes('intern ') || lowerText.includes('stipend')) {
       type = 'Internship';
-    } else if (lowerText.includes('contract') || lowerText.includes('freelance')) {
+    } else if (lowerText.includes('contract') || lowerText.includes('freelance') || lowerText.includes('consultant')) {
       type = 'Contract';
     } else if (lowerText.includes('part-time') || lowerText.includes('part time')) {
       type = 'Part-time';
@@ -424,14 +438,39 @@ export default function AdminDashboard() {
       type = 'Full-time';
     }
 
-    const locMatch = text.match(/(location|workplace|office|city|state):\s*(.+)/i);
-    if (locMatch) {
-      location = locMatch[2].trim();
-    } else {
-      const commonLocs = ['hyderabad', 'bengaluru', 'bangalore', 'mumbai', 'pune', 'delhi', 'noida', 'remote', 'work from home', 'chennai'];
-      for (const loc of commonLocs) {
-        if (lowerText.includes(loc)) {
-          location = loc.charAt(0).toUpperCase() + loc.slice(1);
+    // 3. Location Detector
+    const locPatterns = [
+      /^(?:location|workplace|office|city|state|job location):\s*(.+)/i,
+      /based\s+in\s+([^.\n]+)/i
+    ];
+    for (const pat of locPatterns) {
+      const match = cleanText.match(pat);
+      if (match) {
+        location = match[1].trim();
+        break;
+      }
+    }
+
+    if (!location) {
+      const locKeywords = [
+        { word: 'remote', display: 'Remote' },
+        { word: 'work from home', display: 'Remote' },
+        { word: 'wfh', display: 'Remote' },
+        { word: 'hyderabad', display: 'Hyderabad' },
+        { word: 'bengaluru', display: 'Bengaluru' },
+        { word: 'bangalore', display: 'Bengaluru' },
+        { word: 'mumbai', display: 'Mumbai' },
+        { word: 'pune', display: 'Pune' },
+        { word: 'delhi', display: 'Delhi NCR' },
+        { word: 'noida', display: 'Noida' },
+        { word: 'gurugram', display: 'Gurugram' },
+        { word: 'gurgaon', display: 'Gurugram' },
+        { word: 'chennai', display: 'Chennai' },
+        { word: 'karimnagar', display: 'Karimnagar' }
+      ];
+      for (const item of locKeywords) {
+        if (lowerText.includes(item.word)) {
+          location = item.display;
           if (lowerText.includes('hybrid')) location += ' (Hybrid)';
           break;
         }
@@ -439,48 +478,55 @@ export default function AdminDashboard() {
       if (!location) location = 'Remote';
     }
 
-    const salaryMatch = text.match(/(salary|stipend|ctc|package|compensation|pay):\s*(.+)/i);
-    if (salaryMatch) {
-      salary = salaryMatch[2].trim();
-    } else {
-      const linesWithCurrency = lines.filter(l => l.includes('₹') || l.includes('LPA') || l.includes('INR') || l.includes('$') || l.toLowerCase().includes('stipend'));
-      if (linesWithCurrency[0]) {
-        salary = linesWithCurrency[0].trim();
+    // 4. Salary Detector
+    const salPatterns = [
+      /^(?:salary|stipend|ctc|package|compensation|pay|remuneration):\s*(.+)/i,
+      /(?:offering|stipend of|salary of|ctc of)\s+([^.\n]+)/i
+    ];
+    for (const pat of salPatterns) {
+      const match = cleanText.match(pat);
+      if (match) {
+        salary = match[1].trim();
+        break;
       }
     }
 
-    let reqSectionFound = false;
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i];
-      const lowerLine = line.toLowerCase();
-      
-      if (lowerLine.includes('requirements:') || lowerLine.includes('skills:') || lowerLine.includes('qualifications:') || lowerLine.includes('skills required:')) {
-        reqSectionFound = true;
-        continue;
+    if (!salary) {
+      const ctcMatch = cleanText.match(/(\d+[-–]\d+\s*(?:lpa|k|inr|usd|per month|stipend))/i) ||
+                       cleanText.match(/(?:₹|\$)\s*\d+[\d,]*\s*(?:to\s*(?:₹|\$)?\s*\d+[\d,]*|\/\s*month|per month|lpa)?/i);
+      if (ctcMatch) {
+        salary = ctcMatch[0].trim();
+      } else {
+        salary = 'Competitive / Unspecified';
       }
-      
-      const isBullet = line.startsWith('-') || line.startsWith('•') || line.startsWith('*') || line.match(/^\d+\./);
-      if (isBullet) {
-        const cleanReq = line.replace(/^[-•*\d.]\s*/, '').trim();
-        if (cleanReq.length > 2 && requirements.length < 6) {
-          requirements.push(cleanReq);
+    }
+
+    // 5. Requirements extraction
+    const bulletLines = lines.filter(l => l.startsWith('-') || l.startsWith('•') || l.startsWith('*') || l.match(/^\d+\./));
+    for (const line of bulletLines) {
+      const cleaned = line.replace(/^[-•*\d.]\s*/, '').trim();
+      if (cleaned.length > 2 && cleaned.length < 80 && requirements.length < 6) {
+        requirements.push(cleaned);
+      }
+    }
+
+    if (requirements.length < 3) {
+      const techGlossary = [
+        'React', 'Next.js', 'TypeScript', 'JavaScript', 'Node.js', 'Python', 'Django', 
+        'FastAPI', 'PostgreSQL', 'SQL', 'MongoDB', 'Supabase', 'Docker', 'AWS', 'Tailwind CSS',
+        'Figma', 'UI/UX', 'REST APIs', 'Git', 'GitHub', 'Java', 'Spring Boot', 'C++', 'Go', 'Rust'
+      ];
+      for (const tech of techGlossary) {
+        const regex = new RegExp(`\\b${tech.replace('.', '\\.')}\\b`, 'i');
+        if (regex.test(cleanText) && !requirements.includes(tech) && requirements.length < 6) {
+          requirements.push(tech);
         }
-      } else if (reqSectionFound && line.length > 2 && !line.includes(':')) {
-        if (line.split(' ').length < 6 && requirements.length < 6) {
-          requirements.push(line);
-        }
       }
     }
 
-    if (requirements.length === 0) {
-      const techWords = ['react', 'next.js', 'typescript', 'javascript', 'python', 'sql', 'css', 'figma', 'node.js', 'java', 'communication'];
-      const foundTech = techWords.filter(w => lowerText.includes(w));
-      if (foundTech.length > 0) {
-        requirements = foundTech.map(w => w.charAt(0).toUpperCase() + w.slice(1));
-      }
-    }
-
-    description = text;
+    description = lines
+      .filter(l => !l.toLowerCase().includes('apply here') && !l.toLowerCase().includes('click link'))
+      .join('\n');
 
     return { title, company, type, location, salary, requirements, description };
   };
@@ -498,7 +544,7 @@ export default function AdminDashboard() {
     if (parsed.salary) setNewJobSalary(parsed.salary);
     if (parsed.requirements.length > 0) setNewJobReqs(parsed.requirements.join(', '));
     if (parsed.description) setNewJobDesc(parsed.description);
-    toast.success('Job details successfully extracted and mapped to form!');
+    toast.success('Crazy accurate mapping completed! Form fields updated.');
   };
 
   // --- Candidate Assessment Actions ---
