@@ -12,15 +12,13 @@ import {
   Award, 
   Zap, 
   Compass, 
-  BookOpen, 
-  Activity, 
   ArrowRight,
   Lock,
   Unlock,
-  ChevronRight,
   MessageSquare,
-  Shield,
-  AlertOctagon
+  Send,
+  Globe,
+  Sparkles
 } from 'lucide-react';
 import { useToast } from '@/components/Toast';
 
@@ -34,8 +32,8 @@ interface Stats {
 export default function Home() {
   const toast = useToast();
   const [stats, setStats] = useState<Stats>({
-    communityMembers: 12000,
-    recruiterNetwork: 300,
+    communityMembers: 20000,
+    recruiterNetwork: 100,
     opportunitiesShared: 800,
     eventsConducted: 40
   });
@@ -50,9 +48,15 @@ export default function Home() {
       .then((res) => res.json())
       .then((data) => {
         if (data && !data.error) {
-          setStats(data);
+          // Fallback to defaults if values are not defined in DB
+          setStats({
+            communityMembers: data.communityMembers || 20000,
+            recruiterNetwork: data.recruiterNetwork || 100,
+            opportunitiesShared: data.opportunitiesShared || 800,
+            eventsConducted: data.eventsConducted || 40
+          });
         }
-        setIsLoadingStats(false);
+        setIsLoadingStats(false)
       })
       .catch((err) => {
         console.error('Error fetching statistics:', err);
@@ -84,7 +88,6 @@ export default function Home() {
     }
 
     try {
-      // Query the status/verification API using search params
       const checkRes = await fetch(`/api/status-check?memberId=${cleanId}`);
       const checkData = await checkRes.json();
 
@@ -98,8 +101,8 @@ export default function Home() {
         toast.error(checkData.error || 'Member ID not found or not yet verified.');
       }
     } catch (error) {
-      // Fallback/Simulated local verify for testing convenience
-      if (cleanId === 'TSS-ST-010626001') {
+      // Fallback local verify for demo convenience
+      if (cleanId === 'TSS-ST-260618001' || cleanId === 'TSS-ST-010626001') {
         setIsUnlocked(true);
         localStorage.setItem('tss_community_unlocked', 'true');
         toast.success('Access Unlocked (Demo Mode)! Welcome to TSS.');
@@ -110,7 +113,6 @@ export default function Home() {
   };
 
   const handleUnlockDemo = () => {
-    // A quick way for the user/evaluator to test the community links
     setIsUnlocked(true);
     localStorage.setItem('tss_community_unlocked', 'true');
     toast.info('Community links unlocked (Demo bypass mode).');
@@ -122,300 +124,360 @@ export default function Home() {
     toast.info('Community links locked.');
   };
 
+  const platforms = [
+    { name: 'WhatsApp Channel', count: '5,800+ Followers', desc: 'Verified jobs, immediate notices.', link: 'https://whatsapp.com/channel/0029Vb6ft6072WTxJ5eMKA2I' },
+    { name: 'WhatsApp Community', count: '2,000+ Members', desc: 'Peer-to-peer discussions.', link: 'https://chat.whatsapp.com/LxA5xaAdlKp3nvZmIGxLcp' },
+    { name: 'LinkedIn Company', count: '4,200+ Followers', desc: 'Industry announcements.', link: 'https://www.linkedin.com/company/thestudentspot/' },
+    { name: 'Instagram', count: '880+ Followers', desc: 'Student spotlights, tips.', link: 'https://www.instagram.com/the_studentspot' },
+    { name: 'Telegram Hub', count: '200+ Members', desc: 'Immediate announcements backup.', link: 'https://t.me/thestudentspot' },
+    { name: 'YouTube', count: '50+ Subscribers', desc: 'Masterclass archives.', link: 'https://youtube.com/@the.studentspot' },
+    { name: 'X / Twitter', count: '50+ Followers', desc: 'Daily developer threads.', link: 'https://x.com/the_studentspot' }
+  ];
+
   return (
     <div className={styles.home}>
-      {/* Hero Section */}
+      
+      {/* 1A. HERO SECTION */}
       <section className={styles.hero}>
         <div className={`${styles.heroContainer} container`}>
+          
+          {/* Left Column */}
           <div className={styles.heroContent}>
-            <div className={styles.badgeContainer}>
-              <span className={styles.heroBadge}>
-                <Award size={14} /> Trust-Based Professional Circle
-              </span>
+            <div className={styles.eyebrowBadge}>
+              <span>⚡ 20,000+ Verified Members</span>
             </div>
             <h1 className={styles.headline}>
-              India's Verified Talent & <span className={styles.accentText}>Opportunity Network</span>
+              From Student to Founder — and Everything In Between.
             </h1>
             <p className={styles.subheadline}>
-              Connecting Students, Professionals, Founders, Recruiters, and Industry Leaders through verified opportunities, hiring, events, mentorship, and career growth.
+              India's first verified student-to-founder network. 100+ campuses. Real jobs. Monthly builds. One Member ID that opens it all.
             </p>
+            
             <div className={styles.heroActions}>
-              <Link href="/register" className="btn btn-primary btn-lg">
-                Register Now <ArrowRight size={18} />
+              <Link href="/get-verified" className={styles.btnAccent}>
+                Get Your Member ID <ArrowRight size={16} />
               </Link>
-              <Link href="#community-section" className="btn btn-outline btn-lg">
-                Join Community
+              <Link href="/programs" className={styles.btnOutline}>
+                Explore Programs
               </Link>
             </div>
+
+            <div className={styles.trustSignals}>
+              <span><span className={styles.trustCheck}>✓</span> Free to join</span>
+              <span><span className={styles.trustCheck}>✓</span> Verified in 24–48 hours</span>
+              <span><span className={styles.trustCheck}>✓</span> Never pay to get a job</span>
+            </div>
           </div>
+
+          {/* Right Column: Stylized Floating ID Card */}
           <div className={styles.heroVisual}>
-            <div className={styles.heroGlow}></div>
-            <div className={styles.visualCard}>
-              <div className={styles.premiumCardDecor}></div>
-              <div className={styles.cardHeader}>
-                <div className={styles.logoBadge}>
-                  <Shield className={styles.shieldIcon} size={28} />
+            <div className={styles.cardGlowContainer}>
+              <div className={styles.memberCard}>
+                
+                {/* Top header */}
+                <div className={styles.cardHeader}>
+                  <span className={styles.cardLogo}>TSS ⚡</span>
+                  <span className={styles.cardBadge}>VERIFIED</span>
                 </div>
-                <div>
-                  <h4 className={styles.premiumTitle}>TSS Verification Seal</h4>
-                  <p className={styles.premiumSubtitle}>Ecosystem Member Credential</p>
-                </div>
-              </div>
 
-              <div className={styles.cardBody}>
-                <div className={styles.verifRow}>
-                  <span className={styles.verifDot}></span>
-                  <span className={styles.verifLabel}>Status:</span>
-                  <span className={styles.verifBadgeActive}>Verified Member</span>
+                {/* Center ID */}
+                <div className={styles.cardCenter}>
+                  <div className={styles.cardId}>TSS-ST-260618001</div>
+                  <div className={styles.cardSubtitle}>The Student Spot Ecosystem</div>
                 </div>
-                <div className={styles.verifRow}>
-                  <span className={styles.verifDot}></span>
-                  <span className={styles.verifLabel}>Integrity Level:</span>
-                  <span className={styles.verifValue}>Level 1-9 Audited</span>
-                </div>
-                <div className={styles.verifRow}>
-                  <span className={styles.verifDot}></span>
-                  <span className={styles.verifLabel}>Network Access:</span>
-                  <span className={styles.verifValue}>Trusted Circles</span>
-                </div>
-              </div>
 
-              <div className={styles.cardFooterMock}>
-                <div className={styles.qrMockCode}>
-                  <div className={styles.qrDotPattern}></div>
+                {/* Bottom footer */}
+                <div className={styles.cardFooter}>
+                  <div className={styles.cardHolder}>
+                    <span className={styles.holderName}>Rajkamal Panthagani</span>
+                    <span className={styles.holderRole}>Student · Software</span>
+                  </div>
+                  <span className={styles.cardMark}>⚡</span>
                 </div>
-                <div className={styles.verificationMetaBlock}>
-                  <span className={styles.metaLabel}>SECURE AUDIT KEY</span>
-                  <span className={styles.metaValue}>TSS-SECURE-KEY-2026</span>
-                </div>
+
               </div>
             </div>
-            <div className={styles.floatingTag1}>
-              <Zap size={14} /> Startup Network
-            </div>
-            <div className={styles.floatingTag2}>
-              <Building2 size={14} /> Top Recruiters
+            <div className={styles.cardUndertext}>
+              Your unique, permanent TSS identity
             </div>
           </div>
+
         </div>
-        <div className={styles.waveSeparator}></div>
       </section>
 
-      {/* Statistics Section */}
-      <section className={styles.statsSection}>
-        <div className="container">
-          <div className={styles.statsGrid}>
-            <div className={styles.statCard}>
-              <Users size={32} className={styles.statIcon} />
-              <div className={styles.statNumber}>
-                {isLoadingStats ? '...' : stats.communityMembers.toLocaleString()}+
-              </div>
-              <div className={styles.statLabel}>Community Members</div>
-            </div>
-            <div className={styles.statCard}>
-              <Building2 size={32} className={styles.statIcon} />
-              <div className={styles.statNumber}>
-                {isLoadingStats ? '...' : stats.recruiterNetwork.toLocaleString()}+
-              </div>
-              <div className={styles.statLabel}>Recruiter Network</div>
-            </div>
-            <div className={styles.statCard}>
-              <Briefcase size={32} className={styles.statIcon} />
-              <div className={styles.statNumber}>
-                {isLoadingStats ? '...' : stats.opportunitiesShared.toLocaleString()}+
-              </div>
-              <div className={styles.statLabel}>Opportunities Shared</div>
-            </div>
-            <div className={styles.statCard}>
-              <Calendar size={32} className={styles.statIcon} />
-              <div className={styles.statNumber}>
-                {isLoadingStats ? '...' : stats.eventsConducted.toLocaleString()}+
-              </div>
-              <div className={styles.statLabel}>Events Conducted</div>
-            </div>
+      {/* 1B. STATS BAR */}
+      <section className={styles.statsBar}>
+        <div className={`${styles.statsGrid} container`}>
+          <div>
+            <span className={styles.statVal}>{isLoadingStats ? '...' : stats.communityMembers.toLocaleString()}+</span>
+            <span className={styles.statLabel}>Community Members</span>
+          </div>
+          <div>
+            <span className={styles.statVal}>100+</span>
+            <span className={styles.statLabel}>Campuses Reached</span>
+          </div>
+          <div>
+            <span className={styles.statVal}>{isLoadingStats ? '...' : stats.opportunitiesShared.toLocaleString()}+</span>
+            <span className={styles.statLabel}>Placements in 6 Months</span>
+          </div>
+          <div>
+            <span className={styles.statVal}>{isLoadingStats ? '...' : stats.recruiterNetwork.toLocaleString()}+</span>
+            <span className={styles.statLabel}>Recruiter Connections</span>
           </div>
         </div>
       </section>
 
-      {/* Why Join TSS */}
-      <section className={styles.whyJoin}>
+      {/* 1C. WHAT IS TSS SECTION */}
+      <section className={styles.whatIsSection}>
+        <div className={`${styles.introSplit} container`}>
+          
+          {/* Left Text */}
+          <div className={styles.heroContent}>
+            <span className={styles.eyebrow}>WHO WE ARE</span>
+            <h2 className={styles.sectionHeading}>
+              Not Another Student Group. A System That Actually Moves You Forward.
+            </h2>
+            <div className={styles.subheadline} style={{ fontSize: '1rem', color: 'var(--text-secondary)' }}>
+              <p style={{ marginBottom: '1.25rem' }}>
+                We're not a LinkedIn group. We're not another student club. We don't host webinars nobody remembers or share job listings that expired last month.
+              </p>
+              <p style={{ marginBottom: '1.25rem' }}>
+                The Student Spot is a verified professional network linking students, freshers, founders, and recruiters. Once verified, you get a unique TSS Member ID, which is your passport to skip public job application queues.
+              </p>
+              <p>
+                Started in Karimnagar, Telangana, we've grown organically to 100+ campuses across India. High trust, no spam.
+              </p>
+            </div>
+          </div>
+
+          {/* Right Visual: Telangana node dot map */}
+          <div className={styles.mapVisual}>
+            <div className={styles.mapCard}>
+              {/* Spreading nodes from center */}
+              <div className={styles.mapNode} style={{ top: '50%', left: '50%' }}></div>
+              <div className={styles.mapNode} style={{ top: '35%', left: '42%', animationDelay: '0.4s' }}></div>
+              <div className={styles.mapNode} style={{ top: '65%', left: '55%', animationDelay: '0.8s' }}></div>
+              <div className={styles.mapNode} style={{ top: '40%', left: '60%', animationDelay: '1.2s' }}></div>
+              <div className={styles.mapNode} style={{ top: '60%', left: '38%', animationDelay: '1.6s' }}></div>
+              
+              <span className={styles.mapLabel}> Telengana Node Spreading to 100+ Campuses</span>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      {/* 1D. PROGRAMS SECTION */}
+      <section className={styles.programsSection}>
         <div className="container">
-          <div className={styles.sectionHeader}>
-            <span className={styles.sectionSub}>Value Proposition</span>
-            <h2 className={styles.sectionTitle}>Why Join The Student Spot?</h2>
-            <p className={styles.sectionDesc}>
-              We maintain high-trust connections. No job boards, no recruiters spamming, and no fake CVs.
+          <div className={styles.programsHeader}>
+            <span className={styles.eyebrow}>WHAT WE OFFER</span>
+            <h2>Three Programs. One Direction.</h2>
+            <p>
+              Whether you want to get hired, build something real, or craft the resume that actually gets read — there's a TSS program for exactly where you are.
             </p>
           </div>
 
-          <div className={styles.cardsGrid}>
-            <div className={`${styles.benefitCard} premium-card`}>
-              <Award size={24} className={styles.benefitIcon} />
-              <h3>Verified Talent Network</h3>
-              <p>Every single member is manually vetted. Connect with genuine, high-achieving peers, mentors, and founders.</p>
+          <div className={styles.programsGrid}>
+            
+            {/* Card 1: 100x Students */}
+            <div className={styles.programCard} style={{ borderLeft: '3px solid var(--primary)' }}>
+              <div>
+                <div className={styles.progHeader}>
+                  <span className={`${styles.progBadge} ${styles.progBadgePrimary}`}>PREMIUM MEMBERSHIP</span>
+                  <span className={styles.progIcon}>🌟</span>
+                </div>
+                <h3>100x Students</h3>
+                <p>
+                  Accelerate your preparation. Live expert reviews, private placements pipeline, mock recruiter reviews, and priority access to every TSS node.
+                </p>
+              </div>
+              <Link href="/programs#100x-students" className={styles.progCta}>
+                Join 100x Students <ArrowRight size={14} />
+              </Link>
             </div>
-            <div className={`${styles.benefitCard} premium-card`}>
-              <Briefcase size={24} className={styles.benefitIcon} />
-              <h3>Internship Opportunities</h3>
-              <p>Exclusive access to high-impact internships at top startups and conglomerates looking for trusted talent.</p>
+
+            {/* Card 2: BuildX */}
+            <div className={styles.programCard} style={{ borderLeft: '3px solid var(--accent)' }}>
+              <div>
+                <div className={styles.progHeader}>
+                  <span className={`${styles.progBadge} ${styles.progBadgeAmber}`}>BUILDER PROGRAM</span>
+                  <span className={styles.progIcon}>🚀</span>
+                </div>
+                <h3>BuildX Sandbox</h3>
+                <p>
+                  30 days. 1 real problem. 1 working product. Pull in teammates, get Sunday code reviews from operators, and show your demo to active founders.
+                </p>
+              </div>
+              <Link href="/programs#buildx" className={styles.progCta}>
+                Register for BuildX <ArrowRight size={14} />
+              </Link>
             </div>
-            <div className={`${styles.benefitCard} premium-card`}>
-              <Building2 size={24} className={styles.benefitIcon} />
-              <h3>Job Opportunities</h3>
-              <p>Skip the resume pile. Apply directly using your verified TSS Member ID to partnered recruiter listings.</p>
+
+            {/* Card 3: Resume Studio */}
+            <div className={styles.programCard} style={{ borderLeft: '3px solid var(--green-light)' }}>
+              <div>
+                <div className={styles.progHeader}>
+                  <span className={`${styles.progBadge} ${styles.progBadgeGreen}`}>FREE FOR ALL MEMBERS</span>
+                  <span className={styles.progIcon}>📝</span>
+                </div>
+                <h3>Resume Studio</h3>
+                <p>
+                  Build a print-ready, single-column ATS-friendly resume matching FAANG/Startup layout criteria in under 5 minutes. 100% free downloads.
+                </p>
+              </div>
+              <Link href="/programs#resume-studio" className={styles.progCta}>
+                Launch Resume Studio <ArrowRight size={14} />
+              </Link>
             </div>
-            <div className={`${styles.benefitCard} premium-card`}>
-              <Zap size={24} className={styles.benefitIcon} />
-              <h3>Startup Ecosystem</h3>
-              <p>Meet co-founders, early-stage hires, and secure connections with incubators, accelerators, and active angel investors.</p>
-            </div>
-            <div className={`${styles.benefitCard} premium-card`}>
-              <Compass size={24} className={styles.benefitIcon} />
-              <h3>Mentorship Access</h3>
-              <p>Get direct calendar access to industry leaders, senior developers, product veterans, and startup founders.</p>
-            </div>
-            <div className={`${styles.benefitCard} premium-card`}>
-              <Calendar size={24} className={styles.benefitIcon} />
-              <h3>Events & Workshops</h3>
-              <p>Participate in exclusive hackathons, masterclasses, networking mixers, and recruiters-only office hours.</p>
-            </div>
+
           </div>
         </div>
       </section>
 
-      {/* How It Works */}
-      <section className={styles.howItWorks}>
-        <div className="container">
-          <div className={styles.sectionHeader}>
-            <span className={styles.sectionSub}>Onboarding Flow</span>
-            <h2 className={styles.sectionTitle}>Simple and Structured Path</h2>
-          </div>
-
-          <div className={styles.stepsTimeline}>
-            <div className={styles.step}>
-              <div className={styles.stepNumber}>1</div>
-              <h3>Register</h3>
-              <p>Complete the secure multi-step verification form and upload your resume PDF.</p>
-            </div>
-            <div className={styles.step}>
-              <div className={styles.stepNumber}>2</div>
-              <h3>Get Verified</h3>
-              <p>TSS Admins perform manual vetting of your details, socials, and experience documents.</p>
-            </div>
-            <div className={styles.step}>
-              <div className={styles.stepNumber}>3</div>
-              <h3>Receive TSS ID</h3>
-              <p>Get your unique, tamper-proof TSS Member ID (e.g. TSS260618001) via email/SMS.</p>
-            </div>
-            <div className={styles.step}>
-              <div className={styles.stepNumber}>4</div>
-              <h3>Access Opportunities</h3>
-              <p>Unlock our verified community links, masterclasses, and curated talent-recruiter mixers.</p>
-            </div>
-            <div className={styles.step}>
-              <div className={styles.stepNumber}>5</div>
-              <h3>Apply Using ID</h3>
-              <p>Submit your TSS Member ID on partner applications to skip first-round resumes.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Community Access Section */}
+      {/* 1E. COMMUNITY PROOF SECTION */}
       <section id="community-section" className={styles.communitySection}>
         <div className="container">
-          <div className={`${styles.communityBox} ${isUnlocked ? styles.boxUnlocked : ''}`}>
-            {!isUnlocked ? (
-              <div className={styles.lockedContent}>
-                <Lock size={48} className={styles.lockIcon} />
-                <h2>Community Links are Locked</h2>
-                <p>
-                  To prevent spam, access to our WhatsApp groups, LinkedIn circles, and Instagram channels is restricted.
-                  Please complete registration and verify your account.
-                </p>
-                <form onSubmit={handleUnlock} className={styles.unlockForm}>
-                  <input
-                    type="text"
-                    placeholder="Enter Verified TSS Member ID"
-                    value={memberIdInput}
-                    onChange={(e) => setMemberIdInput(e.target.value)}
-                    className="form-input"
-                  />
-                  <button type="submit" className="btn btn-secondary">
-                    Unlock Access
-                  </button>
-                </form>
-                <p className={styles.checkStatusInfo}>
-                  Access requires an active TSS Member ID. Please check your verification approval email or log in to your dashboard to retrieve your ID.
-                </p>
+          <div className={styles.communityHeader}>
+            <span className={styles.eyebrow}>THE NUMBERS</span>
+            <h2>A Community That Ships, Not Just Scrolls.</h2>
+            <p>
+              Every number here is a real person verified to prevent placement spam. Access to community channels is locked until your Member ID is approved.
+            </p>
+          </div>
+
+          <div className={styles.platformGrid}>
+            {platforms.map((plat, idx) => (
+              <div key={idx} className={styles.platformCard}>
+                <div className={styles.platHeader}>
+                  <span>⚡</span>
+                  <span>{plat.name}</span>
+                </div>
+                <span className={styles.platNum}>{plat.count}</span>
+                <span className={styles.platLabel}>{plat.desc}</span>
               </div>
+            ))}
+          </div>
+
+          {/* Interactive Member ID Unlock Widget */}
+          <div className={styles.verifUnlockWidget}>
+            <h3>Verify Member ID to Unlock Official Links</h3>
+            <p>
+              Approved members can enter their unique ID below to unlock WhatsApp channels, Telegram handles, and direct access links.
+            </p>
+
+            {!isUnlocked ? (
+              <form onSubmit={handleUnlock} className={styles.unlockForm}>
+                <input 
+                  type="text" 
+                  className={styles.unlockInput}
+                  placeholder="e.g. TSS-ST-260618001" 
+                  value={memberIdInput}
+                  onChange={(e) => setMemberIdInput(e.target.value)}
+                />
+                <button type="submit" className={styles.btnAccent} style={{ padding: '0.75rem 1.5rem', fontSize: '0.85rem' }}>
+                  Verify & Unlock
+                </button>
+              </form>
             ) : (
-              <div className={styles.unlockedContent}>
-                <Unlock size={48} className={styles.unlockIcon} />
-                <h2>Welcome to the TSS Circle</h2>
-                <p className={styles.successSub}>
-                  Your membership is verified. Connect with peers and recruiters across our official channels below:
-                </p>
-                <div className={styles.channelsGrid}>
-                  <a href="https://chat.whatsapp.com/LxA5xaAdlKp3nvZmIGxLcp" target="_blank" rel="noopener noreferrer" className={`${styles.channelCard} ${styles.whatsapp}`}>
-                    <MessageSquare size={32} />
-                    <h3>WhatsApp Community</h3>
-                    <p>Subgroups for Developers, Design, Founders & HRs.</p>
-                    <span className={styles.channelLinkBtn}>Join Group <ChevronRight size={16} /></span>
-                  </a>
-                  <a href="https://www.linkedin.com/company/thestudentspot/" target="_blank" rel="noopener noreferrer" className={`${styles.channelCard} ${styles.linkedin}`}>
-                    <Building2 size={32} />
-                    <h3>LinkedIn Network</h3>
-                    <p>Tag our page and connect with verified network alumni.</p>
-                    <span className={styles.channelLinkBtn}>Follow Page <ChevronRight size={16} /></span>
-                  </a>
-                  <a href="https://www.instagram.com/the_studentspot" target="_blank" rel="noopener noreferrer" className={`${styles.channelCard} ${styles.instagram}`}>
-                    <Users size={32} />
-                    <h3>Instagram Channel</h3>
-                    <p>Daily updates on events, workshops, and startup mixers.</p>
-                    <span className={styles.channelLinkBtn}>Follow Feed <ChevronRight size={16} /></span>
-                  </a>
-                </div>
-
-                {/* Additional Community Links */}
-                <div style={{
-                  marginTop: '2rem',
-                  padding: '1.5rem',
-                  background: 'var(--bg-main)',
-                  border: '1px solid var(--border-color)',
-                  borderRadius: 'var(--radius-lg)',
-                  textAlign: 'left'
-                }}>
-                  <h4 style={{ fontFamily: 'var(--font-heading)', color: 'var(--text-main)', marginBottom: '0.75rem', fontSize: '1rem' }}>Additional Community Resources</h4>
-                  <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: '0.65rem', fontSize: '0.875rem' }}>
-                    <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                      <span style={{ color: 'var(--success)' }}>🟢</span>
-                      <strong>Official WhatsApp Channel:</strong>&nbsp;
-                      <a href="https://www.whatsapp.com/channel/0029Vb6ft6072WTxJ5eMKA2I" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary)', textDecoration: 'underline' }}>Join WhatsApp Channel</a>
-                    </li>
-                    <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                      <span style={{ color: 'var(--danger)' }}>🚨</span>
-                      <strong>Health & Emergency Support:</strong>&nbsp;
-                      <a href="https://chat.whatsapp.com/I5OT95lbZeo1yraUKyPUjP" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary)', textDecoration: 'underline' }}>Access Support Chat</a>
-                    </li>
-                    <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                      <span style={{ color: 'var(--primary)' }}>💼</span>
-                      <strong>Founder Rajkamal:</strong>&nbsp;
-                      <a href="https://www.linkedin.com/in/rajkamalprls" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary)', textDecoration: 'underline' }}>Connect on LinkedIn</a>
-                    </li>
-                  </ul>
-                </div>
-
-                <div style={{ marginTop: '2rem' }}>
-                  <button onClick={handleResetLock} className="btn btn-outline btn-sm">
-                    Re-lock Links (Test)
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'rgba(5, 150, 105, 0.1)', border: '1px solid rgba(5, 150, 105, 0.2)', padding: '1rem', borderRadius: '10px', marginBottom: '1.5rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--green-light)' }}>
+                    <CheckCircle2 size={18} />
+                    <strong>Verified Candidate Access Unlocked</strong>
+                  </div>
+                  <button onClick={handleResetLock} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: '11px', textDecoration: 'underline', cursor: 'pointer' }}>
+                    Lock Links
                   </button>
+                </div>
+                <div className={styles.unlockedLinksGrid}>
+                  <a href={platforms[0].link} target="_blank" rel="noopener noreferrer" className={styles.inviteLinkCard}>
+                    Join Official WhatsApp Channel <ArrowRight size={14} />
+                  </a>
+                  <a href={platforms[1].link} target="_blank" rel="noopener noreferrer" className={styles.inviteLinkCard}>
+                    Join WhatsApp Community <ArrowRight size={14} />
+                  </a>
+                  <a href={platforms[4].link} target="_blank" rel="noopener noreferrer" className={styles.inviteLinkCard}>
+                    Join Telegram Group <ArrowRight size={14} />
+                  </a>
+                  <a href={platforms[2].link} target="_blank" rel="noopener noreferrer" className={styles.inviteLinkCard}>
+                    Connect LinkedIn Network <ArrowRight size={14} />
+                  </a>
                 </div>
               </div>
             )}
+
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', marginTop: '1.5rem' }}>
+              <button onClick={handleUnlockDemo} style={{ background: 'none', border: 'none', color: 'var(--primary-pale)', fontSize: '11px', textDecoration: 'underline', cursor: 'pointer' }}>
+                [Demo Bypass Access]
+              </button>
+            </div>
+          </div>
+
+          <div className={styles.quoteBlock}>
+            "Most communities measure followers. We measure verified members. That's who actually shows up."
+            <span className={styles.quoteAuthor}>— Rajkamal Panthagani, Founder</span>
+          </div>
+
+        </div>
+      </section>
+
+      {/* 1F. VERIFICATION CTA SECTION */}
+      <section className={styles.ctaSection}>
+        <div className="container">
+          <div className={styles.scanWrapper}>
+            <div className={styles.scanLine}></div>
+            <div className={styles.memberCard} style={{ opacity: 0.85 }}>
+              <div className={styles.cardHeader}>
+                <span className={styles.cardLogo}>TSS ⚡</span>
+                <span className={styles.cardBadge}>VERIFIED</span>
+              </div>
+              <div className={styles.cardCenter}>
+                <div className={styles.cardId}>TSS-ST-260618001</div>
+                <div className={styles.cardSubtitle}>The Student Spot Ecosystem</div>
+              </div>
+              <div className={styles.cardFooter}>
+                <div className={styles.cardHolder}>
+                  <span className={styles.holderName}>Rajkamal Panthagani</span>
+                  <span className={styles.holderRole}>Student · Software</span>
+                </div>
+                <span className={styles.cardMark}>⚡</span>
+              </div>
+            </div>
+          </div>
+
+          <h2 className={styles.ctaHeading}>Everything in TSS Starts With Your Member ID.</h2>
+          <p className={styles.ctaDesc}>
+            When you verify your student credentials, you unlock direct referrals, builder sessions, and ATS formatting tools. It takes two minutes and stays free forever.
+          </p>
+
+          <span className={styles.largeIdDisplay}>TSS-ST-260618001</span>
+
+          <div>
+            <Link href="/get-verified" className={styles.btnAccent} style={{ fontSize: '1.05rem', padding: '1rem 2.2rem' }}>
+              Get Verified Free — Takes 2 Minutes <ArrowRight size={18} />
+            </Link>
+          </div>
+          <span className={styles.helperNote}>* Requires verification via college email, ID card, or verified portfolio link.</span>
+        </div>
+      </section>
+
+      {/* 1G. FINAL SECTION */}
+      <section className={styles.finalSection}>
+        <div className="container">
+          <h2 className={styles.finalHeading}>Stop Waiting. Start Building.</h2>
+          <p className={styles.finalDesc}>20,000+ students already inside. Your Member ID is waiting.</p>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+            <Link href="/get-verified" className={styles.btnAccent}>
+              Get Verified
+            </Link>
+            <Link href="/contact" className={styles.btnOutline}>
+              Contact Us
+            </Link>
           </div>
         </div>
       </section>
+
     </div>
   );
 }
