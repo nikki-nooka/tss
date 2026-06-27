@@ -111,7 +111,7 @@ export default function AdminLogin() {
           <div className={styles.roleTip}>
             <span>Available Roles for evaluation:</span>
             <ul>
-              <li><strong>Admin:</strong> contact.thestudentspot@gmail.com / TssAdmin2026!</li>
+              <li><strong>Admin:</strong> contact.thestudentspot@gmail.com / Rajkamal@TSS</li>
               <li><strong>HR:</strong> hr@thestudentspot.com / TssHr2026!</li>
             </ul>
           </div>
