@@ -18,7 +18,9 @@ import {
   Trash2,
   CheckCircle2,
   AlertOctagon,
-  FileText
+  FileText,
+  Lock,
+  ShieldAlert
 } from 'lucide-react';
 import { useToast } from '@/components/Toast';
 
@@ -27,6 +29,7 @@ interface CandidateProfile {
   role: string;
   fullName: string;
   memberId: string;
+  status: string;
   email: string;
   mobile: string;
   city: string;
@@ -705,6 +708,22 @@ export default function CandidateDashboard() {
     return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
   };
 
+  const renderLockedState = (tabName: string) => {
+    return (
+      <div className={styles.lockedStateCard}>
+        <Lock size={40} className={styles.lockStateIcon} />
+        <h3>{tabName} is Locked</h3>
+        <p>
+          This workspace panel is only available for verified members. 
+          Your candidate registration status is currently <strong>PENDING REVIEW</strong>.
+        </p>
+        <div className={styles.pendingAuditNotice}>
+          Vetting audits usually take 24-48 hours. You will receive an approval email once validated.
+        </div>
+      </div>
+    );
+  };
+
   // RENDERING
   return (
     <div className={styles.dashboardPage}>
@@ -715,7 +734,7 @@ export default function CandidateDashboard() {
           <h1>{profile ? `Welcome Back, ${profile.fullName}` : 'Sign In to Your Workspace'}</h1>
           <p className={styles.tagline}>
             {profile 
-              ? `Member ID: ${profile.memberId} | Connected as verified ${profile.role}`
+              ? `Status: ${profile.status} | Role: ${profile.role} ${profile.memberId ? `| Member ID: ${profile.memberId}` : ''}`
               : 'Access your TSS virtual ID card, dynamic resume builder studio, and vetting levels logs.'}
           </p>
         </div>
@@ -835,8 +854,20 @@ export default function CandidateDashboard() {
                 {activeTab === 'card' && (
                   <div className={`${styles.tabView} fade-in`}>
                     <h2>Digital Membership Card</h2>
-                    <p>Your verified credentials card represents high-trust security. Download it or share the QR validation code.</p>
+                    <p>Your verified credentials card represents high-trust security. Once verified, download it or share the QR validation code.</p>
                     
+                    {profile.status !== 'Verified' && (
+                      <div className={styles.pendingBanner} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', padding: '1rem', marginBottom: '1.5rem' }}>
+                        <ShieldAlert className={styles.pendingIcon} style={{ color: 'var(--primary)' }} size={24} />
+                        <div>
+                          <strong style={{ display: 'block', color: 'var(--text-main)', marginBottom: '0.2rem' }}>Account Vetting in Progress</strong>
+                          <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                            Your profile is currently under manual audit. The verified resume studio, vetting levels logs, and Build sandbox submission features will unlock automatically once an administrator approves your registration.
+                          </span>
+                        </div>
+                      </div>
+                    )}
+
                     <div className={styles.cardContainer}>
                       <div id="tss-id-card" className={styles.memberCardVirtual}>
                         <div className={styles.cardGlow}></div>
@@ -847,8 +878,8 @@ export default function CandidateDashboard() {
                             <Award className={styles.cardLogoIcon} size={18} />
                             <span>THE STUDENT SPOT</span>
                           </div>
-                          <div className={styles.cardStatusBadge}>
-                            <span className={styles.statusDot}></span> VERIFIED TALENT
+                          <div className={`${styles.cardStatusBadge} ${profile.status === 'Verified' ? styles.statusVerified : styles.statusPending}`} style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.7rem', fontWeight: 700, padding: '0.25rem 0.5rem', borderRadius: 'var(--radius-sm)' }}>
+                            <span className={styles.statusDot} style={{ width: '6px', height: '6px', backgroundColor: profile.status === 'Verified' ? 'var(--success)' : 'var(--secondary)', borderRadius: '50%' }}></span> {profile.status === 'Verified' ? 'VERIFIED MEMBER' : 'UNDER AUDIT'}
                           </div>
                         </div>
 
@@ -875,7 +906,7 @@ export default function CandidateDashboard() {
                         <div className={styles.cardFooterGrid}>
                           <div className={styles.detailsColumn}>
                             <span className={styles.detailsLabel}>TSS MEMBER ID</span>
-                            <span className={styles.memberIdCode}>{profile.memberId}</span>
+                            <span className={styles.memberIdCode}>{profile.status === 'Verified' ? profile.memberId : 'PENDING AUDIT'}</span>
                           </div>
                           
                           <div className={styles.detailsColumn}>
@@ -884,7 +915,7 @@ export default function CandidateDashboard() {
                           </div>
 
                           <div className={styles.detailsColumn}>
-                            <span className={styles.detailsLabel}>VERIFIED ON</span>
+                            <span className={styles.detailsLabel}>{profile.status === 'Verified' ? 'VERIFIED ON' : 'SUBMITTED ON'}</span>
                             <span className={styles.detailsValue}>{formatDate(profile.registrationDate)}</span>
                           </div>
 
@@ -892,8 +923,8 @@ export default function CandidateDashboard() {
                             <img 
                               src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(
                                 typeof window !== 'undefined' 
-                                  ? `${window.location.origin}/status?memberId=${profile.memberId}` 
-                                  : `https://thestudentspot.app/status?memberId=${profile.memberId}`
+                                  ? `${window.location.origin}/status?memberId=${profile.status === 'Verified' ? profile.memberId : profile.id}` 
+                                  : `https://thestudentspot.app/status?memberId=${profile.status === 'Verified' ? profile.memberId : profile.id}`
                               )}`} 
                               crossOrigin="anonymous"
                               className={styles.cardQrCode} 
@@ -904,15 +935,18 @@ export default function CandidateDashboard() {
                       </div>
                     </div>
 
-                    <div className={styles.tabActions}>
-                      <button onClick={handleDownloadPdf} className="btn btn-primary">
-                        <Download size={16} /> Download Card PDF
-                      </button>
-                    </div>
+                    {profile.status === 'Verified' && (
+                      <div className={styles.tabActions}>
+                        <button onClick={handleDownloadPdf} className="btn btn-primary">
+                          <Download size={16} /> Download Card PDF
+                        </button>
+                      </div>
+                    )}
 
-                    <div className={styles.unlockedLinks}>
-                      <h3>🚀 Unlocked Ecosystem Connections</h3>
-                      <p>As a verified talent, you have immediate access to regional cohorts:</p>
+                    {profile.status === 'Verified' && (
+                      <div className={styles.unlockedLinks}>
+                        <h3>🚀 Unlocked Ecosystem Connections</h3>
+                        <p>As a verified talent, you have immediate access to regional cohorts:</p>
                       <div className={styles.linkButtonsGrid}>
                         <a href="https://whatsapp.com" target="_blank" rel="noreferrer" className={styles.linkBox}>
                           <strong>WhatsApp Group</strong>
@@ -932,12 +966,14 @@ export default function CandidateDashboard() {
                         </a>
                       </div>
                     </div>
+                    )}
                   </div>
                 )}
 
                 {/* B. RESUME STUDIO TAB */}
                 {activeTab === 'resume' && (
-                  <div className={`${styles.tabView} fade-in`}>
+                  profile.status !== 'Verified' ? renderLockedState('Resume Studio') : (
+                    <div className={`${styles.tabView} fade-in`}>
                     <h2>TSS Resume Studio</h2>
                     <p>Customize and download print-ready resumes tailored for different application settings.</p>
                     
@@ -1209,11 +1245,13 @@ export default function CandidateDashboard() {
                       </div>
                     </div>
                   </div>
-                )}
+                )
+              )}
 
                 {/* C. VETTING LEVELS TAB */}
                 {activeTab === 'levels' && (
-                  <div className={`${styles.tabView} fade-in`}>
+                  profile.status !== 'Verified' ? renderLockedState('Vetting Levels Logs') : (
+                    <div className={`${styles.tabView} fade-in`}>
                     <h2>TSS Verification Levels</h2>
                     <p>Track your trust indicators and vetted levels on the Student Spot platform.</p>
 
@@ -1271,11 +1309,13 @@ export default function CandidateDashboard() {
                       </div>
                     </div>
                   </div>
-                )}
+                )
+              )}
 
                 {/* D. BUILD CHALLENGE TAB */}
                 {activeTab === 'build' && (
-                  <div className={`${styles.tabView} fade-in`}>
+                  profile.status !== 'Verified' ? renderLockedState('Build Challenge Sandbox') : (
+                    <div className={`${styles.tabView} fade-in`}>
                     <h2>TSS Build Challenge Sandbox</h2>
                     <p>Submit problems, join active 30-day cohorts, and collaborate on real-world projects.</p>
 
@@ -1314,6 +1354,7 @@ export default function CandidateDashboard() {
                       </button>
                     </form>
                   </div>
+                  )
                 )}
 
                 {/* E. ACCOUNT SETTINGS TAB */}

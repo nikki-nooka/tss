@@ -1036,3 +1036,89 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* PENDING BANNER & LOCK STATES */
+.pendingBanner {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.pendingIcon {
+  color: var(--primary);
+  flex-shrink: 0;
+}
+
+.lockedStateCard {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 3rem 2rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  max-width: 500px;
+  margin: 3rem auto;
+  box-shadow: var(--shadow-md);
+}
+
+.lockStateIcon {
+  color: var(--text-muted);
+  margin-bottom: 0.5rem;
+}
+
+.lockedStateCard h3 {
+  font-family: var(--font-heading);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin: 0;
+}
+
+.lockedStateCard p {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.pendingAuditNotice {
+  font-size: 0.8rem;
+  color: var(--secondary);
+  font-weight: 600;
+  background-color: var(--primary-light);
+  padding: 0.4rem 0.8rem;
+  border-radius: var(--radius-sm);
+  margin-top: 0.5rem;
+}
+
+.lockedBadge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #64748b;
+  background-color: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+.statusVerified {
+  color: var(--success) !important;
+  background-color: rgba(16, 185, 129, 0.1) !important;
+  border-color: rgba(16, 185, 129, 0.2) !important;
+}
+
+.statusPending {
+  color: var(--secondary) !important;
+  background-color: var(--primary-light) !important;
+  border-color: rgba(247, 127, 0, 0.2) !important;
+}
