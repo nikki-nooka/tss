@@ -70,10 +70,7 @@ export const Footer: React.FC = () => {
           <p className={styles.copyright}>
             &copy; {new Date().getFullYear()} The Student Spot (TSS). All rights reserved.
           </p>
-          <div className={styles.badges}>
-            <span className={styles.badge}>Phase 1 Platform</span>
-            <span className={styles.badge}>Secure Access</span>
-          </div>
+
         </div>
       </div>
     </footer>
