@@ -297,15 +297,15 @@ export default function AdminDashboard() {
 
     setIsPostingJob(true);
     try {
-      const requirementsArray = newJobReqs.split(',').map(r => r.trim()).filter(Boolean);
+      const requirementsArray = newJobReqs ? newJobReqs.split(',').map(r => r.trim()).filter(Boolean) : [];
       const res = await fetch('/api/admin/jobs', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           title: newJobTitle,
           companyName: newJobCompany,
-          type: newJobType,
-          location: newJobLocation,
+          type: newJobType || 'Full-time',
+          location: newJobLocation || 'Remote',
           salaryRange: newJobSalary,
           description: newJobDesc,
           requirements: requirementsArray,
@@ -1344,13 +1344,13 @@ export default function AdminDashboard() {
 
                   <form onSubmit={handlePostJob} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
                     <div className="form-group">
-                      <label className="form-label" style={{ fontSize: '0.8rem' }}>Job Title *</label>
+                      <label className="form-label" style={{ fontSize: '0.8rem' }}>Role Title *</label>
                       <input 
                         type="text" 
                         value={newJobTitle}
                         onChange={e => setNewJobTitle(e.target.value)}
                         className="form-input" 
-                        placeholder="e.g. Software Engineering Intern"
+                        placeholder="e.g. Software Engineer"
                         required
                       />
                     </div>
@@ -1361,45 +1361,18 @@ export default function AdminDashboard() {
                         value={newJobCompany}
                         onChange={e => setNewJobCompany(e.target.value)}
                         className="form-input" 
-                        placeholder="e.g. TechSpot Inc"
+                        placeholder="e.g. Harman"
                         required
                       />
                     </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                      <div className="form-group">
-                        <label className="form-label" style={{ fontSize: '0.8rem' }}>Job Type *</label>
-                        <select 
-                          value={newJobType}
-                          onChange={e => setNewJobType(e.target.value as any)}
-                          className="form-input"
-                          style={{ backgroundColor: 'var(--bg-card-2)', color: 'var(--text-primary)' }}
-                        >
-                          <option value="Full-time">Full-time</option>
-                          <option value="Part-time">Part-time</option>
-                          <option value="Internship">Internship</option>
-                          <option value="Contract">Contract</option>
-                        </select>
-                      </div>
-                      <div className="form-group">
-                        <label className="form-label" style={{ fontSize: '0.8rem' }}>Location *</label>
-                        <input 
-                          type="text" 
-                          value={newJobLocation}
-                          onChange={e => setNewJobLocation(e.target.value)}
-                          className="form-input" 
-                          placeholder="e.g. Hyderabad (Hybrid)"
-                          required
-                        />
-                      </div>
-                    </div>
                     <div className="form-group">
-                      <label className="form-label" style={{ fontSize: '0.8rem' }}>Salary / Compensation (Optional)</label>
+                      <label className="form-label" style={{ fontSize: '0.8rem' }}>CTC / Compensation (Optional)</label>
                       <input 
                         type="text" 
                         value={newJobSalary}
                         onChange={e => setNewJobSalary(e.target.value)}
                         className="form-input" 
-                        placeholder="e.g. ₹25,000/month or 8-12 LPA"
+                        placeholder="e.g. ₹25,000/month or 12 LPA"
                       />
                     </div>
                     <div className="form-group">
@@ -1414,23 +1387,13 @@ export default function AdminDashboard() {
                       />
                     </div>
                     <div className="form-group">
-                      <label className="form-label" style={{ fontSize: '0.8rem' }}>Requirements (separated by commas)</label>
-                      <input 
-                        type="text" 
-                        value={newJobReqs}
-                        onChange={e => setNewJobReqs(e.target.value)}
-                        className="form-input" 
-                        placeholder="React, TypeScript, Next.js"
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label className="form-label" style={{ fontSize: '0.8rem' }}>Job Description *</label>
+                      <label className="form-label" style={{ fontSize: '0.8rem' }}>Opportunity Description / Notes *</label>
                       <textarea 
                         value={newJobDesc}
                         onChange={e => setNewJobDesc(e.target.value)}
                         className="form-input" 
-                        placeholder="Detailed role description, responsibilities..."
-                        rows={4}
+                        placeholder="Detailed role details, instructions, or descriptions..."
+                        rows={6}
                         style={{ resize: 'none' }}
                         required
                       />
