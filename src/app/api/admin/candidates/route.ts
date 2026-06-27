@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getCandidates, getCandidateById, updateCandidate, logAdminAction, Candidate } from '@/lib/db';
 import { getSessionUser } from '@/lib/auth';
+import { sendEmail } from '@/lib/email';
 
 // Helper to convert role to its standard prefix abbreviation
 const getRoleAbbreviation = (role: string): string => {
@@ -180,14 +181,11 @@ export async function PUT(request: Request) {
         `Approved candidate ${candidate.fullName} (${candidate.email}). Generated Member ID: ${candidate.memberId}`
       );
 
-      // Mock Email Output to System logs
-      console.log(`
-======================================================
-[MOCK EMAIL GATEWAY - CANDIDATE VERIFIED & APPROVED]
-To: ${candidate.email}
-Subject: Welcome to the Spot! Your TSS Member ID is Verified
-Body:
-Dear ${candidate.fullName},
+      // Send Verification Approval email (Nodemailer dispatcher)
+      await sendEmail({
+        to: candidate.email,
+        subject: `Welcome to the Spot! Your TSS Member ID is Verified`,
+        text: `Dear ${candidate.fullName},
 
 Congratulations! Your registration request on The Student Spot (TSS) has been verified and approved by the admin team.
 
@@ -203,9 +201,8 @@ Once logged in, you can unlock premium features, track jobs and applications, ac
 Welcome to the community!
 
 Best regards,
-The Student Spot Team
-======================================================
-      `);
+The Student Spot Team`
+      });
     } 
     else if (action === 'reject') {
       updates.status = 'Rejected';
