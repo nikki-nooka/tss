@@ -121,6 +121,10 @@ export default function AdminDashboard() {
   const [newJobReqs, setNewJobReqs] = useState('');
   const [isPostingJob, setIsPostingJob] = useState(false);
 
+  // JD Text Parser States
+  const [jdText, setJdText] = useState('');
+  const [showParser, setShowParser] = useState(false);
+
   // Recruiter Forwarding Form
   const [showFwdForm, setShowFwdForm] = useState(false);
   const [fwdRecruiterName, setFwdRecruiterName] = useState('');
@@ -374,6 +378,128 @@ export default function AdminDashboard() {
       fetchAdminJobsData();
     }
   }, [activeTab]);
+
+  const parseJobText = (text: string) => {
+    const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+    
+    let title = '';
+    let company = '';
+    let type: 'Full-time' | 'Part-time' | 'Internship' | 'Contract' = 'Full-time';
+    let location = '';
+    let salary = '';
+    let requirements: string[] = [];
+    let description = '';
+
+    const firstFewLines = lines.slice(0, 3);
+    
+    for (const line of firstFewLines) {
+      const atMatch = line.match(/(.+)\s+at\s+(.+)/i);
+      if (atMatch) {
+        title = atMatch[1].replace(/(hiring|looking for|we are hiring|position:)\s*/i, '').trim();
+        company = atMatch[2].trim();
+        break;
+      }
+      const compMatch = line.match(/company:\s*(.+)/i);
+      if (compMatch) {
+        company = compMatch[1].trim();
+      }
+      const titleMatch = line.match(/(title|role|position):\s*(.+)/i);
+      if (titleMatch) {
+        title = titleMatch[2].trim();
+      }
+    }
+
+    if (!title && lines[0]) {
+      title = lines[0].replace(/(hiring|looking for|we are hiring|position:)\s*/i, '').trim();
+    }
+
+    const lowerText = text.toLowerCase();
+    if (lowerText.includes('internship') || lowerText.includes('intern ')) {
+      type = 'Internship';
+    } else if (lowerText.includes('contract') || lowerText.includes('freelance')) {
+      type = 'Contract';
+    } else if (lowerText.includes('part-time') || lowerText.includes('part time')) {
+      type = 'Part-time';
+    } else {
+      type = 'Full-time';
+    }
+
+    const locMatch = text.match(/(location|workplace|office|city|state):\s*(.+)/i);
+    if (locMatch) {
+      location = locMatch[2].trim();
+    } else {
+      const commonLocs = ['hyderabad', 'bengaluru', 'bangalore', 'mumbai', 'pune', 'delhi', 'noida', 'remote', 'work from home', 'chennai'];
+      for (const loc of commonLocs) {
+        if (lowerText.includes(loc)) {
+          location = loc.charAt(0).toUpperCase() + loc.slice(1);
+          if (lowerText.includes('hybrid')) location += ' (Hybrid)';
+          break;
+        }
+      }
+      if (!location) location = 'Remote';
+    }
+
+    const salaryMatch = text.match(/(salary|stipend|ctc|package|compensation|pay):\s*(.+)/i);
+    if (salaryMatch) {
+      salary = salaryMatch[2].trim();
+    } else {
+      const linesWithCurrency = lines.filter(l => l.includes('₹') || l.includes('LPA') || l.includes('INR') || l.includes('$') || l.toLowerCase().includes('stipend'));
+      if (linesWithCurrency[0]) {
+        salary = linesWithCurrency[0].trim();
+      }
+    }
+
+    let reqSectionFound = false;
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      const lowerLine = line.toLowerCase();
+      
+      if (lowerLine.includes('requirements:') || lowerLine.includes('skills:') || lowerLine.includes('qualifications:') || lowerLine.includes('skills required:')) {
+        reqSectionFound = true;
+        continue;
+      }
+      
+      const isBullet = line.startsWith('-') || line.startsWith('•') || line.startsWith('*') || line.match(/^\d+\./);
+      if (isBullet) {
+        const cleanReq = line.replace(/^[-•*\d.]\s*/, '').trim();
+        if (cleanReq.length > 2 && requirements.length < 6) {
+          requirements.push(cleanReq);
+        }
+      } else if (reqSectionFound && line.length > 2 && !line.includes(':')) {
+        if (line.split(' ').length < 6 && requirements.length < 6) {
+          requirements.push(line);
+        }
+      }
+    }
+
+    if (requirements.length === 0) {
+      const techWords = ['react', 'next.js', 'typescript', 'javascript', 'python', 'sql', 'css', 'figma', 'node.js', 'java', 'communication'];
+      const foundTech = techWords.filter(w => lowerText.includes(w));
+      if (foundTech.length > 0) {
+        requirements = foundTech.map(w => w.charAt(0).toUpperCase() + w.slice(1));
+      }
+    }
+
+    description = text;
+
+    return { title, company, type, location, salary, requirements, description };
+  };
+
+  const handleParseJD = () => {
+    if (!jdText.trim()) {
+      toast.warning('Please paste some J.D. text first.');
+      return;
+    }
+    const parsed = parseJobText(jdText);
+    if (parsed.title) setNewJobTitle(parsed.title);
+    if (parsed.company) setNewJobCompany(parsed.company);
+    if (parsed.type) setNewJobType(parsed.type);
+    if (parsed.location) setNewJobLocation(parsed.location);
+    if (parsed.salary) setNewJobSalary(parsed.salary);
+    if (parsed.requirements.length > 0) setNewJobReqs(parsed.requirements.join(', '));
+    if (parsed.description) setNewJobDesc(parsed.description);
+    toast.success('Job details successfully extracted and mapped to form!');
+  };
 
   // --- Candidate Assessment Actions ---
 
@@ -1110,6 +1236,40 @@ export default function AdminDashboard() {
                 {/* Column 1: Post Job Form */}
                 <div className="premium-card" style={{ padding: '2.25rem', backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '12px' }}>
                   <h4 style={{ fontWeight: 700, fontSize: '1.1rem', marginBottom: '1.5rem', color: 'var(--text-primary)' }}>Post New Opening</h4>
+                  
+                  {/* J.D. Auto-Parser Expander box */}
+                  <div style={{ marginBottom: '1.5rem', padding: '1rem', backgroundColor: 'var(--bg-card-2)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                    <button 
+                      type="button" 
+                      onClick={() => setShowParser(!showParser)}
+                      className="btn btn-outline btn-sm"
+                      style={{ width: '100%', justifyContent: 'center', display: 'flex', gap: '0.25rem', padding: '0.4rem' }}
+                    >
+                      {showParser ? 'Close J.D. Parser' : '⚡ Auto-Parse J.D. Text'}
+                    </button>
+                    
+                    {showParser && (
+                      <div style={{ marginTop: '0.75rem' }}>
+                        <textarea
+                          placeholder="Paste raw Job Description (J.D.) or hiring message text here..."
+                          value={jdText}
+                          onChange={(e) => setJdText(e.target.value)}
+                          className="form-input"
+                          rows={6}
+                          style={{ resize: 'none', fontSize: '0.8rem', width: '100%', marginBottom: '0.75rem', backgroundColor: 'var(--bg-card)', padding: '0.5rem', fontFamily: 'inherit' }}
+                        />
+                        <button
+                          type="button"
+                          onClick={handleParseJD}
+                          className="btn btn-primary"
+                          style={{ width: '100%', justifyContent: 'center', background: 'linear-gradient(110deg, var(--accent), var(--accent-light))', color: '#050810', padding: '0.4rem' }}
+                        >
+                          Extract & Auto-Fill Fields
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
                   <form onSubmit={handlePostJob} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
                     <div className="form-group">
                       <label className="form-label" style={{ fontSize: '0.8rem' }}>Job Title *</label>
