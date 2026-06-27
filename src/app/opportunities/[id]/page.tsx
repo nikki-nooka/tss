@@ -79,8 +79,8 @@ export default function OpportunityDetailsPage() {
   // Inline sign-in handler
   const handleInlineLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!emailInput.trim() || !memberIdInput.trim()) {
-      toast.warning('Please enter both Email and Member ID.');
+    if (!emailInput.trim()) {
+      toast.warning('Please enter your Registered Email.');
       return;
     }
 
@@ -89,14 +89,11 @@ export default function OpportunityDetailsPage() {
       const res = await fetch('/api/auth/candidate-login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: emailInput.trim(), memberId: memberIdInput.trim() })
+        body: JSON.stringify({ email: emailInput.trim() })
       });
       const data = await res.json();
       if (res.ok && data.success) {
-        localStorage.setItem('tss_candidate_session', JSON.stringify({
-          email: data.candidate.email,
-          memberId: data.candidate.memberId
-        }));
+        localStorage.setItem('tss_candidate_session', JSON.stringify(data.candidate));
         setProfile(data.candidate);
         toast.success('Successfully authenticated TSS Member Session!');
       } else {
@@ -258,22 +255,10 @@ export default function OpportunityDetailsPage() {
                   <div className={styles.loginHeader} style={{ marginBottom: '2rem' }}>
                     <Shield className={styles.lockIcon} size={40} style={{ color: 'var(--primary)', marginBottom: '0.75rem' }} />
                     <h2>TSS Member Sign In</h2>
-                    <p style={{ margin: 0 }}>This community opportunity is exclusive to verified members. Enter your Member ID and Email to view recruiter contacts.</p>
+                    <p style={{ margin: 0 }}>This community opportunity is exclusive to verified members. Enter your registered email to view recruiter contacts.</p>
                   </div>
 
                   <form onSubmit={handleInlineLogin} className={styles.loginForm}>
-                    <div className={styles.formField}>
-                      <label className={styles.formLabel}>TSS Member ID</label>
-                      <input 
-                        type="text" 
-                        placeholder="e.g. TSS-ST-240626001" 
-                        value={memberIdInput}
-                        onChange={(e) => setMemberIdInput(e.target.value)}
-                        className={styles.formInput}
-                        required
-                      />
-                    </div>
-
                     <div className={styles.formField}>
                       <label className={styles.formLabel}>Registered Email Address</label>
                       <input 
@@ -287,7 +272,7 @@ export default function OpportunityDetailsPage() {
                     </div>
 
                     <button type="submit" disabled={isLoggingIn} className="btn btn-primary" style={{ width: '100%' }}>
-                      {isLoggingIn ? 'Verifying Member ID...' : 'Verify Session & Unlock'}
+                      {isLoggingIn ? 'Verifying Email...' : 'Verify Session & Unlock'}
                     </button>
                   </form>
 

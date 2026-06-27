@@ -228,8 +228,8 @@ export default function CandidateDashboard() {
 
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!memberIdInput.trim() || !emailInput.trim()) {
-      toast.error('Please fill in both Member ID and Email.');
+    if (!emailInput.trim()) {
+      toast.error('Please enter your registered email address.');
       return;
     }
     
@@ -239,7 +239,6 @@ export default function CandidateDashboard() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          memberId: memberIdInput.trim(),
           email: emailInput.trim()
         })
       });
@@ -821,22 +820,10 @@ export default function CandidateDashboard() {
               <div className={styles.loginHeader}>
                 <Shield className={styles.lockIcon} size={40} />
                 <h2>Verified Account Sign In</h2>
-                <p>Enter your approved Member ID and registered email to unlock your workspace.</p>
+                <p>Enter your registered email to unlock your candidate dashboard.</p>
               </div>
 
               <form onSubmit={handleLoginSubmit} className={styles.loginForm}>
-                <div className={styles.formField}>
-                  <label className={styles.formLabel}>TSS Member ID</label>
-                  <input 
-                    type="text" 
-                    placeholder="e.g. TSS-ST-240626001" 
-                    value={memberIdInput}
-                    onChange={(e) => setMemberIdInput(e.target.value)}
-                    className={styles.formInput}
-                    required
-                  />
-                </div>
-
                 <div className={styles.formField}>
                   <label className={styles.formLabel}>Registered Email Address</label>
                   <input 

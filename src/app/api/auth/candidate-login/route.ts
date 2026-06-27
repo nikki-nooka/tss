@@ -4,20 +4,19 @@ import { getCandidates } from '@/lib/db';
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { memberId, email } = body;
+    const { email } = body;
 
-    if (!memberId || !email) {
-      return NextResponse.json({ success: false, error: 'Member ID and Registered Email are required.' }, { status: 400 });
+    if (!email) {
+      return NextResponse.json({ success: false, error: 'Registered Email is required.' }, { status: 400 });
     }
 
     const candidates = await getCandidates();
     const candidate = candidates.find(
-      (c) => (c.memberId?.trim().toUpperCase() === memberId.trim().toUpperCase() || c.id.trim() === memberId.trim()) &&
-             c.email.trim().toLowerCase() === email.trim().toLowerCase()
+      (c) => c.email.trim().toLowerCase() === email.trim().toLowerCase()
     );
 
     if (!candidate) {
-      return NextResponse.json({ success: false, error: 'Invalid Member ID / Reference ID or Registered Email.' }, { status: 401 });
+      return NextResponse.json({ success: false, error: 'Candidate profile not registered under this email.' }, { status: 401 });
     }
 
     // Return successfully authenticated candidate profile payload including status

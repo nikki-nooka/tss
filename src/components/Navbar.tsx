@@ -50,9 +50,14 @@ export const Navbar: React.FC = () => {
             ))}
           </nav>
 
-          <Link href="/get-verified" className={`${styles.desktopNav} ${styles.getVerifiedBtn}`}>
-            Get Verified
-          </Link>
+          <div className={styles.desktopNav} style={{ gap: '1.25rem' }}>
+            <Link href="/dashboard" className={styles.navLink} style={{ fontWeight: 600, color: 'var(--text-main)' }}>
+              Sign In
+            </Link>
+            <Link href="/get-verified" className={styles.getVerifiedBtn}>
+              Get Verified
+            </Link>
+          </div>
         </div>
 
         {/* Mobile Navigation Toggle */}
@@ -80,6 +85,14 @@ export const Navbar: React.FC = () => {
               </Link>
             ))}
             
+            <Link 
+              href="/dashboard" 
+              className={styles.mobileNavLink}
+              style={{ fontWeight: 600, color: 'var(--text-main)', marginTop: '0.5rem' }}
+              onClick={closeMenu}
+            >
+              Sign In
+            </Link>
             <Link 
               href="/get-verified" 
               className={styles.getVerifiedBtn} 
