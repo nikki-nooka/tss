@@ -76,7 +76,7 @@ Candidate Details:
 - Skills: ${(candidate.skills || []).join(', ')}
 - LinkedIn: ${candidate.linkedin}
 
-Resume Link/File: ${candidate.resumeName || 'N/A'} (Link: http://localhost:3000/api/download/resume?id=${candidate.id})
+Resume Link/File: ${candidate.resumeName || 'N/A'} (Link: https://thestudentspot.vercel.app/api/download/resume?id=${candidate.id})
 Notes: ${notes || 'No extra notes.'}
 
 Best regards,

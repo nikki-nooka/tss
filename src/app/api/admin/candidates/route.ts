@@ -194,7 +194,7 @@ Your official member credentials are now active:
 - Access Level: Verified Candidate
 
 You can now sign in directly to the TSS portal at:
-http://localhost:3000/dashboard
+https://thestudentspot.vercel.app/dashboard
 
 Once logged in, you can unlock premium features, track jobs and applications, access your member ID card, and build your resume in the TSS Resume Studio.
 
