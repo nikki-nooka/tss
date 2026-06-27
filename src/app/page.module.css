@@ -170,106 +170,142 @@
   color: var(--text-muted);
 }
 
+.premiumCardDecor {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 6px;
+  background: linear-gradient(95deg, var(--primary) 0%, var(--secondary) 100%);
+  border-top-left-radius: var(--radius-xl);
+  border-top-right-radius: var(--radius-xl);
+}
+
+.logoBadge {
+  background-color: var(--primary-light);
+  border: 1px solid rgba(247, 127, 0, 0.15);
+  border-radius: var(--radius-md);
+  padding: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .shieldIcon {
   color: var(--primary);
 }
 
-.heroVerifyForm {
-  display: flex;
-  gap: 0.5rem;
-  margin-bottom: 0.5rem;
-}
-
-.heroVerifyInput {
-  flex: 1;
-  padding: 0.5rem 0.75rem;
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  font-family: var(--font-body);
-  font-size: 0.8rem;
-  background-color: var(--bg-main);
-  color: var(--text-main);
-  outline: none;
-}
-
-.heroVerifyInput:focus {
-  border-color: var(--primary);
-}
-
-.heroVerifyBtn {
-  background-color: var(--primary);
-  color: #ffffff;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: var(--radius-md);
-  font-family: var(--font-body);
-  font-weight: 700;
-  font-size: 0.8rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.heroVerifyBtn:hover {
-  background-color: var(--secondary);
-  box-shadow: 0 4px 10px rgba(247, 127, 0, 0.2);
-}
-
-.verifySuccess {
-  background-color: var(--success-light);
-  border: 1px solid rgba(16, 185, 129, 0.2);
-  border-radius: var(--radius-md);
-  padding: 0.75rem;
-  text-align: left;
-  margin-top: 0.5rem;
-}
-
-.successBadge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-  font-size: 0.65rem;
-  font-weight: 700;
-  color: var(--success);
-  margin-bottom: 0.35rem;
-}
-
-.verifyName {
+.premiumTitle {
   font-family: var(--font-heading);
-  font-size: 0.95rem;
   font-weight: 700;
-  color: #064e3b;
+  font-size: 1.05rem;
+  color: var(--text-main);
   margin: 0;
 }
 
-.verifyMeta {
-  font-size: 0.75rem;
-  color: #047857;
+.premiumSubtitle {
+  font-size: 0.72rem;
+  color: var(--text-muted);
   margin: 2px 0 0 0;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
 }
 
-.verifyFail {
-  background-color: var(--danger-light);
-  border: 1px solid rgba(239, 68, 68, 0.2);
-  border-radius: var(--radius-md);
-  padding: 0.75rem;
-  text-align: left;
+.verifRow {
+  display: flex;
+  align-items: center;
+  font-size: 0.82rem;
+  color: var(--text-main);
+  gap: 0.5rem;
+  border-bottom: 1px solid rgba(var(--primary-rgb), 0.05);
+  padding-bottom: 0.65rem;
+}
+
+.verifRow:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.verifDot {
+  width: 6px;
+  height: 6px;
+  background-color: var(--primary);
+  border-radius: 50%;
+}
+
+.verifLabel {
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.verifValue {
+  margin-left: auto;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.verifBadgeActive {
+  margin-left: auto;
+  font-size: 0.7rem;
+  font-weight: 700;
+  background-color: var(--success-light);
+  color: var(--success);
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--radius-sm);
+  text-transform: uppercase;
+}
+
+.cardFooterMock {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  border-top: 1px solid var(--border-color);
+  padding-top: 1.25rem;
   margin-top: 0.5rem;
 }
 
-.failBadge {
-  display: inline-flex;
+.qrMockCode {
+  width: 44px;
+  height: 44px;
+  background-color: var(--bg-main);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 4px;
+  display: flex;
   align-items: center;
-  gap: 0.25rem;
-  font-size: 0.65rem;
-  font-weight: 700;
-  color: var(--danger);
-  margin-bottom: 0.35rem;
+  justify-content: center;
+  position: relative;
 }
 
-.failText {
-  font-size: 0.8rem;
-  color: #7f1d1d;
-  margin: 0;
+.qrDotPattern {
+  width: 100%;
+  height: 100%;
+  background-image: 
+    radial-gradient(var(--text-muted) 1px, transparent 0),
+    radial-gradient(var(--text-muted) 1px, transparent 0);
+  background-size: 6px 6px;
+  background-position: 0 0, 3px 3px;
+  opacity: 0.65;
+}
+
+.verificationMetaBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.metaLabel {
+  font-size: 0.6rem;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
+
+.metaValue {
+  font-family: monospace;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--secondary);
 }
 
 .cardBody {
