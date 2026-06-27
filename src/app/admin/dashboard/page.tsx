@@ -119,6 +119,7 @@ export default function AdminDashboard() {
   const [newJobLocation, setNewJobLocation] = useState('');
   const [newJobSalary, setNewJobSalary] = useState('');
   const [newJobApplyLink, setNewJobApplyLink] = useState('');
+  const [newJobRecruiterEmail, setNewJobRecruiterEmail] = useState('');
   const [newJobDesc, setNewJobDesc] = useState('');
   const [newJobReqs, setNewJobReqs] = useState('');
   const [isPostingJob, setIsPostingJob] = useState(false);
@@ -309,7 +310,8 @@ export default function AdminDashboard() {
           salaryRange: newJobSalary,
           description: newJobDesc,
           requirements: requirementsArray,
-          applyLink: newJobApplyLink
+          applyLink: newJobApplyLink,
+          recruiterEmail: newJobRecruiterEmail
         })
       });
       const data = await res.json();
@@ -321,6 +323,7 @@ export default function AdminDashboard() {
         setNewJobLocation('');
         setNewJobSalary('');
         setNewJobApplyLink('');
+        setNewJobRecruiterEmail('');
         setNewJobDesc('');
         setNewJobReqs('');
         fetchAdminJobsData();
@@ -553,7 +556,13 @@ export default function AdminDashboard() {
       }
     }
 
-    return { title, company, type, location, salary, requirements, description, applyLink };
+    let recruiterEmail = '';
+    const emailMatch = cleanText.match(/\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/);
+    if (emailMatch) {
+      recruiterEmail = emailMatch[0].trim();
+    }
+
+    return { title, company, type, location, salary, requirements, description, applyLink, recruiterEmail };
   };
 
   const handleParseJD = () => {
@@ -568,6 +577,7 @@ export default function AdminDashboard() {
     if (parsed.location) setNewJobLocation(parsed.location);
     if (parsed.salary) setNewJobSalary(parsed.salary);
     if (parsed.applyLink) setNewJobApplyLink(parsed.applyLink);
+    if (parsed.recruiterEmail) setNewJobRecruiterEmail(parsed.recruiterEmail);
     if (parsed.requirements.length > 0) setNewJobReqs(parsed.requirements.join(', '));
     if (parsed.description) setNewJobDesc(parsed.description);
     toast.success('Crazy accurate mapping completed! Form fields updated.');
@@ -1387,6 +1397,16 @@ export default function AdminDashboard() {
                       />
                     </div>
                     <div className="form-group">
+                      <label className="form-label" style={{ fontSize: '0.8rem' }}>Recruiter Email Address (Optional)</label>
+                      <input 
+                        type="email" 
+                        value={newJobRecruiterEmail}
+                        onChange={e => setNewJobRecruiterEmail(e.target.value)}
+                        className="form-input" 
+                        placeholder="e.g. recruiter@company.com"
+                      />
+                    </div>
+                    <div className="form-group">
                       <label className="form-label" style={{ fontSize: '0.8rem' }}>Opportunity Description / Notes *</label>
                       <textarea 
                         value={newJobDesc}
@@ -1429,9 +1449,10 @@ export default function AdminDashboard() {
                       <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '1rem', fontSize: '0.8rem', color: 'var(--text-muted)', whiteSpace: 'pre-line', maxHeight: '180px', overflowY: 'auto', lineHeight: 1.5 }}>
                         {newJobDesc || 'Description, instructions, and notes details will render here in real time...'}
                       </div>
-                      {newJobApplyLink && (
-                        <div style={{ marginTop: '1.25rem', padding: '0.75rem', border: '1px dashed var(--primary)', borderRadius: '6px', fontSize: '0.8rem', color: 'var(--text-main)', backgroundColor: 'rgba(245, 143, 29, 0.02)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                          🔒 Recruiter Contact: <strong>{newJobApplyLink}</strong>
+                      {(newJobApplyLink || newJobRecruiterEmail) && (
+                        <div style={{ marginTop: '1.25rem', padding: '0.75rem', border: '1px dashed var(--primary)', borderRadius: '6px', fontSize: '0.8rem', color: 'var(--text-main)', backgroundColor: 'rgba(245, 143, 29, 0.02)', display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                          {newJobApplyLink && <div>🔒 Recruiter Contact: <strong>{newJobApplyLink}</strong></div>}
+                          {newJobRecruiterEmail && <div>📧 Recruiter Email: <strong>{newJobRecruiterEmail}</strong></div>}
                         </div>
                       )}
                     </div>

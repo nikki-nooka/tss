@@ -385,6 +385,7 @@ export interface Job {
   postedAt: string; // ISO string
   status: 'Active' | 'Closed';
   applyLink?: string; // Mobile number or apply URL link
+  recruiterEmail?: string; // Recruiter email contact
 }
 
 export interface JobApplication {

@@ -345,8 +345,20 @@ export default function OpportunityDetailsPage() {
                       </div>
                     </div>
 
-                    <div style={{ marginTop: '1rem' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '1rem' }}>
                       {renderApplyAction(opportunity.applyLink)}
+                      
+                      {opportunity.recruiterEmail && (
+                        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', borderTop: opportunity.applyLink ? '1px solid var(--border-color)' : 'none', paddingTop: opportunity.applyLink ? '1rem' : '0' }}>
+                          <a 
+                            href={`mailto:${opportunity.recruiterEmail}?subject=Application for ${opportunity.title} at ${opportunity.companyName}`}
+                            className="btn btn-outline"
+                            style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none', padding: '0.75rem 1.75rem' }}
+                          >
+                            📧 Email Recruiter ({opportunity.recruiterEmail})
+                          </a>
+                        </div>
+                      )}
                     </div>
                   </div>
 
