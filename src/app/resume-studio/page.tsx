@@ -164,19 +164,63 @@ export default function ResumeStudio() {
   };
 
   const [resumeData, setResumeData] = useState<ResumeData>(initialData);
+  const [hasTssSession, setHasTssSession] = useState<boolean | null>(null);
 
-  // Load from localStorage on mount (for offline draft persistence)
   useEffect(() => {
-    const saved = localStorage.getItem('tss_resumestudio_draft');
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        setResumeData(parsed);
-      } catch (e) {
-        console.error(e);
-      }
+    if (typeof window !== 'undefined') {
+      const session = localStorage.getItem('tss_candidate_session');
+      setHasTssSession(!!session);
     }
   }, []);
+
+  // Load from localStorage on mount (for offline draft persistence) or pre-fill from profile
+  useEffect(() => {
+    if (hasTssSession) {
+      const saved = localStorage.getItem('tss_resumestudio_draft');
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          setResumeData(parsed);
+        } catch (e) {
+          console.error(e);
+        }
+      } else {
+        // Auto pre-fill from verified profile
+        const session = localStorage.getItem('tss_candidate_session');
+        if (session) {
+          try {
+            const profile = JSON.parse(session);
+            setResumeData(prev => ({
+              ...prev,
+              fullName: profile.fullName || prev.fullName,
+              email: profile.email || prev.email,
+              phone: profile.mobile || prev.phone,
+              location: profile.city && profile.state ? `${profile.city}, ${profile.state}` : prev.location,
+              linkedin: profile.linkedin || prev.linkedin,
+              github: profile.github || prev.github,
+              portfolio: profile.portfolio || prev.portfolio,
+              title: profile.role || prev.title,
+              skillsLanguages: profile.skills || prev.skillsLanguages,
+              education: [
+                {
+                  institution: profile.college || '',
+                  degree: profile.highestQualification || '',
+                  branch: '',
+                  cgpa: '',
+                  startYear: '',
+                  endYear: profile.graduationYear ? String(profile.graduationYear) : '',
+                  location: '',
+                  achievements: ''
+                }
+              ]
+            }));
+          } catch (e) {
+            console.error(e);
+          }
+        }
+      }
+    }
+  }, [hasTssSession]);
 
   // Save changes to localStorage automatically
   const updateResumeState = (updater: (prev: ResumeData) => ResumeData) => {
@@ -199,15 +243,6 @@ export default function ResumeStudio() {
     ].filter(Boolean);
     return list.length > 0 ? list : ['TypeScript', 'React', 'Next.js', 'PostgreSQL', 'AWS', 'Docker', 'Git'];
   };
-
-  const [hasTssSession, setHasTssSession] = useState(false);
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const session = localStorage.getItem('tss_candidate_session');
-      setHasTssSession(!!session);
-    }
-  }, []);
 
   const importTssProfile = () => {
     const session = localStorage.getItem('tss_candidate_session');
@@ -810,6 +845,62 @@ export default function ResumeStudio() {
       </div>
     );
   };
+
+  if (hasTssSession === null) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '80vh', backgroundColor: 'var(--bg-main)' }}>
+        <div style={{ fontStyle: 'italic', fontWeight: 600, color: 'var(--text-muted)' }}>Checking TSS Credentials...</div>
+      </div>
+    );
+  }
+
+  if (!hasTssSession) {
+    return (
+      <div className={styles.lockedContainer}>
+        <div className={styles.lockedCard}>
+          <div className={styles.lockIconOuter}>
+            <Lock size={40} className={styles.lockIconInner} />
+          </div>
+          <span className={styles.premiumTag}>PREMIUM PORTAL ACCESS</span>
+          <h1 className={styles.lockedTitle}>TSS Resume Studio</h1>
+          <p className={styles.lockedDescription}>
+            Create recruiter-approved, ATS-optimized resumes using industry templates. This is a premium workspace reserved exclusively for verified TSS Spot Network members.
+          </p>
+
+          <div className={styles.premiumFeaturesList}>
+            <div className={styles.premiumFeatureItem}>
+              <Sparkles size={16} className={styles.featureIcon} />
+              <span><strong>3 Layout Formats:</strong> FAANG (ATS Times), Modern Startup, and Executive General.</span>
+            </div>
+            <div className={styles.premiumFeatureItem}>
+              <Sparkles size={16} className={styles.featureIcon} />
+              <span><strong>One-Click PDF Generator:</strong> Standard letter margins without watermarks or margins clipping.</span>
+            </div>
+            <div className={styles.premiumFeatureItem}>
+              <Sparkles size={16} className={styles.featureIcon} />
+              <span><strong>TSS Profile Integration:</strong> Pre-fill academic metrics, certificates, and project repositories instantly.</span>
+            </div>
+            <div className={styles.premiumFeatureItem}>
+              <Sparkles size={16} className={styles.featureIcon} />
+              <span><strong>ATS & Readiness Score:</strong> Real-time assessment tools for Big Tech and early-stage startup criteria.</span>
+            </div>
+          </div>
+
+          <div className={styles.lockedActions}>
+            <Link href="/dashboard" className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'center' }}>
+              Sign In to Unlock <ArrowRight size={16} />
+            </Link>
+            <Link href="/register" className="btn btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'center', borderColor: 'var(--primary)', color: 'var(--primary)' }}>
+              Register for Member ID
+            </Link>
+          </div>
+          <Link href="/" style={{ fontSize: '0.8rem', color: 'var(--text-muted)', textDecoration: 'underline', marginTop: '1.5rem', display: 'inline-block' }}>
+            Back to Homepage
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.resumeStudioPage}>
