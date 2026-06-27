@@ -290,7 +290,7 @@ export default function AdminDashboard() {
 
   const handlePostJob = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newJobTitle || !newJobCompany || !newJobLocation || !newJobDesc) {
+    if (!newJobTitle || !newJobCompany || !newJobDesc || !newJobApplyLink) {
       toast.error('Please fill all mandatory fields.');
       return;
     }
