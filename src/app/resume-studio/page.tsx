@@ -1868,13 +1868,11 @@ export default function ResumeStudio() {
               style={{ display: mobileViewTab === 'preview' ? 'flex' : '' }}
             >
               <div className={styles.previewStickyBar}>
-                
-                {/* Floating Preview Toolbar */}
-                <div className={styles.previewToolbar}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                   <select
                     value={selectedTemplate}
                     onChange={(e) => setSelectedTemplate(e.target.value as any)}
-                    style={{ background: 'none', border: 'none', fontStyle: 'italic', fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer', outline: 'none' }}
+                    style={{ background: 'none', border: 'none', fontStyle: 'italic', fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer', outline: 'none', color: 'var(--secondary)' }}
                   >
                     <option value="FAANG">FAANG Template</option>
                     <option value="Startup">Startup Template</option>
@@ -1883,26 +1881,20 @@ export default function ResumeStudio() {
 
                   <div className={styles.toolbarDivider}></div>
 
-                  <button type="button" onClick={() => setZoomScale(p => Math.max(p - 0.1, 0.6))} className="btn btn-outline btn-sm" style={{ padding: '0.2rem 0.4rem' }}>
-                    <ZoomOut size={14} />
-                  </button>
-                  <span className={styles.zoomLabel}>{Math.round(zoomScale * 100)}%</span>
-                  <button type="button" onClick={() => setZoomScale(p => Math.min(p + 0.1, 1.3))} className="btn btn-outline btn-sm" style={{ padding: '0.2rem 0.4rem' }}>
-                    <ZoomIn size={14} />
-                  </button>
-
-                  <div className={styles.toolbarDivider}></div>
-
-                  <button type="button" onClick={handleDownloadPdf} className="btn btn-primary btn-sm" style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                    <Download size={14} /> Download PDF
-                  </button>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <button type="button" onClick={() => setZoomScale(p => Math.max(p - 0.1, 0.6))} className="btn btn-outline btn-sm" style={{ padding: '0.2rem 0.4rem', border: 'none', background: 'none' }}>
+                      <ZoomOut size={16} />
+                    </button>
+                    <span className={styles.zoomLabel}>{Math.round(zoomScale * 100)}%</span>
+                    <button type="button" onClick={() => setZoomScale(p => Math.min(p + 0.1, 1.3))} className="btn btn-outline btn-sm" style={{ padding: '0.2rem 0.4rem', border: 'none', background: 'none' }}>
+                      <ZoomIn size={16} />
+                    </button>
+                  </div>
                 </div>
 
-                {/* Privacy Badge */}
-                <div className={styles.privacyNoticeBadge}>
-                  <Lock size={12} style={{ color: 'var(--success)' }} />
-                  <span>Your draft is stored client-side and is not sent to any remote servers.</span>
-                </div>
+                <button type="button" onClick={handleDownloadPdf} className="btn btn-primary btn-sm" style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', boxShadow: '0 4px 12px rgba(247, 127, 0, 0.2)' }}>
+                  <Download size={14} /> Download PDF
+                </button>
               </div>
 
               {/* Scroll Container for Paper */}
@@ -1921,6 +1913,11 @@ export default function ResumeStudio() {
                 </div>
               </div>
 
+              {/* Privacy Badge */}
+              <div className={styles.privacyNoticeBadge} style={{ marginTop: '2.5rem', marginBottom: '1.5rem', width: '100%', justifyContent: 'center' }}>
+                <Lock size={12} style={{ color: 'var(--success)' }} />
+                <span>Your draft is stored client-side and is not sent to any remote servers.</span>
+              </div>
             </div>
 
           </div>

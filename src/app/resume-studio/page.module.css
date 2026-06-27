@@ -380,7 +380,7 @@
   background-color: #edf2f7;
   background-image: radial-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 0);
   background-size: 16px 16px;
-  padding: 3rem 2.5rem;
+  padding: 0 2.5rem 3rem 2.5rem;
   overflow-y: auto;
   max-height: calc(100vh - 65px);
   display: flex;
@@ -806,26 +806,22 @@
 
 /* 4. PREVIEW CONTROLS & RENDER CONTAINER */
 .previewStickyBar {
-  width: 100%;
+  width: calc(100% + 5rem);
+  margin-left: -2.5rem;
+  margin-right: -2.5rem;
   position: sticky;
-  top: 1rem;
+  top: 0;
   z-index: 10;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1.25rem;
-}
-
-.previewToolbar {
-  background-color: rgba(255, 255, 255, 0.85);
-  border: 1px solid var(--border-color);
+  background-color: rgba(237, 242, 247, 0.96);
   backdrop-filter: blur(12px);
-  padding: 0.5rem 1rem;
-  border-radius: 9999px;
-  box-shadow: var(--shadow-md);
+  border-bottom: 1px solid var(--border-color);
   display: flex;
+  flex-direction: row;
   align-items: center;
-  gap: 0.75rem;
+  justify-content: space-between;
+  padding: 0.75rem 2.5rem;
+  gap: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
 }
 
 .toolbarDivider {
@@ -845,7 +841,7 @@
   overflow-x: auto;
   display: flex;
   justify-content: center;
-  padding: 1.5rem 0;
+  padding: 3rem 0 1.5rem 0;
 }
 
 /* A4 Page layout specifications */
