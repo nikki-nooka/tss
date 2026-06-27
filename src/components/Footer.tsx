@@ -40,6 +40,7 @@ export const Footer: React.FC = () => {
             <Link href="/about" className={styles.link}>About Network</Link>
             <Link href="/register" className={styles.link}>Register</Link>
             <Link href="/dashboard" className={styles.link}>Dashboard</Link>
+            <Link href="/resume-studio" className={styles.link}>Resume Studio</Link>
           </div>
         </div>
 
