@@ -16,10 +16,9 @@ import {
   Phone, 
   ExternalLink,
   ShieldAlert,
-  Send
+  Shield
 } from 'lucide-react';
-import { Navbar } from '@/components/Navbar';
-import { Footer } from '@/components/Footer';
+import styles from '@/app/dashboard/page.module.css';
 import { useToast } from '@/components/Toast';
 
 export default function OpportunityDetailsPage() {
@@ -140,12 +139,10 @@ export default function OpportunityDetailsPage() {
     }
     
     // Check if WhatsApp format or standard mobile number
-    // Clean string of spaces/dashes
     const digitsOnly = cleaned.replace(/[^0-9+]/g, '');
     const isPhone = digitsOnly.length >= 8;
 
     if (isPhone) {
-      // WhatsApp default link is awesome as fallback
       const waLink = `https://wa.me/${digitsOnly.startsWith('+') ? digitsOnly.substring(1) : (digitsOnly.startsWith('91') ? digitsOnly : '91' + digitsOnly)}`;
       return (
         <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
@@ -169,10 +166,9 @@ export default function OpportunityDetailsPage() {
       );
     }
 
-    // Default fallback text representation
     return (
-      <div style={{ padding: '1rem', backgroundColor: 'var(--bg-card-2)', border: '1px solid var(--border-color)', borderRadius: '8px' }}>
-        <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-primary)' }}>
+      <div style={{ padding: '1rem', backgroundColor: 'var(--bg-main)', border: '1px solid var(--border-color)', borderRadius: '8px' }}>
+        <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-main)' }}>
           <strong>Apply Instructions:</strong> {cleaned}
         </p>
       </div>
@@ -180,182 +176,191 @@ export default function OpportunityDetailsPage() {
   };
 
   return (
-    <div style={{ backgroundColor: 'var(--bg-void)', minHeight: '100vh', display: 'flex', flexDirection: 'column', color: 'var(--text-primary)' }}>
-      <Navbar />
+    <div className={styles.dashboardPage}>
+      {/* Header banner */}
+      <header className={styles.dashboardHeader}>
+        <div className="container">
+          <span className={styles.subTitle}>Community Opportunity</span>
+          <h1>{opportunity ? opportunity.title : 'Opportunity Portal'}</h1>
+          <p className={styles.tagline}>
+            {opportunity ? `Shared from the recruiter network of ${opportunity.companyName}` : 'Gated community opportunity for verified candidates.'}
+          </p>
+        </div>
+      </header>
 
-      <main style={{ flex: 1, padding: '5rem 1rem 8rem' }}>
-        <div className="container" style={{ maxWidth: '800px', margin: '0 auto' }}>
+      <section className={styles.dashboardContent}>
+        <div className="container" style={{ maxWidth: '720px', margin: '0 auto', padding: '0 1rem' }}>
           
           {/* Back button */}
-          <Link 
-            href="/dashboard" 
-            style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-secondary)', textDecoration: 'none', fontSize: '0.9rem', marginBottom: '2rem' }}
-          >
-            <ArrowLeft size={16} /> Back to dashboard
-          </Link>
+          <div style={{ marginBottom: '1.5rem' }}>
+            <Link 
+              href="/dashboard" 
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-muted)', textDecoration: 'none', fontSize: '0.85rem' }}
+            >
+              <ArrowLeft size={14} /> Back to Dashboard
+            </Link>
+          </div>
 
           {loading ? (
-            <div style={{ textAlign: 'center', padding: '6rem 0', color: 'var(--text-secondary)' }}>
-              <div className="loading-spinner" style={{ marginBottom: '1rem' }} />
-              Loading opportunity details...
-            </div>
+             <div style={{ textAlign: 'center', padding: '4rem 0', color: 'var(--text-muted)' }}>
+               Loading opportunity parameters...
+             </div>
           ) : !opportunity ? (
-            <div style={{ textAlign: 'center', padding: '6rem 2rem', border: '1px dashed var(--border-color)', borderRadius: '16px' }}>
-              <ShieldAlert size={48} style={{ color: 'var(--accent)', marginBottom: '1.5rem' }} />
-              <h3>Opportunity Not Found</h3>
-              <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', maxWidth: '400px', margin: '0.5rem auto 1.5rem' }}>
-                This link may have expired, or the opportunity has been closed by the community administration.
-              </p>
-              <Link href="/dashboard" className="btn btn-primary btn-sm">
-                Return to Dashboard
-              </Link>
-            </div>
+             <div className={styles.loginCard} style={{ textAlign: 'center', maxWidth: '100%' }}>
+               <ShieldAlert size={40} style={{ color: 'var(--secondary)', marginBottom: '1rem' }} />
+               <h2>Opportunity Not Found</h2>
+               <p>This opening may have closed, or the link has expired.</p>
+               <Link href="/dashboard" className="btn btn-primary" style={{ marginTop: '1.25rem', display: 'inline-block' }}>
+                 Return to Dashboard
+               </Link>
+             </div>
           ) : (
             <div>
-              {/* HEADER DETAILS PANEL */}
-              <div className="premium-card" style={{ padding: '2.5rem', backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '16px', marginBottom: '2rem', position: 'relative' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.5rem' }}>
+              
+              {/* 1. Opportunity Metadata Card */}
+              <div className={styles.loginCard} style={{ maxWidth: '100%', marginBottom: '1.5rem', boxShadow: 'none', border: '1px solid var(--border-color)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
                   <div>
-                    <span style={{ fontSize: '0.8rem', fontFamily: 'Space Mono', color: 'var(--accent)', fontWeight: 600, display: 'block', textTransform: 'uppercase', marginBottom: '0.5rem' }}>
-                      {opportunity.type} OPPORTUNITY
-                    </span>
-                    <h1 style={{ fontSize: '1.8rem', fontWeight: 800, margin: 0, color: 'var(--text-primary)', lineHeight: 1.2 }}>
+                    <h3 style={{ fontSize: '1.45rem', fontWeight: 800, color: 'var(--text-main)', margin: 0, letterSpacing: '-0.02em' }}>
                       {opportunity.title}
-                    </h1>
-                    <span style={{ fontSize: '1.1rem', color: 'var(--primary-pale)', fontWeight: 700, marginTop: '0.25rem', display: 'block' }}>
+                    </h3>
+                    <span style={{ fontSize: '1rem', color: 'var(--primary)', fontWeight: 700, marginTop: '0.25rem', display: 'block' }}>
                       {opportunity.companyName}
                     </span>
                   </div>
-
                   <button 
                     onClick={handleCopyLink}
-                    className="btn btn-outline btn-sm" 
-                    style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem' }}
-                    title="Copy opportunity link to share"
+                    className="btn btn-outline btn-sm"
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}
                   >
-                    <Share2 size={14} /> Share Link
+                    <Share2 size={12} /> Share Link
                   </button>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '1rem', borderTop: '1px solid rgba(255,255,255,0.04)', paddingTop: '1.25rem', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <MapPin size={16} style={{ color: 'var(--accent)' }} /> {opportunity.location}
-                  </div>
+                <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap', fontSize: '0.85rem', color: 'var(--text-muted)', borderTop: '1px solid var(--border-color)', paddingTop: '1rem', marginTop: '1.25rem' }}>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+                    <MapPin size={14} /> {opportunity.location}
+                  </span>
                   {opportunity.salaryRange && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                      <Coins size={16} style={{ color: 'var(--accent)' }} /> {opportunity.salaryRange}
-                    </div>
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+                      <Coins size={14} /> {opportunity.salaryRange}
+                    </span>
                   )}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <Calendar size={16} style={{ color: 'var(--accent)' }} /> Posted {new Date(opportunity.postedAt).toLocaleDateString()}
-                  </div>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+                    <Calendar size={14} /> Posted {new Date(opportunity.postedAt).toLocaleDateString()}
+                  </span>
                 </div>
               </div>
 
-              {/* GATE CONTAINER */}
+              {/* 2. Authentication Gate: NOT Signed In */}
               {!profile ? (
-                /* GATE A: Candidate Login REQUIRED */
-                <div className="premium-card" style={{ padding: '3rem 2rem', backgroundColor: 'rgba(13,17,32,0.7)', border: '1px solid rgba(245,158,11,0.2)', borderRadius: '16px', textAlign: 'center', backdropFilter: 'blur(8px)', boxShadow: '0 20px 40px rgba(0,0,0,0.5)' }}>
-                  <Lock size={44} style={{ color: 'var(--accent)', marginBottom: '1.5rem', animation: 'pulse 2s infinite' }} />
-                  <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '0.5rem' }}>TSS Community Membership Lock</h3>
-                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', maxWidth: '480px', margin: '0 auto 2rem', lineHeight: 1.5 }}>
-                    This opportunity details, compensation ranges, and contact parameters are exclusive to verified TSS community members. Authenticate below to unlock.
-                  </p>
+                <div className={styles.loginCard} style={{ maxWidth: '100%' }}>
+                  <div className={styles.loginHeader} style={{ marginBottom: '2rem' }}>
+                    <Shield className={styles.lockIcon} size={40} style={{ color: 'var(--primary)', marginBottom: '0.75rem' }} />
+                    <h2>TSS Member Sign In</h2>
+                    <p style={{ margin: 0 }}>This community opportunity is exclusive to verified members. Enter your Member ID and Email to view recruiter contacts.</p>
+                  </div>
 
-                  <form onSubmit={handleInlineLogin} style={{ maxWidth: '400px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '1rem', textAlign: 'left' }}>
-                    <div className="form-group">
-                      <label className="form-label" style={{ fontSize: '0.75rem' }}>Email Address</label>
-                      <input 
-                        type="email" 
-                        value={emailInput}
-                        onChange={e => setEmailInput(e.target.value)}
-                        placeholder="e.g. name@domain.com"
-                        className="form-input" 
-                        required 
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label className="form-label" style={{ fontSize: '0.75rem' }}>TSS Member ID</label>
+                  <form onSubmit={handleInlineLogin} className={styles.loginForm}>
+                    <div className={styles.formField}>
+                      <label className={styles.formLabel}>TSS Member ID</label>
                       <input 
                         type="text" 
+                        placeholder="e.g. TSS-ST-240626001" 
                         value={memberIdInput}
-                        onChange={e => setMemberIdInput(e.target.value)}
-                        placeholder="e.g. TSS-ST-2606..."
-                        className="form-input" 
-                        required 
+                        onChange={(e) => setMemberIdInput(e.target.value)}
+                        className={styles.formInput}
+                        required
                       />
                     </div>
-                    <button type="submit" disabled={isLoggingIn} className="btn btn-primary" style={{ width: '100%', justifyContent: 'center', marginTop: '0.5rem' }}>
-                      {isLoggingIn ? 'Verifying Credentials...' : 'Unlock Opportunity'}
+
+                    <div className={styles.formField}>
+                      <label className={styles.formLabel}>Registered Email Address</label>
+                      <input 
+                        type="email" 
+                        placeholder="name@college.com" 
+                        value={emailInput}
+                        onChange={(e) => setEmailInput(e.target.value)}
+                        className={styles.formInput}
+                        required
+                      />
+                    </div>
+
+                    <button type="submit" disabled={isLoggingIn} className="btn btn-primary" style={{ width: '100%' }}>
+                      {isLoggingIn ? 'Verifying Member ID...' : 'Verify Session & Unlock'}
                     </button>
                   </form>
 
-                  <div style={{ marginTop: '2rem', borderTop: '1px solid rgba(255,255,255,0.03)', paddingTop: '1.5rem', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-                    Don't have a Member ID? <Link href="/register" style={{ color: 'var(--accent)', textDecoration: 'underline' }}>Register now for free verification</Link>
+                  <div className={styles.loginHelp}>
+                    <p>
+                      Don't have a Member ID? <Link href="/register">Register here</Link> or <Link href="/status">check status</Link>.
+                    </p>
                   </div>
                 </div>
               ) : profile.status !== 'Verified' ? (
-                /* GATE B: Logged in, but NOT Verified */
-                <div className="premium-card" style={{ padding: '3.5rem 2rem', backgroundColor: 'rgba(13,17,32,0.8)', border: '1px solid rgba(245,158,11,0.25)', borderRadius: '16px', textAlign: 'center' }}>
-                  <Clock size={48} style={{ color: 'var(--accent)', marginBottom: '1.5rem' }} />
-                  <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '0.5rem' }}>Verification Review Pending</h3>
-                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', maxWidth: '500px', margin: '0 auto 1.5rem', lineHeight: 1.6 }}>
-                    Hello, <strong>{profile.fullName}</strong>. Your session is active, but your TSS Member ID status is currently <strong>{profile.status}</strong>.
+                /* 3. Verification Gate: Signed In, NOT Verified */
+                <div className={styles.loginCard} style={{ maxWidth: '100%', textAlign: 'center' }}>
+                  <Clock size={40} style={{ color: 'var(--primary)', marginBottom: '1rem' }} />
+                  <h2>ID Verification Review Pending</h2>
+                  <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '1.5rem', lineHeight: 1.5 }}>
+                    Hello, <strong>{profile.fullName}</strong>. Your session is active, but your TSS Member ID (<code>{profile.memberId}</code>) is currently <strong>{profile.status}</strong>.
                   </p>
-                  <div style={{ backgroundColor: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', padding: '1.25rem', borderRadius: '8px', maxWidth: '480px', margin: '0 auto', fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
-                    Community contact link access unlocks automatically as soon as an administrator vets and approves your registration profile. Please check back in a short while.
+                  <div style={{ backgroundColor: 'var(--bg-main)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '1.25rem', fontSize: '0.8rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>
+                    This opportunity's apply links and contact parameters will automatically unlock here once the team approves your verification.
                   </div>
                 </div>
               ) : (
-                /* CONTENT: Logged in & Verified (Success) */
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                /* 4. CONTENT: Signed In & Verified */
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                   
-                  {/* Job Details Card */}
-                  <div className="premium-card" style={{ padding: '2.5rem', backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '16px' }}>
-                    <h3 style={{ fontSize: '1.25rem', fontWeight: 800, marginBottom: '1.25rem', color: 'var(--text-primary)' }}>Role Description</h3>
-                    <p style={{ fontSize: '0.925rem', color: 'var(--text-secondary)', lineHeight: 1.7, whiteSpace: 'pre-line', margin: 0 }}>
+                  {/* Description & Requirements */}
+                  <div className={styles.loginCard} style={{ maxWidth: '100%', boxShadow: 'none', border: '1px solid var(--border-color)' }}>
+                    <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-main)', marginBottom: '0.75rem' }}>
+                      Role Description
+                    </h3>
+                    <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', lineHeight: 1.6, whiteSpace: 'pre-line', margin: 0 }}>
                       {opportunity.description}
                     </p>
 
                     {opportunity.requirements && opportunity.requirements.length > 0 && (
-                      <div style={{ marginTop: '2.5rem' }}>
-                        <h3 style={{ fontSize: '1.25rem', fontWeight: 800, marginBottom: '1.25rem', color: 'var(--text-primary)' }}>Skills & Requirements</h3>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '0.75rem' }}>
+                      <div style={{ marginTop: '1.75rem' }}>
+                        <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-main)', marginBottom: '0.75rem' }}>
+                          Requirements & Skills
+                        </h3>
+                        <ul style={{ paddingLeft: '1.25rem', margin: 0, display: 'flex', flexDirection: 'column', gap: '0.5rem', listStyleType: 'disc', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
                           {opportunity.requirements.map((req: string, i: number) => (
-                            <div key={i} style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-start', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                              <CheckCircle2 size={16} style={{ color: 'var(--green-light)', flexShrink: 0, marginTop: '0.1rem' }} />
-                              <span>{req}</span>
-                            </div>
+                            <li key={i}>{req}</li>
                           ))}
-                        </div>
-                      </div>
+                        </ul>
+                       </div>
                     )}
                   </div>
 
-                  {/* Apply Actions Lock Unlock */}
-                  <div className="premium-card" style={{ padding: '2rem', backgroundColor: 'rgba(5, 150, 105, 0.04)', border: '1px dashed rgba(5, 150, 105, 0.25)', borderRadius: '16px' }}>
-                    <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
-                      <CheckCircle2 size={24} style={{ color: 'var(--green-light)', flexShrink: 0 }} />
+                  {/* Apply CTA Container */}
+                  <div className={styles.loginCard} style={{ maxWidth: '100%', border: '1px dashed var(--primary)', backgroundColor: 'rgba(245, 143, 29, 0.03)', boxShadow: 'none' }}>
+                    <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start', marginBottom: '1.25rem' }}>
+                      <CheckCircle2 size={20} style={{ color: 'var(--success)', flexShrink: 0, marginTop: '0.15rem' }} />
                       <div>
-                        <h4 style={{ margin: 0, fontWeight: 700, fontSize: '1rem', color: 'var(--text-primary)' }}>TSS Verified Member Access Active</h4>
-                        <p style={{ margin: '0.25rem 0 0', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-                          As a verified member, you can connect directly with the hiring team using the contacts below.
-                        </p>
+                        <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700, color: 'var(--text-main)' }}>TSS Verified Member Access Active</h4>
+                        <p style={{ margin: '0.15rem 0 0', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                          You can now reach out or apply to this opportunity directly using the contact pathways below:
+                         </p>
                       </div>
                     </div>
 
-                    {renderApplyAction(opportunity.applyLink)}
+                    <div style={{ marginTop: '1rem' }}>
+                      {renderApplyAction(opportunity.applyLink)}
+                    </div>
                   </div>
 
                 </div>
               )}
+
             </div>
           )}
 
         </div>
-      </main>
-
-      <Footer />
+      </section>
     </div>
   );
 }
