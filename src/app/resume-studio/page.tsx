@@ -170,6 +170,13 @@ export default function ResumeStudio() {
     if (typeof window !== 'undefined') {
       const session = localStorage.getItem('tss_candidate_session');
       setHasTssSession(!!session);
+
+      // Auto-set mobile zoom scale depending on device width
+      if (window.innerWidth < 768) {
+        setZoomScale(0.45);
+      } else if (window.innerWidth < 1024) {
+        setZoomScale(0.7);
+      }
     }
   }, []);
 
@@ -1096,8 +1103,7 @@ export default function ResumeStudio() {
             
             {/* Left Panel: Steps Form */}
             <div 
-              className={styles.formPanel}
-              style={{ display: mobileViewTab === 'form' ? 'block' : 'none' }}
+              className={`${styles.formPanel} ${mobileViewTab === 'preview' ? styles.formPanelMobileHidden : ''}`}
             >
               {hasTssSession && (
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#e0f2fe', border: '1px solid #bae6fd', borderRadius: '12px', padding: '1rem', marginBottom: '1.5rem', gap: '0.75rem' }}>
@@ -1955,8 +1961,7 @@ export default function ResumeStudio() {
 
             {/* Right Panel: Live Preview Panel */}
             <div 
-              className={styles.previewPanel}
-              style={{ display: mobileViewTab === 'preview' ? 'flex' : '' }}
+              className={`${styles.previewPanel} ${mobileViewTab === 'form' ? styles.previewPanelMobileHidden : ''}`}
             >
               <div className={styles.previewStickyBar}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
