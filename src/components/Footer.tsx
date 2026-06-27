@@ -39,7 +39,6 @@ export const Footer: React.FC = () => {
             <Link href="/" className={styles.link}>Home</Link>
             <Link href="/about" className={styles.link}>About Network</Link>
             <Link href="/register" className={styles.link}>Register</Link>
-            <Link href="/status" className={styles.link}>Status Check</Link>
           </div>
         </div>
 

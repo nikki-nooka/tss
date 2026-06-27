@@ -384,11 +384,8 @@ export default function Home() {
                   </button>
                 </form>
                 <p className={styles.checkStatusInfo}>
-                  Don't have your ID yet? <Link href="/status">Check registration status</Link> or use the demo test ID: <strong style={{color: 'var(--primary)', cursor: 'pointer'}} onClick={() => setMemberIdInput('TSS-ST-010626001')}>TSS-ST-010626001</strong>.
+                  Access requires an active TSS Member ID. Please check your verification approval email or log in to your dashboard to retrieve your ID.
                 </p>
-                <button onClick={handleUnlockDemo} className={styles.demoBypassBtn}>
-                  [Demo Mode: Fast Unlock]
-                </button>
               </div>
             ) : (
               <div className={styles.unlockedContent}>

@@ -107,8 +107,49 @@ export default function CandidateDashboard() {
   const [buildTeamLinks, setBuildTeamLinks] = useState('');
   const [isSubmittingBuild, setIsSubmittingBuild] = useState(false);
 
-  // Check login on load
+  // Check login on load & process query credentials (for direct validation email links)
   useEffect(() => {
+    // 1. Check if URL has memberId & email parameters for auto-login
+    const params = new URLSearchParams(window.location.search);
+    const urlMemberId = params.get('memberId');
+    const urlEmail = params.get('email');
+
+    if (urlMemberId && urlEmail) {
+      const cleanId = urlMemberId.trim().toUpperCase();
+      const cleanEmail = urlEmail.trim().toLowerCase();
+      
+      setIsAuthenticating(true);
+      fetch('/api/auth/candidate-login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ memberId: cleanId, email: cleanEmail })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          toast.success('Successfully signed in via validation link!');
+          localStorage.setItem('tss_candidate_session', JSON.stringify(data.candidate));
+          setProfile(data.candidate);
+          initializeSettings(data.candidate);
+          
+          // Clean URL parameters without reloading
+          const newUrl = window.location.pathname;
+          window.history.replaceState({}, '', newUrl);
+        } else {
+          toast.error(data.error || 'Failed to authenticate via link.');
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        toast.error('Network connection error.');
+      })
+      .finally(() => {
+        setIsAuthenticating(false);
+      });
+      return;
+    }
+
+    // 2. Fallback to existing localStorage session
     const savedSession = localStorage.getItem('tss_candidate_session');
     if (savedSession) {
       try {
