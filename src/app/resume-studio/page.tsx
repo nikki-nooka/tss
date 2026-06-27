@@ -91,6 +91,7 @@ interface ResumeData {
   skillsLanguages: string[];
   skillsFrameworks: string[];
   skillsDatabases: string[];
+  skillsCloud: string[];
   skillsTools: string[];
   skillsSoft: string[];
   customSkills: string[];
@@ -147,6 +148,7 @@ export default function ResumeStudio() {
     skillsLanguages: [],
     skillsFrameworks: [],
     skillsDatabases: [],
+    skillsCloud: [],
     skillsTools: [],
     skillsSoft: [],
     customSkills: [],
@@ -183,6 +185,67 @@ export default function ResumeStudio() {
       localStorage.setItem('tss_resumestudio_draft', JSON.stringify(next));
       return next;
     });
+  };
+
+  const getAllSkills = () => {
+    const list = [
+      ...(resumeData.skillsLanguages || []),
+      ...(resumeData.skillsFrameworks || []),
+      ...(resumeData.skillsDatabases || []),
+      ...(resumeData.skillsCloud || []),
+      ...(resumeData.skillsTools || []),
+      ...(resumeData.skillsSoft || []),
+      ...(resumeData.customSkills || [])
+    ].filter(Boolean);
+    return list.length > 0 ? list : ['TypeScript', 'React', 'Next.js', 'PostgreSQL', 'AWS', 'Docker', 'Git'];
+  };
+
+  const [hasTssSession, setHasTssSession] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const session = localStorage.getItem('tss_candidate_session');
+      setHasTssSession(!!session);
+    }
+  }, []);
+
+  const importTssProfile = () => {
+    const session = localStorage.getItem('tss_candidate_session');
+    if (!session) {
+      toast.error('No TSS candidate session found. Please sign in via the Dashboard first.');
+      return;
+    }
+    try {
+      const profile = JSON.parse(session);
+      updateResumeState((prev) => ({
+        ...prev,
+        fullName: profile.fullName || prev.fullName,
+        email: profile.email || prev.email,
+        phone: profile.mobile || prev.phone,
+        location: profile.city && profile.state ? `${profile.city}, ${profile.state}` : prev.location,
+        linkedin: profile.linkedin || prev.linkedin,
+        github: profile.github || prev.github,
+        portfolio: profile.portfolio || prev.portfolio,
+        title: profile.role || prev.title,
+        skillsLanguages: profile.skills || prev.skillsLanguages,
+        education: [
+          {
+            institution: profile.college || '',
+            degree: profile.highestQualification || '',
+            branch: '',
+            cgpa: '',
+            startYear: '',
+            endYear: profile.graduationYear ? String(profile.graduationYear) : '',
+            location: '',
+            achievements: ''
+          }
+        ]
+      }));
+      toast.success('Successfully imported verified TSS candidate profile!');
+    } catch (e) {
+      console.error(e);
+      toast.error('Failed to parse TSS profile session.');
+    }
   };
 
   // Helper field handlers
@@ -546,13 +609,12 @@ export default function ResumeStudio() {
           </div>
         )}
 
-        {(resumeData.skillsLanguages.length > 0 || resumeData.customSkills.length > 0) && (
-          <div className={styles.faangSectionBlock}>
-            <div className={styles.faangSectionTitle}>SKILLS & CERTIFICATIONS</div>
-            <div className={styles.faangSkillsBlock}>
-              <strong>Technical Skills: </strong>
-              {[...resumeData.skillsLanguages, ...resumeData.customSkills].join(', ') || 'React, Node, Git, SQL'}
-            </div>
+        <div className={styles.faangSectionBlock}>
+          <div className={styles.faangSectionTitle}>SKILLS & CERTIFICATIONS</div>
+          <div className={styles.faangSkillsBlock}>
+            <strong>Technical Skills: </strong>
+            {getAllSkills().join(', ')}
+          </div>
             {resumeData.certifications.length > 0 && resumeData.certifications[0].name && (
               <div className={styles.faangSkillsBlock}>
                 <strong>Certifications: </strong>
@@ -560,9 +622,8 @@ export default function ResumeStudio() {
               </div>
             )}
           </div>
-        )}
-      </div>
-    );
+        </div>
+      );
   };
 
   const renderStartupTemplate = () => {
@@ -592,9 +653,9 @@ export default function ResumeStudio() {
             <div className={styles.startupSection}>
               <div className={styles.startupSectionTitle}>STACK</div>
               <div className={styles.startupSkillTags}>
-                {[...resumeData.skillsLanguages, ...resumeData.customSkills].map((skill, sidx) => (
+                {getAllSkills().map((skill, sidx) => (
                   <span key={sidx} className={styles.startupSkillTag}>{skill}</span>
-                )) || <span className={styles.startupSkillTag}>Next.js</span>}
+                ))}
               </div>
             </div>
 
@@ -733,6 +794,14 @@ export default function ResumeStudio() {
             ))}
           </div>
         )}
+
+        <div style={{ marginBottom: '1.25rem' }}>
+          <div className={styles.proSectionTitle}>Core Competencies & Skills</div>
+          <p style={{ margin: '0', fontSize: '9.5pt' }}>
+            <strong>Technical: </strong>
+            {getAllSkills().join(', ')}
+          </p>
+        </div>
       </div>
     );
   };
@@ -934,6 +1003,24 @@ export default function ResumeStudio() {
               className={styles.formPanel}
               style={{ display: mobileViewTab === 'form' ? 'block' : 'none' }}
             >
+              {hasTssSession && (
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#e0f2fe', border: '1px solid #bae6fd', borderRadius: '12px', padding: '1rem', marginBottom: '1.5rem', gap: '0.75rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#0369a1', fontSize: '0.85rem' }}>
+                    <Sparkles size={18} style={{ flexShrink: 0 }} />
+                    <div>
+                      <strong>TSS Candidate Profile Detected:</strong> You can automatically import your verified name, contacts, skills, and academic history.
+                    </div>
+                  </div>
+                  <button 
+                    type="button" 
+                    onClick={importTssProfile}
+                    className="btn btn-primary btn-sm"
+                    style={{ whiteSpace: 'nowrap', backgroundColor: '#0284c7', borderColor: '#0284c7' }}
+                  >
+                    Import Profile
+                  </button>
+                </div>
+              )}
               
               {/* Step tracker node map */}
               <div className={styles.stepTracker}>
@@ -1397,7 +1484,7 @@ export default function ResumeStudio() {
                       <input
                         type="text"
                         placeholder="TypeScript, JavaScript, Python, Java"
-                        value={resumeData.skillsLanguages.join(', ')}
+                        value={resumeData.skillsLanguages?.join(', ') || ''}
                         onChange={(e) => handleFieldChange('skillsLanguages', e.target.value.split(',').map(s => s.trim()).filter(Boolean))}
                         className={styles.formInput}
                       />
@@ -1408,8 +1495,52 @@ export default function ResumeStudio() {
                       <input
                         type="text"
                         placeholder="React, Next.js, Node.js, Express"
-                        value={resumeData.skillsFrameworks.join(', ')}
+                        value={resumeData.skillsFrameworks?.join(', ') || ''}
                         onChange={(e) => handleFieldChange('skillsFrameworks', e.target.value.split(',').map(s => s.trim()).filter(Boolean))}
+                        className={styles.formInput}
+                      />
+                    </div>
+
+                    <div className={styles.formField}>
+                      <label className={styles.formLabel}>Databases</label>
+                      <input
+                        type="text"
+                        placeholder="PostgreSQL, MongoDB, Redis, MySQL"
+                        value={resumeData.skillsDatabases?.join(', ') || ''}
+                        onChange={(e) => handleFieldChange('skillsDatabases', e.target.value.split(',').map(s => s.trim()).filter(Boolean))}
+                        className={styles.formInput}
+                      />
+                    </div>
+
+                    <div className={styles.formField}>
+                      <label className={styles.formLabel}>Cloud Platforms</label>
+                      <input
+                        type="text"
+                        placeholder="AWS, GCP, Vercel, Firebase"
+                        value={resumeData.skillsCloud?.join(', ') || ''}
+                        onChange={(e) => handleFieldChange('skillsCloud', e.target.value.split(',').map(s => s.trim()).filter(Boolean))}
+                        className={styles.formInput}
+                      />
+                    </div>
+
+                    <div className={styles.formField}>
+                      <label className={styles.formLabel}>Developer Tools & Orchestrations</label>
+                      <input
+                        type="text"
+                        placeholder="Git, Docker, Kubernetes, Webpack"
+                        value={resumeData.skillsTools?.join(', ') || ''}
+                        onChange={(e) => handleFieldChange('skillsTools', e.target.value.split(',').map(s => s.trim()).filter(Boolean))}
+                        className={styles.formInput}
+                      />
+                    </div>
+
+                    <div className={styles.formField}>
+                      <label className={styles.formLabel}>Soft Skills</label>
+                      <input
+                        type="text"
+                        placeholder="Agile, Leadership, Technical Writing, Mentoring"
+                        value={resumeData.skillsSoft?.join(', ') || ''}
+                        onChange={(e) => handleFieldChange('skillsSoft', e.target.value.split(',').map(s => s.trim()).filter(Boolean))}
                         className={styles.formInput}
                       />
                     </div>
@@ -1419,7 +1550,7 @@ export default function ResumeStudio() {
                       <div className={styles.skillInputWrapper}>
                         <input
                           type="text"
-                          placeholder="e.g. AWS, Docker, Kubernetes"
+                          placeholder="e.g. CI/CD, GraphQL, Figma"
                           value={skillInput}
                           onChange={(e) => setSkillInput(e.target.value)}
                           onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addCustomSkill())}
@@ -1428,7 +1559,7 @@ export default function ResumeStudio() {
                         <button type="button" onClick={addCustomSkill} className="btn btn-primary">+</button>
                       </div>
                       <div className={styles.skillChipsGrid}>
-                        {resumeData.customSkills.map((tag, sidx) => (
+                        {resumeData.customSkills?.map((tag, sidx) => (
                           <span key={sidx} className={styles.skillChip}>
                             {tag}
                             <button type="button" onClick={() => removeCustomSkill(sidx)} className={styles.removeChipBtn}>&times;</button>
@@ -1770,11 +1901,14 @@ export default function ResumeStudio() {
               </div>
 
               {/* Scroll Container for Paper */}
-              <div className={styles.previewContainerScroll}>
+              <div 
+                className={styles.previewContainerScroll}
+                style={{ height: `${1130 * zoomScale}px`, overflow: 'visible' }}
+              >
                 <div 
                   id="tss-resume-preview" 
                   className={styles.resumePaper}
-                  style={{ transform: `scale(${zoomScale})` }}
+                  style={{ transform: `scale(${zoomScale})`, transformOrigin: 'top center' }}
                 >
                   {selectedTemplate === 'FAANG' && renderFaangTemplate()}
                   {selectedTemplate === 'Startup' && renderStartupTemplate()}
