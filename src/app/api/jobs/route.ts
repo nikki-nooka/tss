@@ -5,7 +5,17 @@ import { getJobs, getCandidateById, insertApplication, getApplications, JobAppli
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
+    const jobId = searchParams.get('id') || '';
     const candidateId = searchParams.get('candidateId') || '';
+
+    if (jobId) {
+      const allJobs = await getJobs();
+      const job = allJobs.find(j => j.id === jobId);
+      if (!job) {
+        return NextResponse.json({ error: 'Opportunity not found' }, { status: 404 });
+      }
+      return NextResponse.json({ job });
+    }
 
     const allJobs = await getJobs();
     const activeJobs = allJobs.filter(j => j.status === 'Active');

@@ -27,7 +27,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { title, companyName, type, location, salaryRange, description, requirements } = body;
+    const { title, companyName, type, location, salaryRange, description, requirements, applyLink } = body;
 
     if (!title || !companyName || !type || !location || !description) {
       return NextResponse.json({ error: 'Missing required job parameters' }, { status: 400 });
@@ -43,7 +43,8 @@ export async function POST(request: Request) {
       description,
       requirements: Array.isArray(requirements) ? requirements : (requirements ? [requirements] : []),
       postedAt: new Date().toISOString(),
-      status: 'Active'
+      status: 'Active',
+      applyLink: applyLink || ''
     };
 
     await insertJob(newJob);

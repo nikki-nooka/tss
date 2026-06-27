@@ -384,6 +384,7 @@ export interface Job {
   salaryRange?: string;
   postedAt: string; // ISO string
   status: 'Active' | 'Closed';
+  applyLink?: string; // Mobile number or apply URL link
 }
 
 export interface JobApplication {

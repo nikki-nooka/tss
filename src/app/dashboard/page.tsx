@@ -1654,22 +1654,15 @@ export default function CandidateDashboard() {
                             )}
 
                             <div>
-                              {job.appliedStatus ? (
-                                <button disabled style={{ backgroundColor: 'rgba(5,150,105,0.1)', border: '1px solid rgba(5,150,105,0.2)', color: 'var(--green-light)', padding: '0.55rem 1.25rem', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
-                                  <CheckCircle2 size={14} /> Applied ({job.appliedStatus})
-                                </button>
-                              ) : (
-                                <button 
-                                  onClick={() => setSelectedJobForApply(job)}
-                                  disabled={profile.status !== 'Verified'}
-                                  className="btn btn-primary"
-                                  style={{ padding: '0.55rem 1.25rem', borderRadius: '8px', fontSize: '0.85rem' }}
-                                >
-                                  Apply Direct
-                                </button>
-                              )}
+                               <Link 
+                                 href={`/opportunities/${job.id}`}
+                                 className="btn btn-primary"
+                                 style={{ padding: '0.55rem 1.25rem', borderRadius: '8px', fontSize: '0.85rem', display: 'inline-block', textAlign: 'center' }}
+                               >
+                                 View Opportunity →
+                               </Link>
+                             </div>
                             </div>
-                          </div>
                         ))}
                       </div>
                     )}

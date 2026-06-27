@@ -29,7 +29,8 @@ import {
   RefreshCw,
   TrendingUp,
   FileSpreadsheet,
-  X
+  X,
+  Share2
 } from 'lucide-react';
 import { useToast } from '@/components/Toast';
 import { Candidate, ForwardLog, ContactMessage, AdminActivityLog } from '@/lib/db';
@@ -117,6 +118,7 @@ export default function AdminDashboard() {
   const [newJobType, setNewJobType] = useState<'Full-time' | 'Part-time' | 'Internship' | 'Contract'>('Full-time');
   const [newJobLocation, setNewJobLocation] = useState('');
   const [newJobSalary, setNewJobSalary] = useState('');
+  const [newJobApplyLink, setNewJobApplyLink] = useState('');
   const [newJobDesc, setNewJobDesc] = useState('');
   const [newJobReqs, setNewJobReqs] = useState('');
   const [isPostingJob, setIsPostingJob] = useState(false);
@@ -306,7 +308,8 @@ export default function AdminDashboard() {
           location: newJobLocation,
           salaryRange: newJobSalary,
           description: newJobDesc,
-          requirements: requirementsArray
+          requirements: requirementsArray,
+          applyLink: newJobApplyLink
         })
       });
       const data = await res.json();
@@ -317,6 +320,7 @@ export default function AdminDashboard() {
         setNewJobType('Full-time');
         setNewJobLocation('');
         setNewJobSalary('');
+        setNewJobApplyLink('');
         setNewJobDesc('');
         setNewJobReqs('');
         fetchAdminJobsData();
@@ -528,7 +532,28 @@ export default function AdminDashboard() {
       .filter(l => !l.toLowerCase().includes('apply here') && !l.toLowerCase().includes('click link'))
       .join('\n');
 
-    return { title, company, type, location, salary, requirements, description };
+    let applyLink = '';
+    const linkMatch = cleanText.match(/(?:apply link|link|apply url|website|form link|apply|url):\s*(https?:\/\/[^\s]+)/i);
+    if (linkMatch) {
+      applyLink = linkMatch[1].trim();
+    } else {
+      const phoneMatch = cleanText.match(/(?:phone|mobile|whatsapp|contact|call|number):\s*([+0-9\s\-]{8,15})/i);
+      if (phoneMatch) {
+        applyLink = phoneMatch[1].trim();
+      } else {
+        const urlMatch = cleanText.match(/https?:\/\/[^\s]+/i);
+        if (urlMatch) {
+          applyLink = urlMatch[0].trim();
+        } else {
+          const numMatch = cleanText.match(/\b[789]\d{9}\b/);
+          if (numMatch) {
+            applyLink = numMatch[0].trim();
+          }
+        }
+      }
+    }
+
+    return { title, company, type, location, salary, requirements, description, applyLink };
   };
 
   const handleParseJD = () => {
@@ -542,6 +567,7 @@ export default function AdminDashboard() {
     if (parsed.type) setNewJobType(parsed.type);
     if (parsed.location) setNewJobLocation(parsed.location);
     if (parsed.salary) setNewJobSalary(parsed.salary);
+    if (parsed.applyLink) setNewJobApplyLink(parsed.applyLink);
     if (parsed.requirements.length > 0) setNewJobReqs(parsed.requirements.join(', '));
     if (parsed.description) setNewJobDesc(parsed.description);
     toast.success('Crazy accurate mapping completed! Form fields updated.');
@@ -1377,6 +1403,17 @@ export default function AdminDashboard() {
                       />
                     </div>
                     <div className="form-group">
+                      <label className="form-label" style={{ fontSize: '0.8rem' }}>Recruiter Mobile Number OR Apply URL Link *</label>
+                      <input 
+                        type="text" 
+                        value={newJobApplyLink}
+                        onChange={e => setNewJobApplyLink(e.target.value)}
+                        className="form-input" 
+                        placeholder="e.g. +919876543210 or https://careers.company.com"
+                        required
+                      />
+                    </div>
+                    <div className="form-group">
                       <label className="form-label" style={{ fontSize: '0.8rem' }}>Requirements (separated by commas)</label>
                       <input 
                         type="text" 
@@ -1451,13 +1488,28 @@ export default function AdminDashboard() {
                                   </span>
                                 </td>
                                 <td>
-                                  <button 
-                                    onClick={() => handleToggleJobStatus(job.id, job.status)}
-                                    className="btn btn-outline btn-xs"
-                                    style={{ fontSize: '10px', padding: '0.2rem 0.5rem' }}
-                                  >
-                                    {job.status === 'Active' ? 'Close Job' : 'Re-open'}
-                                  </button>
+                                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                    <button 
+                                      onClick={() => handleToggleJobStatus(job.id, job.status)}
+                                      className="btn btn-outline btn-xs"
+                                      style={{ fontSize: '10px', padding: '0.2rem 0.5rem' }}
+                                    >
+                                      {job.status === 'Active' ? 'Close Job' : 'Re-open'}
+                                    </button>
+                                    <button 
+                                      onClick={() => {
+                                        if (typeof window !== 'undefined') {
+                                          const shareUrl = `${window.location.origin}/opportunities/${job.id}`;
+                                          navigator.clipboard.writeText(shareUrl);
+                                          toast.success('Opportunity share link copied!');
+                                        }
+                                      }}
+                                      className="btn btn-outline btn-xs"
+                                      style={{ fontSize: '10px', padding: '0.2rem 0.5rem', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}
+                                    >
+                                      <Share2 size={10} /> Copy Link
+                                    </button>
+                                  </div>
                                 </td>
                               </tr>
                             ))
