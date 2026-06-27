@@ -1402,6 +1402,40 @@ export default function AdminDashboard() {
                       {isPostingJob ? 'Posting Job...' : 'Publish Job Opening'}
                     </button>
                   </form>
+
+                  {/* Live Card Preview */}
+                  <div style={{ marginTop: '2rem', paddingTop: '2rem', borderTop: '1px solid var(--border-color)' }}>
+                    <span style={{ fontSize: '0.75rem', fontFamily: 'Space Mono', color: 'var(--primary)', fontWeight: 700, display: 'block', textTransform: 'uppercase', marginBottom: '1rem' }}>
+                      👁️ Live Opportunity Card Preview
+                    </span>
+                    <div style={{ backgroundColor: 'var(--bg-main)', border: '1px solid var(--border-color)', borderRadius: '12px', padding: '1.5rem' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
+                        <div>
+                          <span style={{ fontSize: '9px', fontFamily: 'Space Mono', padding: '0.15rem 0.4rem', backgroundColor: 'rgba(245,143,29,0.1)', color: 'var(--primary)', borderRadius: '3px', fontWeight: 700, textTransform: 'uppercase' }}>
+                            Full-time
+                          </span>
+                          <h5 style={{ fontSize: '1.1rem', fontWeight: 800, margin: '0.4rem 0 0.15rem 0', color: 'var(--text-main)', lineHeight: 1.25 }}>
+                            {newJobTitle || 'Associate Engineer'}
+                          </h5>
+                          <span style={{ fontSize: '0.85rem', color: 'var(--primary)', fontWeight: 700 }}>
+                            {newJobCompany || 'Harman'}
+                          </span>
+                        </div>
+                      </div>
+                      <div style={{ display: 'flex', gap: '1rem', fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>
+                        <span>📍 Remote</span>
+                        {newJobSalary && <span>💰 {newJobSalary}</span>}
+                      </div>
+                      <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '1rem', fontSize: '0.8rem', color: 'var(--text-muted)', whiteSpace: 'pre-line', maxHeight: '180px', overflowY: 'auto', lineHeight: 1.5 }}>
+                        {newJobDesc || 'Description, instructions, and notes details will render here in real time...'}
+                      </div>
+                      {newJobApplyLink && (
+                        <div style={{ marginTop: '1.25rem', padding: '0.75rem', border: '1px dashed var(--primary)', borderRadius: '6px', fontSize: '0.8rem', color: 'var(--text-main)', backgroundColor: 'rgba(245, 143, 29, 0.02)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          🔒 Recruiter Contact: <strong>{newJobApplyLink}</strong>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
 
                 {/* Column 2: Manage Jobs & Applications */}

@@ -173,9 +173,13 @@ export default function OpportunityDetailsPage() {
   };
 
   return (
-    <div className={styles.dashboardPage}>
+    <div className={styles.dashboardPage} style={{ position: 'relative', overflow: 'hidden' }}>
+      {/* Decorative Radial glow background elements */}
+      <div style={{ position: 'absolute', top: '0', left: '20%', width: '400px', height: '400px', background: 'radial-gradient(circle, rgba(245, 143, 29, 0.04) 0%, transparent 70%)', filter: 'blur(50px)', pointerEvents: 'none', zIndex: 0 }} />
+      <div style={{ position: 'absolute', top: '30%', right: '10%', width: '500px', height: '500px', background: 'radial-gradient(circle, rgba(214, 40, 40, 0.03) 0%, transparent 70%)', filter: 'blur(60px)', pointerEvents: 'none', zIndex: 0 }} />
+
       {/* Header banner */}
-      <header className={styles.dashboardHeader}>
+      <header className={styles.dashboardHeader} style={{ position: 'relative', zIndex: 1 }}>
         <div className="container">
           <span className={styles.subTitle}>Community Opportunity</span>
           <h1>{opportunity ? opportunity.title : 'Opportunity Portal'}</h1>
@@ -185,7 +189,7 @@ export default function OpportunityDetailsPage() {
         </div>
       </header>
 
-      <section className={styles.dashboardContent}>
+      <section className={styles.dashboardContent} style={{ position: 'relative', zIndex: 1 }}>
         <div className="container" style={{ maxWidth: '720px', margin: '0 auto', padding: '0 1rem' }}>
           
           {/* Back button */}
@@ -215,13 +219,21 @@ export default function OpportunityDetailsPage() {
             <div>
               
               {/* 1. Opportunity Metadata Card */}
-              <div className={styles.loginCard} style={{ maxWidth: '100%', marginBottom: '1.5rem', boxShadow: 'none', border: '1px solid var(--border-color)' }}>
+              <div className={styles.loginCard} style={{ maxWidth: '100%', marginBottom: '1.5rem', boxShadow: '0 10px 30px -10px rgba(0, 0, 0, 0.04)', border: '1px solid var(--border-color)', borderLeft: '4px solid var(--primary)', transition: 'var(--transition)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
                   <div>
-                    <h3 style={{ fontSize: '1.45rem', fontWeight: 800, color: 'var(--text-main)', margin: 0, letterSpacing: '-0.02em' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.4rem' }}>
+                      <span style={{ fontSize: '9px', fontFamily: 'Space Mono', padding: '0.15rem 0.4rem', backgroundColor: 'rgba(245,143,29,0.1)', color: 'var(--primary)', borderRadius: '3px', fontWeight: 700, textTransform: 'uppercase' }}>
+                        {opportunity.type || 'Full-time'}
+                      </span>
+                      <span style={{ fontSize: '9px', fontFamily: 'Space Mono', padding: '0.15rem 0.4rem', backgroundColor: 'rgba(5,150,105,0.08)', color: 'var(--success)', borderRadius: '3px', fontWeight: 700, textTransform: 'uppercase' }}>
+                        Active
+                      </span>
+                    </div>
+                    <h3 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-main)', margin: 0, letterSpacing: '-0.02em', lineHeight: 1.2 }}>
                       {opportunity.title}
                     </h3>
-                    <span style={{ fontSize: '1rem', color: 'var(--primary)', fontWeight: 700, marginTop: '0.25rem', display: 'block' }}>
+                    <span style={{ fontSize: '1.05rem', color: 'var(--primary)', fontWeight: 700, marginTop: '0.15rem', display: 'block' }}>
                       {opportunity.companyName}
                     </span>
                   </div>
