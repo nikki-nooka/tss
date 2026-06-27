@@ -971,7 +971,7 @@ export default function ResumeStudio() {
               <button onClick={handleExportJson} className="btn btn-outline btn-sm">
                 Export JSON Backup
               </button>
-              <button onClick={handleClearForm} className="btn btn-secondary btn-sm" style={{ color: 'var(--danger)' }}>
+              <button onClick={handleClearForm} className="btn btn-secondary btn-sm" style={{ backgroundColor: '#dc2626', color: '#ffffff', borderColor: '#dc2626' }}>
                 Clear Draft
               </button>
               <Link href="/" className={styles.exitLink}>
