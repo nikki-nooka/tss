@@ -551,12 +551,12 @@ export default function ResumeStudio() {
             {resumeData.education.map((edu, idx) => (
               <div key={idx} style={{ marginBottom: '0.5rem' }}>
                 <div className={styles.faangItemHeader}>
-                  <span>{edu.institution}</span>
-                  <span>{edu.location || `${edu.startYear} - ${edu.endYear}`}</span>
+                  <strong>{edu.institution}</strong>
+                  <span>{edu.location}</span>
                 </div>
                 <div className={styles.faangItemSubHeader}>
-                  <span>{edu.degree} {edu.branch && `in ${edu.branch}`}</span>
-                  {edu.cgpa && <span>GPA: {edu.cgpa}</span>}
+                  <span>{edu.degree}{edu.branch ? ` in ${edu.branch}` : ''}{edu.cgpa ? ` | GPA: ${edu.cgpa}` : ''}</span>
+                  <span>{edu.startYear && edu.endYear ? `${edu.startYear} - ${edu.endYear}` : ''}</span>
                 </div>
                 {edu.achievements && <p style={{ margin: '0', fontSize: '9pt', fontStyle: 'italic' }}>{edu.achievements}</p>}
               </div>
@@ -594,9 +594,14 @@ export default function ResumeStudio() {
             {resumeData.projects.map((proj, idx) => (
               <div key={idx} style={{ marginBottom: '0.5rem' }}>
                 <div className={styles.faangItemHeader}>
-                  <span>{proj.name} {proj.tech && `| ${proj.tech}`}</span>
-                  <span>{proj.github || proj.live}</span>
+                  <strong>{proj.name}</strong>
+                  <span>{proj.github}{proj.github && proj.live ? ' | ' : ''}{proj.live}</span>
                 </div>
+                {proj.tech && (
+                  <div style={{ fontSize: '9pt', fontStyle: 'italic', color: '#1a1a1a', marginBottom: '0.2rem' }}>
+                    Technologies: {proj.tech}
+                  </div>
+                )}
                 {proj.description && (
                   <ul className={styles.faangBulletsList}>
                     {proj.description.split('\n').filter(Boolean).map((bullet, bidx) => (
