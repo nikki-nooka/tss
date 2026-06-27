@@ -43,7 +43,15 @@ export async function GET(request: Request) {
       registrationDate: candidate.registrationDate,
       city: candidate.city,
       state: candidate.state,
-      photoPath: candidate.photoPath || null
+      photoPath: candidate.photoPath || null,
+      email: candidate.email,
+      mobile: candidate.mobile,
+      linkedin: candidate.linkedin,
+      github: candidate.github || null,
+      portfolio: candidate.portfolio || null,
+      skills: candidate.skills || [],
+      college: candidate.college || null,
+      graduationYear: candidate.graduationYear || null
     });
 
   } catch (error) {
