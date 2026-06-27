@@ -192,3 +192,31 @@
     transform: scale(0.9);
   }
 }
+
+.getVerifiedBtn {
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 600;
+  padding: 0.55rem 1.1rem;
+  background: linear-gradient(110deg, var(--accent, #F59E0B), var(--accent-light, #FCD34D));
+  color: #050810 !important;
+  border: none;
+  border-radius: 10px;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 15px rgba(245, 158, 11, 0.2);
+}
+
+.getVerifiedBtn:hover {
+  transform: scale(1.02);
+  filter: brightness(1.1);
+  box-shadow: 0 6px 20px rgba(245, 158, 11, 0.35);
+}
+
+.getVerifiedBtn:active {
+  transform: scale(0.98);
+}

@@ -20,11 +20,8 @@ export const Navbar: React.FC = () => {
   const navLinks = [
     { name: 'Home', path: '/' },
     { name: 'About', path: '/about' },
-    { name: 'BuildX', path: '/buildx' },
-    { name: 'Dashboard', path: '/dashboard' },
-    { name: 'Resume Studio', path: '/resume-studio' },
-    { name: 'Contact', path: '/contact' },
-    { name: 'Register', path: '/register' }
+    { name: 'Programs', path: '/programs' },
+    { name: 'Contact', path: '/contact' }
   ];
 
   const closeMenu = () => setIsOpen(false);
@@ -40,17 +37,23 @@ export const Navbar: React.FC = () => {
         </Link>
 
         {/* Desktop Navigation */}
-        <nav className={styles.desktopNav}>
-          {navLinks.map((link) => (
-            <Link
-              key={link.path}
-              href={link.path}
-              className={`${styles.navLink} ${isActive(link.path) ? styles.activeLink : ''}`}
-            >
-              {link.name}
-            </Link>
-          ))}
-        </nav>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+          <nav className={styles.desktopNav}>
+            {navLinks.map((link) => (
+              <Link
+                key={link.path}
+                href={link.path}
+                className={`${styles.navLink} ${isActive(link.path) ? styles.activeLink : ''}`}
+              >
+                {link.name}
+              </Link>
+            ))}
+          </nav>
+
+          <Link href="/get-verified" className={`${styles.desktopNav} ${styles.getVerifiedBtn}`}>
+            Get Verified
+          </Link>
+        </div>
 
         {/* Mobile Navigation Toggle */}
         <button
@@ -76,6 +79,15 @@ export const Navbar: React.FC = () => {
                 {link.name}
               </Link>
             ))}
+            
+            <Link 
+              href="/get-verified" 
+              className={styles.getVerifiedBtn} 
+              style={{ marginTop: '1rem', justifyContent: 'center' }}
+              onClick={closeMenu}
+            >
+              Get Verified
+            </Link>
           </nav>
         </div>
       )}
