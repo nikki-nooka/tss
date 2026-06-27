@@ -384,7 +384,7 @@ export default function Home() {
                   </button>
                 </form>
                 <p className={styles.checkStatusInfo}>
-                  Don't have your ID yet? <Link href="/status">Check registration status</Link> or use the demo test ID: <strong style={{color: 'var(--primary)', cursor: 'pointer'}} onClick={() => setMemberIdInput('TSS260601001')}>TSS260601001</strong>.
+                  Don't have your ID yet? <Link href="/status">Check registration status</Link> or use the demo test ID: <strong style={{color: 'var(--primary)', cursor: 'pointer'}} onClick={() => setMemberIdInput('TSS-ST-010626001')}>TSS-ST-010626001</strong>.
                 </p>
                 <button onClick={handleUnlockDemo} className={styles.demoBypassBtn}>
                   [Demo Mode: Fast Unlock]
