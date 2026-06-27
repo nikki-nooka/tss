@@ -128,7 +128,7 @@ export default function AdminDashboard() {
 
         // Quick session profile check
         // Set fallback info since stats verified we are authenticated
-        setAdminUser({ email: 'admin@thestudentspot.com', role: 'Admin' });
+        setAdminUser({ email: 'contact.thestudentspot@gmail.com', role: 'Admin' });
 
         // Load data in parallel
         await Promise.all([

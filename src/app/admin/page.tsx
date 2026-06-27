@@ -75,7 +75,7 @@ export default function AdminLogin() {
               <Mail className={styles.inputIcon} size={18} />
               <input
                 type="email"
-                placeholder="admin@thestudentspot.com"
+                placeholder="contact.thestudentspot@gmail.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="form-input"
@@ -111,7 +111,7 @@ export default function AdminLogin() {
           <div className={styles.roleTip}>
             <span>Available Roles for evaluation:</span>
             <ul>
-              <li><strong>Admin:</strong> admin@thestudentspot.com / TssAdmin2026!</li>
+              <li><strong>Admin:</strong> contact.thestudentspot@gmail.com / TssAdmin2026!</li>
               <li><strong>HR:</strong> hr@thestudentspot.com / TssHr2026!</li>
             </ul>
           </div>

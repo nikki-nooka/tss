@@ -6,7 +6,7 @@ export interface AdminUser {
 }
 
 const ADMIN_CREDENTIALS = [
-  { email: 'admin@thestudentspot.com', password: 'TssAdmin2026!', role: 'Admin' },
+  { email: 'contact.thestudentspot@gmail.com', password: 'TssAdmin2026!', role: 'Admin' },
   { email: 'hr@thestudentspot.com', password: 'TssHr2026!', role: 'HR' }
 ];
 
