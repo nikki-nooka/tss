@@ -179,6 +179,33 @@ export async function PUT(request: Request) {
         'CANDIDATE_APPROVED',
         `Approved candidate ${candidate.fullName} (${candidate.email}). Generated Member ID: ${candidate.memberId}`
       );
+
+      // Mock Email Output to System logs
+      console.log(`
+======================================================
+[MOCK EMAIL GATEWAY - CANDIDATE VERIFIED & APPROVED]
+To: ${candidate.email}
+Subject: Welcome to the Spot! Your TSS Member ID is Verified
+Body:
+Dear ${candidate.fullName},
+
+Congratulations! Your registration request on The Student Spot (TSS) has been verified and approved by the admin team.
+
+Your official member credentials are now active:
+- TSS Member ID: ${candidate.memberId}
+- Access Level: Verified Candidate
+
+You can now sign in directly to the TSS portal at:
+http://localhost:3000/dashboard
+
+Once logged in, you can unlock premium features, track jobs and applications, access your member ID card, and build your resume in the TSS Resume Studio.
+
+Welcome to the community!
+
+Best regards,
+The Student Spot Team
+======================================================
+      `);
     } 
     else if (action === 'reject') {
       updates.status = 'Rejected';
