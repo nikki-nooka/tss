@@ -18,7 +18,9 @@ import {
   Lock,
   Unlock,
   ChevronRight,
-  MessageSquare
+  MessageSquare,
+  Shield,
+  AlertOctagon
 } from 'lucide-react';
 import { useToast } from '@/components/Toast';
 
@@ -41,6 +43,41 @@ export default function Home() {
   const [memberIdInput, setMemberIdInput] = useState('');
   const [isUnlocked, setIsUnlocked] = useState(false);
   const [isLoadingStats, setIsLoadingStats] = useState(true);
+
+  const [heroVerifyInput, setHeroVerifyInput] = useState('');
+  const [heroVerifyResult, setHeroVerifyResult] = useState<any>(null);
+  const [isHeroLoading, setIsHeroLoading] = useState(false);
+
+  const handleHeroVerify = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!heroVerifyInput.trim()) {
+      toast.error('Please enter a Member ID to verify');
+      return;
+    }
+    
+    setIsHeroLoading(true);
+    try {
+      const res = await fetch(`/api/status-check?memberId=${encodeURIComponent(heroVerifyInput.trim())}`);
+      const data = await res.json();
+      
+      if (data.success && data.status === 'Verified') {
+        setHeroVerifyResult({
+          fullName: data.fullName,
+          memberId: data.memberId,
+          role: data.role
+        });
+        toast.success('Member ID verified successfully!');
+      } else {
+        setHeroVerifyResult('not_found');
+        toast.error('ID not found or currently unverified.');
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error('Verification connection failed.');
+    } finally {
+      setIsHeroLoading(false);
+    }
+  };
 
   // Fetch dynamic stats from settings API
   useEffect(() => {
@@ -150,21 +187,45 @@ export default function Home() {
             <div className={styles.heroGlow}></div>
             <div className={styles.visualCard}>
               <div className={styles.cardHeader}>
-                <CheckCircle2 className={styles.successIcon} size={24} />
+                <Shield className={styles.shieldIcon} size={24} />
                 <div>
-                  <h4>Verified Credentials</h4>
-                  <p>Zero spam, high quality networks</p>
+                  <h4>ID Verification Portal</h4>
+                  <p>Check official membership status</p>
                 </div>
               </div>
               <div className={styles.cardBody}>
-                <div className={styles.statusRow}>
-                  <span>Profile Assessment</span>
-                  <span className={`${styles.statusBadge} ${styles.verified}`}>Verified</span>
-                </div>
-                <div className={styles.statusRow}>
-                  <span>TSS Member ID</span>
-                  <span className={styles.codeText}>TSS-ST-240626001</span>
-                </div>
+                <form onSubmit={handleHeroVerify} className={styles.heroVerifyForm}>
+                  <input
+                    type="text"
+                    placeholder="Enter Member ID (e.g. TSS-ST-010626001)"
+                    value={heroVerifyInput}
+                    onChange={(e) => setHeroVerifyInput(e.target.value)}
+                    className={styles.heroVerifyInput}
+                    required
+                  />
+                  <button type="submit" disabled={isHeroLoading} className={styles.heroVerifyBtn}>
+                    {isHeroLoading ? '...' : 'Verify'}
+                  </button>
+                </form>
+
+                {heroVerifyResult && heroVerifyResult !== 'not_found' && (
+                  <div className={`${styles.verifySuccess} fade-in`}>
+                    <div className={styles.successBadge}>
+                      <CheckCircle2 size={12} /> VERIFIED MEMBER
+                    </div>
+                    <p className={styles.verifyName}>{heroVerifyResult.fullName}</p>
+                    <p className={styles.verifyMeta}>{heroVerifyResult.role} | {heroVerifyResult.memberId}</p>
+                  </div>
+                )}
+
+                {heroVerifyResult === 'not_found' && (
+                  <div className={`${styles.verifyFail} fade-in`}>
+                    <div className={styles.failBadge}>
+                      <AlertOctagon size={12} /> UNVERIFIED ID
+                    </div>
+                    <p className={styles.failText}>No active verified profile found.</p>
+                  </div>
+                )}
               </div>
             </div>
             <div className={styles.floatingTag1}>

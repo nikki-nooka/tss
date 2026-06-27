@@ -170,8 +170,106 @@
   color: var(--text-muted);
 }
 
-.successIcon {
+.shieldIcon {
+  color: var(--primary);
+}
+
+.heroVerifyForm {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.heroVerifyInput {
+  flex: 1;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  outline: none;
+}
+
+.heroVerifyInput:focus {
+  border-color: var(--primary);
+}
+
+.heroVerifyBtn {
+  background-color: var(--primary);
+  color: #ffffff;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-md);
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.heroVerifyBtn:hover {
+  background-color: var(--secondary);
+  box-shadow: 0 4px 10px rgba(247, 127, 0, 0.2);
+}
+
+.verifySuccess {
+  background-color: var(--success-light);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  border-radius: var(--radius-md);
+  padding: 0.75rem;
+  text-align: left;
+  margin-top: 0.5rem;
+}
+
+.successBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.65rem;
+  font-weight: 700;
   color: var(--success);
+  margin-bottom: 0.35rem;
+}
+
+.verifyName {
+  font-family: var(--font-heading);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #064e3b;
+  margin: 0;
+}
+
+.verifyMeta {
+  font-size: 0.75rem;
+  color: #047857;
+  margin: 2px 0 0 0;
+}
+
+.verifyFail {
+  background-color: var(--danger-light);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: var(--radius-md);
+  padding: 0.75rem;
+  text-align: left;
+  margin-top: 0.5rem;
+}
+
+.failBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--danger);
+  margin-bottom: 0.35rem;
+}
+
+.failText {
+  font-size: 0.8rem;
+  color: #7f1d1d;
+  margin: 0;
 }
 
 .cardBody {
