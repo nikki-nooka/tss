@@ -3,7 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 // Define TS Interfaces (aligned with Phase 1 updates)
 export interface Candidate {
   id: string;
-  role: 'Student' | 'Founder' | 'Recruiter' | 'Mentor' | 'Investor' | 'Working Professional';
+  role: 'Student' | 'Founder' | 'Recruiter' | 'HR' | 'Mentor' | 'Investor' | 'Freelancer' | 'Creator' | 'Campus Ambassador' | 'Volunteer' | 'Startup' | 'Company' | string;
   fullName: string;
   gender: 'Male' | 'Female' | 'Prefer Not To Say';
   dob: string;

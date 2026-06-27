@@ -28,9 +28,15 @@ const ROLE_OPTIONS = [
   'Student',
   'Founder',
   'Recruiter',
+  'HR',
   'Mentor',
   'Investor',
-  'Working Professional'
+  'Freelancer',
+  'Creator',
+  'Campus Ambassador',
+  'Volunteer',
+  'Startup',
+  'Company'
 ];
 
 const QUALIFICATION_OPTIONS = [
@@ -403,7 +409,7 @@ export default function Register() {
       }
 
       // 2. Validate role specific fields
-      if (formData.role === 'Student') {
+      if (['Student', 'Campus Ambassador', 'Volunteer'].includes(formData.role)) {
         if (!formData.college.trim()) {
           toast.error('College Name is required.');
           return false;
@@ -426,13 +432,13 @@ export default function Register() {
           return false;
         }
       } 
-      else if (formData.role === 'Founder') {
+      else if (['Founder', 'Startup'].includes(formData.role)) {
         if (!formData.startupName.trim() || !formData.industry.trim() || !formData.startupDescription.trim()) {
           toast.error('Startup Name, Industry, and Description are required.');
           return false;
         }
       } 
-      else if (formData.role === 'Recruiter') {
+      else if (['Recruiter', 'HR', 'Company'].includes(formData.role)) {
         if (!formData.companyName.trim() || !formData.designation.trim() || !formData.hiringDomains.trim()) {
           toast.error('Company Name, Designation, and Hiring Domains are required.');
           return false;
@@ -450,7 +456,7 @@ export default function Register() {
           return false;
         }
       } 
-      else if (formData.role === 'Working Professional') {
+      else if (['Working Professional', 'Freelancer', 'Creator'].includes(formData.role)) {
         if (!formData.company.trim() || !formData.professionalRole.trim()) {
           toast.error('Company Name and Designation are required.');
           return false;
@@ -467,7 +473,7 @@ export default function Register() {
         toast.error('A valid LinkedIn URL is required.');
         return false;
       }
-      if (formData.role === 'Student') {
+      if (['Student', 'Campus Ambassador', 'Volunteer'].includes(formData.role)) {
         if (!formData.resumeLink.trim()) {
           toast.error('Resume URL link is required.');
           return false;
@@ -831,7 +837,7 @@ export default function Register() {
                   {/* DYNAMIC FIELD SECTIONS BY ROLE */}
 
                   {/* 1. STUDENT FIELDS */}
-                  {formData.role === 'Student' && (
+                  {['Student', 'Campus Ambassador', 'Volunteer'].includes(formData.role) && (
                     <div style={{ marginTop: '1.5rem', borderTop: '1px solid var(--border-color)', paddingTop: '1.5rem' }}>
                       <div className={styles.formRow}>
                         <div className="form-group">
@@ -986,7 +992,7 @@ export default function Register() {
                   )}
 
                   {/* 2. FOUNDER FIELDS */}
-                  {formData.role === 'Founder' && (
+                  {['Founder', 'Startup'].includes(formData.role) && (
                     <div style={{ marginTop: '1.5rem', borderTop: '1px solid var(--border-color)', paddingTop: '1.5rem' }}>
                       <div className={styles.formRow}>
                         <div className="form-group">
@@ -1077,7 +1083,7 @@ export default function Register() {
                   )}
 
                   {/* 3. RECRUITER FIELDS */}
-                  {formData.role === 'Recruiter' && (
+                  {['Recruiter', 'HR', 'Company'].includes(formData.role) && (
                     <div style={{ marginTop: '1.5rem', borderTop: '1px solid var(--border-color)', paddingTop: '1.5rem' }}>
                       <div className={styles.formRow}>
                         <div className="form-group">
@@ -1243,7 +1249,7 @@ export default function Register() {
                   )}
 
                   {/* 6. WORKING PROFESSIONAL FIELDS */}
-                  {formData.role === 'Working Professional' && (
+                  {['Working Professional', 'Freelancer', 'Creator'].includes(formData.role) && (
                     <div style={{ marginTop: '1.5rem', borderTop: '1px solid var(--border-color)', paddingTop: '1.5rem' }}>
                       <div className={styles.formRow}>
                         <div className="form-group">
@@ -1341,7 +1347,7 @@ export default function Register() {
                     />
                   </div>
 
-                  {formData.role === 'Student' && (
+                  {['Student', 'Campus Ambassador', 'Volunteer'].includes(formData.role) && (
                     <div className={styles.formRow}>
                       <div className="form-group">
                         <label className="form-label">GitHub Profile URL</label>
@@ -1396,7 +1402,7 @@ export default function Register() {
                   </div>
 
                   {/* Resume Link (Student Only) */}
-                  {formData.role === 'Student' && (
+                  {['Student', 'Campus Ambassador', 'Volunteer'].includes(formData.role) && (
                     <div className="form-group" style={{ marginTop: '1.5rem' }}>
                       <label className="form-label">Resume Link (Google Drive, Dropbox, etc.) <span className="required">*</span></label>
                       <input

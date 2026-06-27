@@ -25,7 +25,10 @@ export async function POST(request: Request) {
     // --- Server-side Validations ---
     
     // Check role validity
-    const validRoles = ['Student', 'Founder', 'Recruiter', 'Mentor', 'Investor', 'Working Professional'];
+    const validRoles = [
+      'Student', 'Founder', 'Recruiter', 'HR', 'Mentor', 'Investor', 
+      'Freelancer', 'Creator', 'Campus Ambassador', 'Volunteer', 'Startup', 'Company'
+    ];
     if (!validRoles.includes(role)) {
       return NextResponse.json({ error: 'Invalid membership role selected' }, { status: 400 });
     }
@@ -95,7 +98,7 @@ export async function POST(request: Request) {
     let skills: string[] | undefined;
     let experienceLevel: string | undefined;
 
-    if (role === 'Student') {
+    if (['Student', 'Campus Ambassador', 'Volunteer'].includes(role)) {
       highestQualification = (formData.get('highestQualification') as string || 'Undergraduate').trim();
       currentStatus = (formData.get('currentStatus') as string || 'Pursuing').trim();
       college = (formData.get('college') as string || '').trim();
@@ -148,7 +151,7 @@ export async function POST(request: Request) {
         buildxInterested
       };
     } 
-    else if (role === 'Founder') {
+    else if (['Founder', 'Startup'].includes(role)) {
       const startupName = (formData.get('startupName') as string || '').trim();
       const startupStage = (formData.get('startupStage') as string || '').trim();
       const industry = (formData.get('industry') as string || '').trim();
@@ -173,7 +176,7 @@ export async function POST(request: Request) {
         teamSize
       };
     } 
-    else if (role === 'Recruiter') {
+    else if (['Recruiter', 'HR', 'Company'].includes(role)) {
       const companyName = (formData.get('companyName') as string || '').trim();
       const designation = (formData.get('designation') as string || '').trim();
       const hiringDomains = (formData.get('hiringDomains') as string || '').trim();
@@ -232,7 +235,7 @@ export async function POST(request: Request) {
         website
       };
     } 
-    else if (role === 'Working Professional') {
+    else if (['Working Professional', 'Freelancer', 'Creator'].includes(role)) {
       const company = (formData.get('company') as string || '').trim();
       const professionalRole = (formData.get('professionalRole') as string || '').trim();
       const professionalExperience = (formData.get('professionalExperience') as string || '').trim();
@@ -280,7 +283,7 @@ export async function POST(request: Request) {
     // 4. Process Resume Link (Only for Students, optional/absent for others)
     let resumeLink = '';
     let resumeName = '';
-    if (role === 'Student') {
+    if (['Student', 'Campus Ambassador', 'Volunteer'].includes(role)) {
       resumeLink = (formData.get('resumeLink') as string) || '';
       if (!resumeLink.trim()) {
         return NextResponse.json({ error: 'Resume link is required for student profiles.' }, { status: 400 });

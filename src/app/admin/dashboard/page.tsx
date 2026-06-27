@@ -368,19 +368,24 @@ export default function AdminDashboard() {
   const getCandidateOrgDetails = (c: Candidate) => {
     switch (c.role) {
       case 'Student':
+      case 'Campus Ambassador':
+      case 'Volunteer':
         return {
           org: c.college || 'N/A',
-          sub: c.currentStatus || 'Student'
+          sub: c.currentStatus || c.role
         };
       case 'Founder':
+      case 'Startup':
         return {
           org: c.roleDetails?.startupName || 'N/A',
-          sub: `Founder (Stage: ${c.roleDetails?.startupStage || 'N/A'})`
+          sub: `${c.role} (Stage: ${c.roleDetails?.startupStage || 'N/A'})`
         };
       case 'Recruiter':
+      case 'HR':
+      case 'Company':
         return {
           org: c.roleDetails?.companyName || 'N/A',
-          sub: c.roleDetails?.designation || 'Recruiter'
+          sub: c.roleDetails?.designation || c.role
         };
       case 'Mentor':
         return {
@@ -393,14 +398,16 @@ export default function AdminDashboard() {
           sub: `Investor (${c.roleDetails?.investmentFocus || 'N/A'})`
         };
       case 'Working Professional':
+      case 'Freelancer':
+      case 'Creator':
         return {
           org: c.roleDetails?.company || 'N/A',
-          sub: c.roleDetails?.professionalRole || 'Working Professional'
+          sub: c.roleDetails?.professionalRole || c.role
         };
       default:
         return {
           org: 'N/A',
-          sub: ''
+          sub: c.role || ''
         };
     }
   };
@@ -1006,7 +1013,7 @@ export default function AdminDashboard() {
                 </div>
 
                 {/* Dynamic Role-Based Parameters */}
-                {selectedCandidate.role === 'Student' && (
+                {['Student', 'Campus Ambassador', 'Volunteer'].includes(selectedCandidate.role) && (
                   <>
                     <div className={styles.detailSection}>
                       <h3>Education Parameters</h3>
@@ -1044,7 +1051,7 @@ export default function AdminDashboard() {
                   </>
                 )}
 
-                {selectedCandidate.role === 'Founder' && (
+                {['Founder', 'Startup'].includes(selectedCandidate.role) && (
                   <div className={styles.detailSection}>
                     <h3>Startup Parameters</h3>
                     <div className={styles.detailGrid}>
@@ -1070,7 +1077,7 @@ export default function AdminDashboard() {
                   </div>
                 )}
 
-                {selectedCandidate.role === 'Recruiter' && (
+                {['Recruiter', 'HR', 'Company'].includes(selectedCandidate.role) && (
                   <div className={styles.detailSection}>
                     <h3>Corporate Recruitment Parameters</h3>
                     <div className={styles.detailGrid}>
@@ -1119,7 +1126,7 @@ export default function AdminDashboard() {
                   </div>
                 )}
 
-                {selectedCandidate.role === 'Working Professional' && (
+                {['Working Professional', 'Freelancer', 'Creator'].includes(selectedCandidate.role) && (
                   <div className={styles.detailSection}>
                     <h3>Professional Placement Parameters</h3>
                     <div className={styles.detailGrid}>
