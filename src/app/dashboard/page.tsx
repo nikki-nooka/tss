@@ -20,7 +20,8 @@ import {
   AlertOctagon,
   FileText,
   Lock,
-  ShieldAlert
+  ShieldAlert,
+  Briefcase
 } from 'lucide-react';
 import { useToast } from '@/components/Toast';
 
@@ -88,7 +89,7 @@ export default function CandidateDashboard() {
   const [profile, setProfile] = useState<CandidateProfile | null>(null);
   
   // Dashboard navigation tab
-  const [activeTab, setActiveTab] = useState<'card' | 'resume' | 'levels' | 'build' | 'settings'>('card');
+  const [activeTab, setActiveTab] = useState<'card' | 'resume' | 'levels' | 'build' | 'settings' | 'jobs'>('card');
   
   // Resume studio states
   const [selectedTemplate, setSelectedTemplate] = useState<'FAANG' | 'Startup' | 'General'>('FAANG');
@@ -109,6 +110,14 @@ export default function CandidateDashboard() {
   const [buildProblemPitch, setBuildProblemPitch] = useState('');
   const [buildTeamLinks, setBuildTeamLinks] = useState('');
   const [isSubmittingBuild, setIsSubmittingBuild] = useState(false);
+
+  // Job board states
+  const [jobs, setJobs] = useState<any[]>([]);
+  const [appliedJobs, setAppliedJobs] = useState<any[]>([]);
+  const [loadingJobs, setLoadingJobs] = useState(false);
+  const [selectedJobForApply, setSelectedJobForApply] = useState<any | null>(null);
+  const [coverLetterInput, setCoverLetterInput] = useState('');
+  const [isSubmittingApplication, setIsSubmittingApplication] = useState(false);
 
   // Check login on load & process query credentials (for direct validation email links)
   useEffect(() => {
@@ -311,6 +320,69 @@ export default function CandidateDashboard() {
       setIsUpdatingSettings(false);
     }
   };
+
+  const fetchJobsData = async () => {
+    if (!profile) return;
+    setLoadingJobs(true);
+    try {
+      const res = await fetch(`/api/jobs?candidateId=${profile.id}`);
+      const data = await res.json();
+      if (data.jobs) {
+        setJobs(data.jobs);
+      }
+      if (data.applications) {
+        setAppliedJobs(data.applications);
+      }
+    } catch (err) {
+      console.error('Error fetching jobs:', err);
+      toast.error('Failed to load jobs list.');
+    } finally {
+      setLoadingJobs(false);
+    }
+  };
+
+  const handleApplySubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!profile || !selectedJobForApply) return;
+    
+    if (profile.status !== 'Verified') {
+      toast.error('Only Verified members can apply to jobs. Please wait for admin approval.');
+      return;
+    }
+
+    setIsSubmittingApplication(true);
+    try {
+      const res = await fetch('/api/jobs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          jobId: selectedJobForApply.id,
+          candidateId: profile.id,
+          coverLetter: coverLetterInput
+        })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        toast.success('Your application was submitted successfully!');
+        setSelectedJobForApply(null);
+        setCoverLetterInput('');
+        fetchJobsData();
+      } else {
+        toast.error(data.error || 'Failed to submit application.');
+      }
+    } catch (err) {
+      console.error('Apply error:', err);
+      toast.error('Failed to submit application due to a network error.');
+    } finally {
+      setIsSubmittingApplication(false);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === 'jobs' && profile) {
+      fetchJobsData();
+    }
+  }, [activeTab, profile]);
 
   // Resume Studio callbacks
   const handleFieldChange = (field: keyof ResumeData, value: string) => {
@@ -831,6 +903,14 @@ export default function CandidateDashboard() {
                   >
                     <Calendar size={18} />
                     <span>Build Challenge</span>
+                  </button>
+                  
+                  <button 
+                    onClick={() => setActiveTab('jobs')}
+                    className={`${styles.sidebarItem} ${activeTab === 'jobs' ? styles.sidebarItemActive : ''}`}
+                  >
+                    <Briefcase size={18} />
+                    <span>Jobs & Openings</span>
                   </button>
                   
                   <button 
@@ -1454,6 +1534,193 @@ export default function CandidateDashboard() {
                       {isUpdatingSettings ? 'Saving Settings...' : 'Save Profile Changes'}
                     </button>
                   </form>
+                )}
+
+                {/* F. JOBS BOARD TAB */}
+                {activeTab === 'jobs' && (
+                  <div className={`${styles.tabView} fade-in`}>
+                    <h2>Jobs & Internship Openings</h2>
+                    <p>Access high-trust partner roles. Applying requires a verified TSS Member ID. Applications skip first-round public resume queues.</p>
+                    
+                    {profile.status !== 'Verified' ? (
+                      <div style={{ backgroundColor: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.25)', borderRadius: '12px', padding: '1.5rem', marginBottom: '2rem', display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
+                        <Lock size={20} style={{ color: 'var(--accent)', flexShrink: 0, marginTop: '0.15rem' }} />
+                        <div>
+                          <h4 style={{ color: 'var(--text-primary)', fontWeight: 700, fontSize: '0.95rem', marginBottom: '0.25rem' }}>Account Verification Required</h4>
+                          <p style={{ fontSize: '0.825rem', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.5 }}>
+                            Your TSS ID validation is currently <strong>{profile.status}</strong>. You can view available jobs, but you can only submit applications after an administrator approves your verification.
+                          </p>
+                        </div>
+                      </div>
+                    ) : (
+                      <div style={{ backgroundColor: 'rgba(5, 150, 105, 0.1)', border: '1px solid rgba(5, 150, 105, 0.25)', borderRadius: '12px', padding: '1.5rem', marginBottom: '2rem', display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
+                        <CheckCircle2 size={20} style={{ color: 'var(--green-light)', flexShrink: 0, marginTop: '0.15rem' }} />
+                        <div>
+                          <h4 style={{ color: 'var(--text-primary)', fontWeight: 700, fontSize: '0.95rem', marginBottom: '0.25rem' }}>Verified Candidate Perks Active</h4>
+                          <p style={{ fontSize: '0.825rem', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.5 }}>
+                            Welcome, {profile.fullName}! Your TSS Member ID (<code>{profile.memberId}</code>) is fully verified. You can now apply directly with one click.
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Section 1: Applied Jobs */}
+                    {appliedJobs.length > 0 && (
+                      <div style={{ marginBottom: '3rem' }}>
+                        <h3 style={{ fontSize: '1.15rem', fontWeight: 700, marginBottom: '1rem', color: 'var(--text-primary)' }}>Your Applications</h3>
+                        <div style={{ overflowX: 'auto', backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '10px' }}>
+                          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.85rem' }}>
+                            <thead>
+                              <tr style={{ borderBottom: '1px solid var(--border-color)', backgroundColor: 'rgba(255,255,255,0.02)' }}>
+                                <th style={{ padding: '0.75rem 1rem', color: 'var(--text-primary)' }}>Job Title</th>
+                                <th style={{ padding: '0.75rem 1rem', color: 'var(--text-primary)' }}>Company</th>
+                                <th style={{ padding: '0.75rem 1rem', color: 'var(--text-primary)' }}>Applied On</th>
+                                <th style={{ padding: '0.75rem 1rem', color: 'var(--text-primary)' }}>Status</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {appliedJobs.map((app) => (
+                                <tr key={app.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
+                                  <td style={{ padding: '0.75rem 1rem', fontWeight: 600 }}>{app.jobTitle}</td>
+                                  <td style={{ padding: '0.75rem 1rem', color: 'var(--text-secondary)' }}>{app.companyName}</td>
+                                  <td style={{ padding: '0.75rem 1rem', color: 'var(--text-secondary)' }}>{new Date(app.appliedAt).toLocaleDateString()}</td>
+                                  <td style={{ padding: '0.75rem 1rem' }}>
+                                    <span style={{
+                                      display: 'inline-block',
+                                      padding: '0.15rem 0.5rem',
+                                      borderRadius: '4px',
+                                      fontSize: '10px',
+                                      fontWeight: 700,
+                                      textTransform: 'uppercase',
+                                      backgroundColor: 
+                                        app.status === 'Shortlisted' ? 'rgba(5,150,105,0.15)' :
+                                        app.status === 'Rejected' ? 'rgba(220,38,38,0.15)' :
+                                        app.status === 'Reviewing' ? 'rgba(245,158,11,0.15)' : 'rgba(255,255,255,0.08)',
+                                      color:
+                                        app.status === 'Shortlisted' ? 'var(--green-light)' :
+                                        app.status === 'Rejected' ? '#ef4444' :
+                                        app.status === 'Reviewing' ? 'var(--accent)' : 'var(--text-secondary)'
+                                    }}>
+                                      {app.status}
+                                    </span>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Section 2: Available Openings */}
+                    <h3 style={{ fontSize: '1.15rem', fontWeight: 700, marginBottom: '1.25rem', color: 'var(--text-primary)' }}>Available Openings</h3>
+                    {loadingJobs ? (
+                      <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-secondary)' }}>Loading job board listings...</div>
+                    ) : jobs.length === 0 ? (
+                      <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-secondary)', border: '1px dashed var(--border-color)', borderRadius: '12px' }}>
+                        No active jobs posted at the moment. Please check back later.
+                      </div>
+                    ) : (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                        {jobs.map((job) => (
+                          <div key={job.id} style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '12px', padding: '1.75rem', position: 'relative' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '1rem' }}>
+                              <div>
+                                <h4 style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>{job.title}</h4>
+                                <span style={{ fontSize: '0.85rem', color: 'var(--accent)', fontWeight: 600 }}>{job.companyName}</span>
+                              </div>
+                              <span style={{ fontSize: '10px', fontFamily: 'Space Mono', fontWeight: 700, padding: '0.2rem 0.6rem', borderRadius: '4px', backgroundColor: 'rgba(139,92,246,0.1)', color: 'var(--primary-pale)' }}>
+                                {job.type}
+                              </span>
+                            </div>
+
+                            <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap', fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '1.25rem', borderBottom: '1px solid rgba(255,255,255,0.03)', paddingBottom: '0.75rem' }}>
+                              <span>📍 {job.location}</span>
+                              {job.salaryRange && <span>💰 {job.salaryRange}</span>}
+                              <span>📅 Posted {new Date(job.postedAt).toLocaleDateString()}</span>
+                            </div>
+
+                            <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: '1.25rem', whiteSpace: 'pre-line' }}>{job.description}</p>
+
+                            {job.requirements && job.requirements.length > 0 && (
+                              <div style={{ marginBottom: '1.5rem' }}>
+                                <span style={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-primary)', display: 'block', marginBottom: '0.5rem' }}>Key Requirements:</span>
+                                <ul style={{ listStyleType: 'disc', paddingLeft: '1.25rem', margin: 0, fontSize: '0.825rem', color: 'var(--text-secondary)', display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                                  {job.requirements.map((req: string, i: number) => (
+                                    <li key={i}>{req}</li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+
+                            <div>
+                              {job.appliedStatus ? (
+                                <button disabled style={{ backgroundColor: 'rgba(5,150,105,0.1)', border: '1px solid rgba(5,150,105,0.2)', color: 'var(--green-light)', padding: '0.55rem 1.25rem', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+                                  <CheckCircle2 size={14} /> Applied ({job.appliedStatus})
+                                </button>
+                              ) : (
+                                <button 
+                                  onClick={() => setSelectedJobForApply(job)}
+                                  disabled={profile.status !== 'Verified'}
+                                  className="btn btn-primary"
+                                  style={{ padding: '0.55rem 1.25rem', borderRadius: '8px', fontSize: '0.85rem' }}
+                                >
+                                  Apply Direct
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Apply Confirmation Modal overlay */}
+                    {selectedJobForApply && (
+                      <div style={{ position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', backgroundColor: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)' }}>
+                        <div style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '16px', padding: '2rem', maxWidth: '520px', width: '100%', margin: '0 auto', boxShadow: '0 20px 50px rgba(0,0,0,0.5)' }}>
+                          <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.25rem' }}>Apply for {selectedJobForApply.title}</h3>
+                          <span style={{ fontSize: '0.85rem', color: 'var(--accent)', fontWeight: 600, display: 'block', marginBottom: '1.25rem' }}>at {selectedJobForApply.companyName}</span>
+                          
+                          <p style={{ fontSize: '0.825rem', color: 'var(--text-secondary)', lineHeight: 1.5, marginBottom: '1.5rem' }}>
+                            Your verified candidate profile, contact details, LinkedIn handle, and TSS resume will be submitted automatically with this application.
+                          </p>
+
+                          <form onSubmit={(e) => { e.preventDefault(); handleApplySubmit(e); }}>
+                            <div className={styles.formField} style={{ marginBottom: '1.5rem' }}>
+                              <label className={styles.formLabel}>Short Cover Letter / Pitch (Optional)</label>
+                              <textarea
+                                placeholder="Introduce yourself, explain why you are interested, or highlight relevant project builds..."
+                                value={coverLetterInput}
+                                onChange={(e) => setCoverLetterInput(e.target.value)}
+                                className={styles.formInput}
+                                rows={4}
+                                style={{ resize: 'none', fontFamily: 'inherit', fontSize: '0.85rem', width: '100%' }}
+                              />
+                            </div>
+
+                            <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
+                              <button 
+                                type="button" 
+                                onClick={() => { setSelectedJobForApply(null); setCoverLetterInput(''); }}
+                                className="btn btn-outline"
+                                style={{ padding: '0.55rem 1.25rem', borderRadius: '8px' }}
+                              >
+                                Cancel
+                              </button>
+                              <button 
+                                type="submit" 
+                                disabled={isSubmittingApplication}
+                                className="btn btn-primary"
+                                style={{ padding: '0.55rem 1.25rem', borderRadius: '8px' }}
+                              >
+                                {isSubmittingApplication ? 'Submitting...' : 'Submit Application'}
+                              </button>
+                            </div>
+                          </form>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 )}
 
               </main>

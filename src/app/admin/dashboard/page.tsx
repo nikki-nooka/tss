@@ -62,7 +62,7 @@ const TwitterIcon = (props: React.SVGProps<SVGSVGElement>) => (
   </svg>
 );
 
-type TabType = 'overview' | 'candidates' | 'settings' | 'messages' | 'logs';
+type TabType = 'overview' | 'candidates' | 'settings' | 'messages' | 'logs' | 'jobs';
 
 export default function AdminDashboard() {
   const toast = useToast();
@@ -107,6 +107,19 @@ export default function AdminDashboard() {
   const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null);
   const [adminNotes, setAdminNotes] = useState('');
   const [candidateFwdLogs, setCandidateFwdLogs] = useState<ForwardLog[]>([]);
+
+  // Jobs Board Admin States
+  const [adminJobs, setAdminJobs] = useState<any[]>([]);
+  const [adminApps, setAdminApps] = useState<any[]>([]);
+  const [loadingAdminJobs, setLoadingAdminJobs] = useState(false);
+  const [newJobTitle, setNewJobTitle] = useState('');
+  const [newJobCompany, setNewJobCompany] = useState('');
+  const [newJobType, setNewJobType] = useState<'Full-time' | 'Part-time' | 'Internship' | 'Contract'>('Full-time');
+  const [newJobLocation, setNewJobLocation] = useState('');
+  const [newJobSalary, setNewJobSalary] = useState('');
+  const [newJobDesc, setNewJobDesc] = useState('');
+  const [newJobReqs, setNewJobReqs] = useState('');
+  const [isPostingJob, setIsPostingJob] = useState(false);
 
   // Recruiter Forwarding Form
   const [showFwdForm, setShowFwdForm] = useState(false);
@@ -246,6 +259,121 @@ export default function AdminDashboard() {
       toast.error('Connection error.');
     }
   };
+
+  const fetchAdminJobsData = async () => {
+    setLoadingAdminJobs(true);
+    try {
+      const jobsRes = await fetch('/api/admin/jobs');
+      const jobsData = await jobsRes.json();
+      if (Array.isArray(jobsData)) {
+        setAdminJobs(jobsData);
+      }
+
+      const appsRes = await fetch('/api/admin/applications');
+      const appsData = await appsRes.json();
+      if (Array.isArray(appsData)) {
+        setAdminApps(appsData);
+      }
+    } catch (err) {
+      console.error('Failed to load admin jobs:', err);
+      toast.error('Failed to retrieve jobs / applications.');
+    } finally {
+      setLoadingAdminJobs(false);
+    }
+  };
+
+  const handlePostJob = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newJobTitle || !newJobCompany || !newJobLocation || !newJobDesc) {
+      toast.error('Please fill all mandatory fields.');
+      return;
+    }
+
+    setIsPostingJob(true);
+    try {
+      const requirementsArray = newJobReqs.split(',').map(r => r.trim()).filter(Boolean);
+      const res = await fetch('/api/admin/jobs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: newJobTitle,
+          companyName: newJobCompany,
+          type: newJobType,
+          location: newJobLocation,
+          salaryRange: newJobSalary,
+          description: newJobDesc,
+          requirements: requirementsArray
+        })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        toast.success('Job posted successfully!');
+        setNewJobTitle('');
+        setNewJobCompany('');
+        setNewJobType('Full-time');
+        setNewJobLocation('');
+        setNewJobSalary('');
+        setNewJobDesc('');
+        setNewJobReqs('');
+        fetchAdminJobsData();
+        loadLogs();
+      } else {
+        toast.error(data.error || 'Failed to post job.');
+      }
+    } catch (err) {
+      console.error('Error posting job:', err);
+      toast.error('Network connection error.');
+    } finally {
+      setIsPostingJob(false);
+    }
+  };
+
+  const handleToggleJobStatus = async (jobId: string, currentStatus: string) => {
+    const nextStatus = currentStatus === 'Active' ? 'Closed' : 'Active';
+    try {
+      const res = await fetch('/api/admin/jobs', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ jobId, action: 'toggle_status', status: nextStatus })
+      });
+      if (res.ok) {
+        toast.success(`Job marked as ${nextStatus}!`);
+        fetchAdminJobsData();
+        loadLogs();
+      } else {
+        toast.error('Failed to change status.');
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error('Network error.');
+    }
+  };
+
+  const handleUpdateAppStatus = async (applicationId: string, status: 'Applied' | 'Reviewing' | 'Shortlisted' | 'Rejected') => {
+    try {
+      const res = await fetch('/api/admin/applications', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ applicationId, status })
+      });
+      if (res.ok) {
+        toast.success(`Application updated to ${status}!`);
+        fetchAdminJobsData();
+        loadLogs();
+      } else {
+        toast.error('Failed to update application.');
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error('Network error.');
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === 'jobs') {
+      fetchAdminJobsData();
+    }
+  }, [activeTab]);
 
   // --- Candidate Assessment Actions ---
 
@@ -535,6 +663,12 @@ export default function AdminDashboard() {
               onClick={() => setActiveTab('logs')}
             >
               <ListTodo size={18} /> Audit Logs
+            </button>
+            <button 
+              className={`${styles.tabBtn} ${activeTab === 'jobs' ? styles.activeTab : ''}`}
+              onClick={() => setActiveTab('jobs')}
+            >
+              <Briefcase size={18} /> Jobs Board
             </button>
           </div>
         </div>
@@ -958,6 +1092,260 @@ export default function AdminDashboard() {
                   </div>
                 </div>
               </div>
+            </div>
+          )}
+
+          {/* TAB 6: Jobs Board Management */}
+          {activeTab === 'jobs' && (
+            <div className="fade-in">
+              <div className={styles.panelHeader}>
+                <div>
+                  <h3>Jobs Board Management</h3>
+                  <p>Create new openings, view candidate applications, and update candidate hiring stages.</p>
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1.8fr', gap: '2rem', alignItems: 'flex-start' }}>
+                
+                {/* Column 1: Post Job Form */}
+                <div className="premium-card" style={{ padding: '2.25rem', backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '12px' }}>
+                  <h4 style={{ fontWeight: 700, fontSize: '1.1rem', marginBottom: '1.5rem', color: 'var(--text-primary)' }}>Post New Opening</h4>
+                  <form onSubmit={handlePostJob} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                    <div className="form-group">
+                      <label className="form-label" style={{ fontSize: '0.8rem' }}>Job Title *</label>
+                      <input 
+                        type="text" 
+                        value={newJobTitle}
+                        onChange={e => setNewJobTitle(e.target.value)}
+                        className="form-input" 
+                        placeholder="e.g. Software Engineering Intern"
+                        required
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label" style={{ fontSize: '0.8rem' }}>Company Name *</label>
+                      <input 
+                        type="text" 
+                        value={newJobCompany}
+                        onChange={e => setNewJobCompany(e.target.value)}
+                        className="form-input" 
+                        placeholder="e.g. TechSpot Inc"
+                        required
+                      />
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                      <div className="form-group">
+                        <label className="form-label" style={{ fontSize: '0.8rem' }}>Job Type *</label>
+                        <select 
+                          value={newJobType}
+                          onChange={e => setNewJobType(e.target.value as any)}
+                          className="form-input"
+                          style={{ backgroundColor: 'var(--bg-card-2)', color: 'var(--text-primary)' }}
+                        >
+                          <option value="Full-time">Full-time</option>
+                          <option value="Part-time">Part-time</option>
+                          <option value="Internship">Internship</option>
+                          <option value="Contract">Contract</option>
+                        </select>
+                      </div>
+                      <div className="form-group">
+                        <label className="form-label" style={{ fontSize: '0.8rem' }}>Location *</label>
+                        <input 
+                          type="text" 
+                          value={newJobLocation}
+                          onChange={e => setNewJobLocation(e.target.value)}
+                          className="form-input" 
+                          placeholder="e.g. Hyderabad (Hybrid)"
+                          required
+                        />
+                      </div>
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label" style={{ fontSize: '0.8rem' }}>Salary / Compensation (Optional)</label>
+                      <input 
+                        type="text" 
+                        value={newJobSalary}
+                        onChange={e => setNewJobSalary(e.target.value)}
+                        className="form-input" 
+                        placeholder="e.g. ₹25,000/month or 8-12 LPA"
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label" style={{ fontSize: '0.8rem' }}>Requirements (separated by commas)</label>
+                      <input 
+                        type="text" 
+                        value={newJobReqs}
+                        onChange={e => setNewJobReqs(e.target.value)}
+                        className="form-input" 
+                        placeholder="React, TypeScript, Next.js"
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label" style={{ fontSize: '0.8rem' }}>Job Description *</label>
+                      <textarea 
+                        value={newJobDesc}
+                        onChange={e => setNewJobDesc(e.target.value)}
+                        className="form-input" 
+                        placeholder="Detailed role description, responsibilities..."
+                        rows={4}
+                        style={{ resize: 'none' }}
+                        required
+                      />
+                    </div>
+                    <button type="submit" disabled={isPostingJob} className="btn btn-primary" style={{ marginTop: '0.5rem' }}>
+                      {isPostingJob ? 'Posting Job...' : 'Publish Job Opening'}
+                    </button>
+                  </form>
+                </div>
+
+                {/* Column 2: Manage Jobs & Applications */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                  
+                  {/* Part A: Posted Jobs */}
+                  <div className={styles.tableCard}>
+                    <h4 style={{ fontWeight: 700, fontSize: '1.1rem', padding: '1.25rem 1.5rem 0.5rem', color: 'var(--text-primary)', margin: 0 }}>Active Openings</h4>
+                    <div className={styles.tableResponsive}>
+                      <table className={styles.cTable}>
+                        <thead>
+                          <tr>
+                            <th>Title / Company</th>
+                            <th>Type / Location</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {loadingAdminJobs ? (
+                            <tr><td colSpan={4} className={styles.noDataRow}>Loading jobs...</td></tr>
+                          ) : adminJobs.length === 0 ? (
+                            <tr><td colSpan={4} className={styles.noDataRow}>No jobs posted yet.</td></tr>
+                          ) : (
+                            adminJobs.map((job) => (
+                              <tr key={job.id}>
+                                <td>
+                                  <strong>{job.title}</strong>
+                                  <div style={{ fontSize: '11px', color: 'var(--accent)' }}>{job.companyName}</div>
+                                </td>
+                                <td>
+                                  <div>{job.type}</div>
+                                  <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{job.location}</div>
+                                </td>
+                                <td>
+                                  <span style={{
+                                    display: 'inline-block',
+                                    padding: '0.15rem 0.4rem',
+                                    borderRadius: '4px',
+                                    fontSize: '9px',
+                                    fontWeight: 700,
+                                    textTransform: 'uppercase',
+                                    backgroundColor: job.status === 'Active' ? 'rgba(5,150,105,0.15)' : 'rgba(220,38,38,0.15)',
+                                    color: job.status === 'Active' ? 'var(--green-light)' : '#ef4444'
+                                  }}>
+                                    {job.status}
+                                  </span>
+                                </td>
+                                <td>
+                                  <button 
+                                    onClick={() => handleToggleJobStatus(job.id, job.status)}
+                                    className="btn btn-outline btn-xs"
+                                    style={{ fontSize: '10px', padding: '0.2rem 0.5rem' }}
+                                  >
+                                    {job.status === 'Active' ? 'Close Job' : 'Re-open'}
+                                  </button>
+                                </td>
+                              </tr>
+                            ))
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+
+                  {/* Part B: Candidate Applications */}
+                  <div className={styles.tableCard}>
+                    <h4 style={{ fontWeight: 700, fontSize: '1.1rem', padding: '1.25rem 1.5rem 0.5rem', color: 'var(--text-primary)', margin: 0 }}>Candidate Applications</h4>
+                    <div className={styles.tableResponsive}>
+                      <table className={styles.cTable}>
+                        <thead>
+                          <tr>
+                            <th>Candidate</th>
+                            <th>Applied Position</th>
+                            <th>Cover Note</th>
+                            <th>Status Pipeline</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {loadingAdminJobs ? (
+                            <tr><td colSpan={4} className={styles.noDataRow}>Loading applications...</td></tr>
+                          ) : adminApps.length === 0 ? (
+                            <tr><td colSpan={4} className={styles.noDataRow}>No candidate applications received yet.</td></tr>
+                          ) : (
+                            adminApps.map((app) => (
+                              <tr key={app.id}>
+                                <td>
+                                  <strong>{app.candidateName}</strong>
+                                  <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{app.candidateEmail}</div>
+                                  <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.25rem' }}>
+                                    {app.candidateResumePath && (
+                                      <a 
+                                        href={`/api/download/resume?candidateId=${app.candidateId}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        style={{ fontSize: '10px', color: 'var(--primary-pale)', textDecoration: 'underline' }}
+                                      >
+                                        Resume PDF
+                                      </a>
+                                    )}
+                                    <a 
+                                      href={app.candidateLinkedin}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      style={{ fontSize: '10px', color: 'var(--accent)', textDecoration: 'underline' }}
+                                    >
+                                      LinkedIn
+                                    </a>
+                                  </div>
+                                </td>
+                                <td>
+                                  <strong>{app.jobTitle}</strong>
+                                  <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{app.companyName}</div>
+                                </td>
+                                <td>
+                                  <div style={{ fontSize: '11px', maxWidth: '160px', color: 'var(--text-secondary)', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }} title={app.coverLetter || 'No cover letter'}>
+                                    {app.coverLetter || 'N/A'}
+                                  </div>
+                                </td>
+                                <td>
+                                  <select
+                                    value={app.status}
+                                    onChange={(e) => handleUpdateAppStatus(app.id, e.target.value as any)}
+                                    style={{
+                                      backgroundColor: 'var(--bg-card-2)',
+                                      color: 'var(--text-primary)',
+                                      border: '1px solid var(--border-color)',
+                                      borderRadius: '4px',
+                                      padding: '0.25rem 0.5rem',
+                                      fontSize: '11px'
+                                    }}
+                                  >
+                                    <option value="Applied">Applied</option>
+                                    <option value="Reviewing">Reviewing</option>
+                                    <option value="Shortlisted">Shortlisted</option>
+                                    <option value="Rejected">Rejected</option>
+                                  </select>
+                                </td>
+                              </tr>
+                            ))
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+
+                </div>
+
+              </div>
+
             </div>
           )}
 

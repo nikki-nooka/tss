@@ -367,3 +367,247 @@ export async function updateForward(id: string, updates: Partial<ForwardLog>): P
 
   if (error) throw error;
 }
+
+// 6. Job Board Support & Helpers
+import fs from 'fs';
+import path from 'path';
+
+export interface Job {
+  id: string;
+  title: string;
+  companyName: string;
+  companyLogo?: string;
+  type: 'Full-time' | 'Part-time' | 'Internship' | 'Contract';
+  location: string;
+  description: string;
+  requirements: string[];
+  salaryRange?: string;
+  postedAt: string; // ISO string
+  status: 'Active' | 'Closed';
+}
+
+export interface JobApplication {
+  id: string;
+  jobId: string;
+  candidateId: string;
+  appliedAt: string; // ISO string
+  status: 'Applied' | 'Reviewing' | 'Shortlisted' | 'Rejected';
+  coverLetter?: string;
+  
+  // Custom joined details for admin dashboard lists
+  candidateName?: string;
+  candidateEmail?: string;
+  candidateResumePath?: string;
+  candidateRole?: string;
+  candidateLinkedin?: string;
+  jobTitle?: string;
+  companyName?: string;
+}
+
+const LOCAL_DB_PATH = path.join(process.cwd(), 'db_fallback.json');
+
+interface FallbackStore {
+  jobs: Job[];
+  applications: JobApplication[];
+}
+
+function readLocalDb(): FallbackStore {
+  try {
+    if (fs.existsSync(LOCAL_DB_PATH)) {
+      const content = fs.readFileSync(LOCAL_DB_PATH, 'utf-8');
+      return JSON.parse(content);
+    }
+  } catch (e) {
+    console.error('Error reading fallback DB:', e);
+  }
+  
+  // Seed initial mock jobs if file doesn't exist
+  const initialJobs: Job[] = [
+    {
+      id: 'job-1',
+      title: 'Software Engineering Intern',
+      companyName: 'TechSpot Solutions',
+      type: 'Internship',
+      location: 'Hyderabad (Hybrid)',
+      salaryRange: '₹25,000/month',
+      description: 'Looking for active student developers to build high-scale web platforms using Next.js, TypeScript, and Supabase. You will work directly with our core engineering team.',
+      requirements: ['React / Next.js experience', 'TypeScript knowledge', 'Basic database design', 'Good communication skills'],
+      postedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+      status: 'Active'
+    },
+    {
+      id: 'job-2',
+      title: 'Associate Product Manager',
+      companyName: 'FounderX Lab',
+      type: 'Full-time',
+      location: 'Bengaluru',
+      salaryRange: '₹8 - 12 LPA',
+      description: 'Own product lifecycle, draft PRDs, coordinate sprints with engineering, and work directly with founders to scale our B2B SaaS platform.',
+      requirements: ['Strong analytical capabilities', 'Familiarity with Figma / UI UX principles', 'Ability to communicate with technical teams'],
+      postedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+      status: 'Active'
+    },
+    {
+      id: 'job-3',
+      title: 'HR & Talent Coordinator',
+      companyName: 'BuildX Partners',
+      type: 'Contract',
+      location: 'Remote',
+      salaryRange: '₹30,000/month',
+      description: 'Source and screen verified candidates from the TSS network for corporate partner roles. Set up interview schedules and track feedback loop metrics.',
+      requirements: ['Basic screening / recruiting knowledge', 'High empathy and excellent communication', 'Active WhatsApp and Gmail usage'],
+      postedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+      status: 'Active'
+    }
+  ];
+  const initialData = { jobs: initialJobs, applications: [] };
+  writeLocalDb(initialData);
+  return initialData;
+}
+
+function writeLocalDb(data: FallbackStore) {
+  try {
+    fs.writeFileSync(LOCAL_DB_PATH, JSON.stringify(data, null, 2), 'utf-8');
+  } catch (e) {
+    console.error('Error writing fallback DB:', e);
+  }
+}
+
+export async function getJobs(): Promise<Job[]> {
+  try {
+    const { data, error } = await supabase
+      .from('jobs')
+      .select('*')
+      .order('postedAt', { ascending: false });
+    
+    if (error) throw error;
+    return (data || []).map(j => ({
+      ...j,
+      requirements: Array.isArray(j.requirements) ? j.requirements : JSON.parse(j.requirements || '[]')
+    })) as Job[];
+  } catch (err) {
+    console.warn('Supabase getJobs failed, using local storage:', err);
+    const local = readLocalDb();
+    return local.jobs.sort((a,b) => new Date(b.postedAt).getTime() - new Date(a.postedAt).getTime());
+  }
+}
+
+export async function insertJob(job: Job): Promise<void> {
+  try {
+    const { error } = await supabase
+      .from('jobs')
+      .insert([{
+        ...job,
+        requirements: job.requirements || []
+      }]);
+    if (error) throw error;
+  } catch (err) {
+    console.warn('Supabase insertJob failed, using local storage:', err);
+    const local = readLocalDb();
+    local.jobs.push(job);
+    writeLocalDb(local);
+  }
+}
+
+export async function updateJob(id: string, updates: Partial<Job>): Promise<void> {
+  try {
+    const { error } = await supabase
+      .from('jobs')
+      .update(updates)
+      .eq('id', id);
+    if (error) throw error;
+  } catch (err) {
+    console.warn('Supabase updateJob failed, using local storage:', err);
+    const local = readLocalDb();
+    const idx = local.jobs.findIndex(j => j.id === id);
+    if (idx !== -1) {
+      local.jobs[idx] = { ...local.jobs[idx], ...updates };
+      writeLocalDb(local);
+    }
+  }
+}
+
+export async function getApplications(): Promise<JobApplication[]> {
+  try {
+    const { data, error } = await supabase
+      .from('job_applications')
+      .select('*')
+      .order('appliedAt', { ascending: false });
+    if (error) throw error;
+    
+    const apps = (data || []) as JobApplication[];
+    const candidates = await getCandidates();
+    const candidatesMap = new Map(candidates.map(c => [c.id, c]));
+    
+    const jobs = await getJobs();
+    const jobsMap = new Map(jobs.map(j => [j.id, j]));
+    
+    return apps.map(app => {
+      const cand = candidatesMap.get(app.candidateId);
+      const job = jobsMap.get(app.jobId);
+      return {
+        ...app,
+        candidateName: cand?.fullName || 'Unknown Candidate',
+        candidateEmail: cand?.email || 'N/A',
+        candidateResumePath: cand?.resumePath || '',
+        candidateRole: cand?.role || 'N/A',
+        candidateLinkedin: cand?.linkedin || '',
+        jobTitle: job?.title || 'Unknown Job',
+        companyName: job?.companyName || 'Unknown Company'
+      };
+    });
+  } catch (err) {
+    console.warn('Supabase getApplications failed, using local storage:', err);
+    const local = readLocalDb();
+    const candidates = await getCandidates();
+    const candidatesMap = new Map(candidates.map(c => [c.id, c]));
+    const jobsMap = new Map(local.jobs.map(j => [j.id, j]));
+    
+    return local.applications.map(app => {
+      const cand = candidatesMap.get(app.candidateId);
+      const job = jobsMap.get(app.jobId);
+      return {
+        ...app,
+        candidateName: cand?.fullName || 'Unknown Candidate',
+        candidateEmail: cand?.email || 'N/A',
+        candidateResumePath: cand?.resumePath || '',
+        candidateRole: cand?.role || 'N/A',
+        candidateLinkedin: cand?.linkedin || '',
+        jobTitle: job?.title || 'Unknown Job',
+        companyName: job?.companyName || 'Unknown Company'
+      };
+    }).sort((a,b) => new Date(b.appliedAt).getTime() - new Date(a.appliedAt).getTime());
+  }
+}
+
+export async function insertApplication(app: JobApplication): Promise<void> {
+  try {
+    const { error } = await supabase
+      .from('job_applications')
+      .insert([app]);
+    if (error) throw error;
+  } catch (err) {
+    console.warn('Supabase insertApplication failed, using local storage:', err);
+    const local = readLocalDb();
+    local.applications.push(app);
+    writeLocalDb(local);
+  }
+}
+
+export async function updateApplicationStatus(id: string, status: 'Applied' | 'Reviewing' | 'Shortlisted' | 'Rejected'): Promise<void> {
+  try {
+    const { error } = await supabase
+      .from('job_applications')
+      .update({ status })
+      .eq('id', id);
+    if (error) throw error;
+  } catch (err) {
+    console.warn('Supabase updateApplicationStatus failed, using local storage:', err);
+    const local = readLocalDb();
+    const idx = local.applications.findIndex(a => a.id === id);
+    if (idx !== -1) {
+      local.applications[idx].status = status;
+      writeLocalDb(local);
+    }
+  }
+}
