@@ -144,18 +144,18 @@ export default function Home() {
           {/* Left Column */}
           <div className={styles.heroContent}>
             <div className={styles.eyebrowBadge}>
-              <span>⚡ 20,000+ Verified Members</span>
+              <span>20,000+ Verified Members</span>
             </div>
             <h1 className={styles.headline}>
-              From Student to Founder — and Everything In Between.
+              Build Your Identity. Build Your Future.
             </h1>
             <p className={styles.subheadline}>
-              India's first verified student-to-founder network. 100+ campuses. Real jobs. Monthly builds. One Member ID that opens it all.
+              The Student Spot helps ambitious students, founders, recruiters and professionals build one verified identity to access opportunities, careers, startups, mentorship and community throughout their journey.
             </p>
             
             <div className={styles.heroActions}>
               <Link href="/get-verified" className={styles.btnAccent}>
-                Get Your Member ID <ArrowRight size={16} />
+                Get Verified <ArrowRight size={16} />
               </Link>
               <Link href="/programs" className={styles.btnOutline}>
                 Explore Programs
@@ -163,9 +163,11 @@ export default function Home() {
             </div>
 
             <div className={styles.trustSignals}>
-              <span><span className={styles.trustCheck}>✓</span> Free to join</span>
-              <span><span className={styles.trustCheck}>✓</span> Verified in 24–48 hours</span>
-              <span><span className={styles.trustCheck}>✓</span> Never pay to get a job</span>
+              <span>One Identity.</span>
+              <span>•</span>
+              <span>Lifetime Verification.</span>
+              <span>•</span>
+              <span>Endless Opportunities.</span>
             </div>
           </div>
 
@@ -176,23 +178,23 @@ export default function Home() {
                 
                 {/* Top header */}
                 <div className={styles.cardHeader}>
-                  <span className={styles.cardLogo}>TSS ⚡</span>
-                  <span className={styles.cardBadge}>VERIFIED</span>
+                  <span className={styles.cardLogo}>TSS</span>
+                  <span className={styles.cardBadge} style={{ backgroundColor: 'rgba(0, 113, 227, 0.15)', borderColor: 'rgba(0, 113, 227, 0.35)', color: '#0071e3' }}>VERIFIED</span>
                 </div>
 
                 {/* Center ID */}
                 <div className={styles.cardCenter}>
-                  <div className={styles.cardId}>TSS-ST-260618001</div>
-                  <div className={styles.cardSubtitle}>The Student Spot Ecosystem</div>
+                  <div className={styles.cardId}>TSS-000257</div>
+                  <div className={styles.cardSubtitle}>One Identity. Lifetime Verification.</div>
                 </div>
 
                 {/* Bottom footer */}
                 <div className={styles.cardFooter}>
                   <div className={styles.cardHolder}>
-                    <span className={styles.holderName}>Rajkamal Panthagani</span>
-                    <span className={styles.holderRole}>Student · Software</span>
+                    <span className={styles.holderName}>Ananya Sharma</span>
+                    <span className={styles.holderRole}>Founder</span>
                   </div>
-                  <span className={styles.cardMark}>⚡</span>
+                  <span className={styles.cardMark} style={{ color: 'var(--text-muted)' }}>TSS</span>
                 </div>
 
               </div>
@@ -285,7 +287,7 @@ export default function Home() {
               <div>
                 <div className={styles.progHeader}>
                   <span className={`${styles.progBadge} ${styles.progBadgePrimary}`}>PREMIUM MEMBERSHIP</span>
-                  <span className={styles.progIcon}>🌟</span>
+                  <span className={styles.progIcon}><Sparkles size={16} style={{ color: 'var(--primary)' }} /></span>
                 </div>
                 <h3>100x Students</h3>
                 <p>
@@ -302,7 +304,7 @@ export default function Home() {
               <div>
                 <div className={styles.progHeader}>
                   <span className={`${styles.progBadge} ${styles.progBadgeAmber}`}>BUILDER PROGRAM</span>
-                  <span className={styles.progIcon}>🚀</span>
+                  <span className={styles.progIcon}><Zap size={16} style={{ color: 'var(--accent)' }} /></span>
                 </div>
                 <h3>BuildX Sandbox</h3>
                 <p>
@@ -319,7 +321,7 @@ export default function Home() {
               <div>
                 <div className={styles.progHeader}>
                   <span className={`${styles.progBadge} ${styles.progBadgeGreen}`}>FREE FOR ALL MEMBERS</span>
-                  <span className={styles.progIcon}>📝</span>
+                  <span className={styles.progIcon}><Award size={16} style={{ color: 'var(--success)' }} /></span>
                 </div>
                 <h3>Resume Studio</h3>
                 <p>

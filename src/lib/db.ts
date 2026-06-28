@@ -38,9 +38,15 @@ export interface Candidate {
   instagram?: string;
   xTwitter?: string;
   status: 'Pending' | 'Under Review' | 'Verified' | 'Rejected';
-  memberId?: string; // Format: TSS-XX-DDMMYYXXX
+  memberId?: string; // Format: TSS-000000
   notes?: string;
   registrationDate: string; // ISO String
+
+  // Dynamic Verification System additions
+  username?: string;
+  communityScore?: number;
+  level?: 'Explorer' | 'Builder' | 'Creator' | 'Leader' | 'Mentor' | string;
+  memberSince?: string;
 }
 
 export interface ForwardLog {
@@ -212,13 +218,19 @@ export async function getCandidates(): Promise<Candidate[]> {
 
   if (error) throw error;
   
-  // Format preferredRoles and skills back to normal arrays (Supabase pulls JSONB natively as arrays, but double-check)
-  return (data || []).map(c => ({
-    ...c,
-    preferredRoles: c.preferredRoles ? (Array.isArray(c.preferredRoles) ? c.preferredRoles : JSON.parse(c.preferredRoles || '[]')) : [],
-    skills: c.skills ? (Array.isArray(c.skills) ? c.skills : JSON.parse(c.skills || '[]')) : [],
-    roleDetails: c.roleDetails ? (typeof c.roleDetails === 'object' ? c.roleDetails : JSON.parse(c.roleDetails || '{}')) : {}
-  })) as Candidate[];
+  return (data || []).map(c => {
+    const roleDetails = c.roleDetails ? (typeof c.roleDetails === 'object' ? c.roleDetails : JSON.parse(c.roleDetails || '{}')) : {};
+    return {
+      ...c,
+      preferredRoles: c.preferredRoles ? (Array.isArray(c.preferredRoles) ? c.preferredRoles : JSON.parse(c.preferredRoles || '[]')) : [],
+      skills: c.skills ? (Array.isArray(c.skills) ? c.skills : JSON.parse(c.skills || '[]')) : [],
+      roleDetails,
+      username: roleDetails.username || '',
+      communityScore: roleDetails.communityScore !== undefined ? roleDetails.communityScore : 20,
+      level: roleDetails.level || 'Explorer',
+      memberSince: roleDetails.memberSince || new Date(c.registrationDate || Date.now()).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+    };
+  }) as Candidate[];
 }
 
 export async function getCandidateById(id: string): Promise<Candidate | null> {
@@ -233,31 +245,67 @@ export async function getCandidateById(id: string): Promise<Candidate | null> {
     throw error;
   }
   
+  const roleDetails = data.roleDetails ? (typeof data.roleDetails === 'object' ? data.roleDetails : JSON.parse(data.roleDetails || '{}')) : {};
   return {
     ...data,
     preferredRoles: data.preferredRoles ? (Array.isArray(data.preferredRoles) ? data.preferredRoles : JSON.parse(data.preferredRoles || '[]')) : [],
     skills: data.skills ? (Array.isArray(data.skills) ? data.skills : JSON.parse(data.skills || '[]')) : [],
-    roleDetails: data.roleDetails ? (typeof data.roleDetails === 'object' ? data.roleDetails : JSON.parse(data.roleDetails || '{}')) : {}
+    roleDetails,
+    username: roleDetails.username || '',
+    communityScore: roleDetails.communityScore !== undefined ? roleDetails.communityScore : 20,
+    level: roleDetails.level || 'Explorer',
+    memberSince: roleDetails.memberSince || new Date(data.registrationDate || Date.now()).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
   } as Candidate;
 }
 
 export async function insertCandidate(candidate: Candidate): Promise<void> {
+  const roleDetails = candidate.roleDetails || {};
+  roleDetails.username = candidate.username || '';
+  roleDetails.communityScore = candidate.communityScore !== undefined ? candidate.communityScore : 20;
+  roleDetails.level = candidate.level || 'Explorer';
+  roleDetails.memberSince = candidate.memberSince || new Date(candidate.registrationDate || Date.now()).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+
+  const dbCandidate = {
+    ...candidate,
+    preferredRoles: candidate.preferredRoles || [],
+    skills: candidate.skills || [],
+    roleDetails: roleDetails
+  };
+  delete (dbCandidate as any).username;
+  delete (dbCandidate as any).communityScore;
+  delete (dbCandidate as any).level;
+  delete (dbCandidate as any).memberSince;
+
   const { error } = await supabase
     .from('candidates')
-    .insert([{
-      ...candidate,
-      preferredRoles: candidate.preferredRoles || [],
-      skills: candidate.skills || [],
-      roleDetails: candidate.roleDetails || {}
-    }]);
+    .insert([dbCandidate]);
 
   if (error) throw error;
 }
 
 export async function updateCandidate(id: string, updates: Partial<Candidate>): Promise<void> {
+  const current = await getCandidateById(id);
+  if (!current) throw new Error('Candidate not found');
+
+  const roleDetails = { ...current.roleDetails, ...updates.roleDetails };
+  if (updates.username !== undefined) roleDetails.username = updates.username;
+  if (updates.communityScore !== undefined) roleDetails.communityScore = updates.communityScore;
+  if (updates.level !== undefined) roleDetails.level = updates.level;
+  if (updates.memberSince !== undefined) roleDetails.memberSince = updates.memberSince;
+
+  const dbUpdates = {
+    ...updates,
+    roleDetails
+  };
+  
+  delete (dbUpdates as any).username;
+  delete (dbUpdates as any).communityScore;
+  delete (dbUpdates as any).level;
+  delete (dbUpdates as any).memberSince;
+
   const { error } = await supabase
     .from('candidates')
-    .update(updates)
+    .update(dbUpdates)
     .eq('id', id);
 
   if (error) throw error;

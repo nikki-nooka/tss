@@ -1,69 +1,70 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap');
 
 :root {
-  /* Color Palette (Extracted from thestudentspot.app) */
-  --primary: hsl(37, 91%, 55%);           /* Golden Orange / Primary Accent */
-  --primary-hover: hsl(37, 91%, 48%);
-  --primary-light: hsl(37, 91%, 95%);
-  --primary-rgb: 245, 143, 29;
+  /* Color Palette (Minimal, Apple-inspired) */
+  --primary: #0071e3;                     /* Blue only for primary actions */
+  --primary-hover: #0077ed;
+  --primary-light: rgba(0, 113, 227, 0.06);
+  --primary-rgb: 0, 113, 227;
   
-  --secondary: hsl(350, 72%, 45%);         /* Deep Crimson Red */
-  --secondary-light: hsl(350, 72%, 38%);
-  --secondary-rgb: 214, 40, 40;
+  --secondary: #1d1d1f;                   /* Black / Near Black */
+  --secondary-light: #424245;
+  --secondary-rgb: 29, 29, 31;
   
-  --accent: hsl(37, 91%, 55%);
-  --accent-light: hsl(37, 30%, 95%);
+  --accent: #0071e3;                      /* Blue only for primary actions */
+  --accent-light: #f5f5f7;
   
-  --success: hsl(145, 63%, 40%);
-  --success-light: hsl(145, 63%, 95%);
+  --success: #00802b;                     /* Pure green for success actions */
+  --success-light: rgba(0, 128, 43, 0.06);
   
-  --warning: hsl(37, 91%, 55%);
-  --warning-light: hsl(37, 20%, 96%);
+  --warning: #f59e0b;
+  --warning-light: rgba(245, 158, 11, 0.06);
   
-  --danger: hsl(350, 72%, 45%);
-  --danger-light: hsl(350, 72%, 95%);
+  --danger: #ff3b30;
+  --danger-light: rgba(255, 59, 48, 0.06);
   
-  /* Neutral Palette */
-  --bg-main: hsl(40, 33%, 98%);           /* Warm Off-White / Cream */
-  --bg-card: hsl(0, 0%, 100%);            /* Crisp White Cards */
-  --text-main: hsl(0, 0%, 12%);           /* Charcoal / Near Black */
-  --text-muted: hsl(0, 0%, 40%);          /* Medium Muted Gray */
-  --text-inverse: hsl(0, 0%, 100%);
-  --border-color: hsl(30, 15%, 88%);      /* Warm Light Gray */
-  --border-focus: hsl(37, 91%, 55%);
+  /* Neutral Palette - White, Black, Light Gray */
+  --bg-main: #f5f5f7;                     /* Apple light gray background */
+  --bg-card: #ffffff;                     /* Crisp White cards */
+  --bg-card-2: #fafafa;
+  --text-main: #1d1d1f;                   /* Apple black text */
+  --text-muted: #86868b;                  /* Apple gray secondary text */
+  --text-inverse: #ffffff;
+  --border-color: #d2d2d7;                /* Apple borders */
+  --border-focus: #0071e3;
   
-  /* Premium Design Gradients (Mapped to thestudentspot.app positions) */
-  --gradient-primary: linear-gradient(135deg, hsl(37, 91%, 55%) 0%, hsl(37, 100%, 65%) 50%, hsl(350, 72%, 45%) 100%); /* Golden Orange to Crimson Red */
-  --gradient-accent: linear-gradient(135deg, hsl(350, 72%, 45%) 0%, hsl(350, 72%, 38%) 100%); /* Crimson CTA */
-  --gradient-glow: radial-gradient(circle, rgba(var(--primary-rgb), 0.15) 0%, transparent 70%);
-  --gradient-card: linear-gradient(135deg, hsl(0, 0%, 100%) 0%, hsl(40, 33%, 98%) 100%); /* White to Cream */
-  --gradient-header: linear-gradient(135deg, hsla(37, 91%, 55%, 0.06) 0%, hsl(40, 33%, 98%) 50%, hsla(350, 72%, 45%, 0.06) 100%); /* Light warm cream gradient */
-  --gradient-hero: linear-gradient(135deg, hsla(37, 91%, 55%, 0.06) 0%, hsl(40, 33%, 98%) 50%, hsla(350, 72%, 45%, 0.06) 100%); /* Light warm hero gradient */
-  --gradient-footer: linear-gradient(135deg, #ffedd5 0%, #fff7ed 50%, #ffffff 100%); /* Peaceful light orange/cream footer gradient */
+  /* Premium Design Gradients (Subtle flat styling mapped to Apple parameters) */
+  --gradient-primary: linear-gradient(135deg, #1d1d1f 0%, #424245 100%);
+  --gradient-accent: linear-gradient(135deg, #0071e3 0%, #0077ed 100%);
+  --gradient-glow: radial-gradient(circle, rgba(0, 113, 227, 0.02) 0%, transparent 70%);
+  --gradient-card: linear-gradient(135deg, #ffffff 0%, #fafafa 100%);
+  --gradient-header: linear-gradient(135deg, #ffffff 0%, #f5f5f7 100%);
+  --gradient-hero: linear-gradient(135deg, #ffffff 0%, #f5f5f7 100%);
+  --gradient-footer: linear-gradient(135deg, #ffffff 0%, #f5f5f7 100%);
   
   /* Glassmorphism settings */
-  --glass-bg: rgba(255, 255, 255, 0.7);
-  --glass-border: rgba(255, 255, 255, 0.4);
-  --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.08);
+  --glass-bg: rgba(255, 255, 255, 0.8);
+  --glass-border: rgba(210, 210, 215, 0.4);
+  --glass-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.05);
 
   /* Fonts */
-  --font-heading: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-heading: 'Inter', -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
 
   /* Shadows */
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-  --shadow-premium: 0 12px 40px -12px rgba(var(--primary-rgb), 0.2);
+  --shadow-md: 0 4px 12px 0 rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 8px 24px 0 rgba(0, 0, 0, 0.06);
+  --shadow-xl: 0 16px 36px 0 rgba(0, 0, 0, 0.08);
+  --shadow-premium: 0 12px 32px 0 rgba(0, 0, 0, 0.04);
 
   /* Layout */
-  --radius-sm: 0.375rem;
-  --radius-md: 0.5rem;
-  --radius-lg: 0.75rem;
-  --radius-xl: 1rem;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
   --radius-full: 9999px;
-  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
 /* Core Resets */

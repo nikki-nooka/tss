@@ -3,48 +3,24 @@ import { getCandidates, getCandidateById, updateCandidate, logAdminAction, Candi
 import { getSessionUser } from '@/lib/auth';
 import { sendEmail } from '@/lib/email';
 
-// Helper to convert role to its standard prefix abbreviation
-const getRoleAbbreviation = (role: string): string => {
-  switch (role) {
-    case 'Student': return 'ST';
-    case 'Founder': return 'FD';
-    case 'Recruiter': return 'HR';
-    case 'Mentor': return 'MT';
-    case 'Investor': return 'IN';
-    case 'Working Professional': return 'WP';
-    default: return 'ST';
-  }
-};
-
-// Helper to generate the unique Member ID: TSS-XX-DDMMYYXXX
+// Helper to generate the unique Member ID: TSS-000257 (sequential lifetime TSS ID)
 const generateMemberId = (candidate: Candidate, allCandidates: Candidate[]): string => {
-  const regDate = new Date(candidate.registrationDate);
-  const dd = String(regDate.getDate()).padStart(2, '0');
-  const mm = String(regDate.getMonth() + 1).padStart(2, '0');
-  const yy = regDate.getFullYear().toString().slice(-2);
-  
-  const role = candidate.role || 'Student';
-  const roleAbbrev = getRoleAbbreviation(role);
-  const dateStr = `${dd}${mm}${yy}`; // e.g. 240626
-  const idPrefix = `TSS-${roleAbbrev}-${dateStr}`; // e.g. TSS-ST-240626
+  const validIds = allCandidates
+    .map(c => c.memberId)
+    .filter(id => id && /^TSS-\d{6}$/.test(id)) as string[];
 
-  // Find all verified candidates on that exact date prefix across this role
-  const dailyVerified = allCandidates.filter(
-    (c) => c.memberId && c.memberId.startsWith(idPrefix)
-  );
-
-  let nextSequence = 1;
-  if (dailyVerified.length > 0) {
-    const sequences = dailyVerified.map((c) => {
-      const seqStr = c.memberId!.slice(-3); // Get the last 3 digits
-      const seqNum = parseInt(seqStr, 10);
-      return isNaN(seqNum) ? 0 : seqNum;
+  let nextSeq = 1;
+  if (validIds.length > 0) {
+    const numbers = validIds.map(id => {
+      const numPart = id.slice(4); // e.g. "000257" -> 257
+      const num = parseInt(numPart, 10);
+      return isNaN(num) ? 0 : num;
     });
-    nextSequence = Math.max(...sequences) + 1;
+    nextSeq = Math.max(...numbers) + 1;
   }
 
-  const xxx = String(nextSequence).padStart(3, '0');
-  return `${idPrefix}${xxx}`;
+  const seqStr = String(nextSeq).padStart(6, '0'); // e.g. "000257"
+  return `TSS-${seqStr}`;
 };
 
 // GET: List candidates with filter/search options
@@ -73,14 +49,18 @@ export async function GET(request: Request) {
       filtered = filtered.filter(c => c.status.toLowerCase() === status.toLowerCase());
     }
 
-    // Filter by Search Query (Name, Email, Mobile, Member ID)
+    // Filter by Search Query (TSS ID, Username, Name, Role, Email, Company, College)
     if (query) {
       const q = query.toLowerCase().trim();
       filtered = filtered.filter(
         c => c.fullName.toLowerCase().includes(q) ||
              c.email.toLowerCase().includes(q) ||
              c.mobile.includes(q) ||
-             (c.memberId && c.memberId.toLowerCase().includes(q))
+             (c.memberId && c.memberId.toLowerCase().includes(q)) ||
+             (c.username && c.username.toLowerCase().includes(q)) ||
+             (c.role && c.role.toLowerCase().includes(q)) ||
+             (c.college && c.college.toLowerCase().includes(q)) ||
+             (c.currentRole && c.currentRole.toLowerCase().includes(q))
       );
     }
 
@@ -173,6 +153,12 @@ export async function PUT(request: Request) {
         candidate.memberId = updates.memberId; // update local ref
       }
       updates.status = 'Verified';
+      
+      // Update community score (+100 points for verification approval!)
+      const currentScore = candidate.communityScore !== undefined ? candidate.communityScore : 20;
+      updates.communityScore = currentScore + 100;
+      updates.level = 'Builder'; // Advance level to Builder!
+
       if (notes !== undefined) updates.notes = notes;
 
       await logAdminAction(

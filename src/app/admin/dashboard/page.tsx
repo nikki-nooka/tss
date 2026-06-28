@@ -758,9 +758,9 @@ export default function AdminDashboard() {
 
     // Define CSV headers
     const headers = [
-      'Member ID', 'Full Name', 'Role', 'Email', 'Phone', 'Gender', 'DOB', 
+      'Member ID', 'Username', 'Full Name', 'Role', 'Email', 'Phone', 'Gender', 'DOB', 
       'City', 'State', 'Organization / College', 'Designation / Status', 
-      'Vetting Status', 'Registration Date', 'LinkedIn', 'Github', 'Role Details'
+      'Vetting Status', 'Community Score', 'Level', 'Registration Date', 'LinkedIn', 'Github', 'Role Details'
     ];
 
     // Map candidate rows
@@ -768,6 +768,7 @@ export default function AdminDashboard() {
       const orgDetails = getCandidateOrgDetails(c);
       return [
         c.memberId || 'Pending',
+        c.username ? `@${c.username}` : '',
         c.fullName,
         c.role || 'Student',
         c.email,
@@ -779,6 +780,8 @@ export default function AdminDashboard() {
         orgDetails.org,
         orgDetails.sub,
         c.status,
+        c.communityScore || 20,
+        c.level || 'Explorer',
         c.registrationDate,
         c.linkedin,
         c.github || '',

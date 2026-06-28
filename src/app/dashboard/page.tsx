@@ -45,6 +45,11 @@ interface CandidateProfile {
   portfolio?: string | null;
   photoPath?: string | null;
   registrationDate: string;
+  username?: string;
+  communityScore?: number;
+  level?: string;
+  memberSince?: string;
+  roleDetails?: any;
 }
 
 interface ResumeEdu {
@@ -432,36 +437,50 @@ export default function CandidateDashboard() {
     script.onload = () => {
       // @ts-ignore
       const html2pdf = window.html2pdf;
-      const cardElement = document.getElementById('tss-id-card');
-      if (!cardElement) return;
+      const frontElement = document.getElementById('tss-id-card-front');
+      const backElement = document.getElementById('tss-id-card-back');
+      if (!frontElement || !backElement) return;
 
-      const clone = cardElement.cloneNode(true) as HTMLElement;
-      clone.style.transform = 'none';
-      clone.style.width = '440px';
-      clone.style.height = '270px';
-      clone.style.margin = '0';
-      clone.style.position = 'relative';
+      const frontClone = frontElement.cloneNode(true) as HTMLElement;
+      frontClone.style.transform = 'none';
+      frontClone.style.width = '440px';
+      frontClone.style.height = '270px';
+      frontClone.style.margin = '0 0 20px 0';
+      frontClone.style.position = 'relative';
+
+      const backClone = backElement.cloneNode(true) as HTMLElement;
+      backClone.style.transform = 'none';
+      backClone.style.width = '440px';
+      backClone.style.height = '270px';
+      backClone.style.margin = '0';
+      backClone.style.position = 'relative';
+
+      const wrapper = document.createElement('div');
+      wrapper.style.padding = '20px';
+      wrapper.style.backgroundColor = '#f5f5f7';
+      wrapper.appendChild(frontClone);
+      wrapper.appendChild(backClone);
 
       const tempContainer = document.createElement('div');
       tempContainer.style.position = 'fixed';
       tempContainer.style.top = '0';
       tempContainer.style.left = '0';
-      tempContainer.style.width = '440px';
-      tempContainer.style.height = '270px';
+      tempContainer.style.width = '480px';
+      tempContainer.style.height = '600px';
       tempContainer.style.opacity = '0';
       tempContainer.style.zIndex = '-9999';
-      tempContainer.appendChild(clone);
+      tempContainer.appendChild(wrapper);
       document.body.appendChild(tempContainer);
 
       const opt = {
         margin: 0,
-        filename: `TSS_Card_${profile.memberId}.pdf`,
+        filename: `TSS_Card_${profile.memberId || 'pending'}.pdf`,
         image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 3, useCORS: true, backgroundColor: '#0f172a' },
-        jsPDF: { unit: 'px', format: [440, 270], orientation: 'landscape' }
+        html2canvas: { scale: 2.5, useCORS: true, backgroundColor: '#f5f5f7' },
+        jsPDF: { unit: 'px', format: [480, 600], orientation: 'portrait' }
       };
 
-      html2pdf().from(clone).set(opt).save()
+      html2pdf().from(wrapper).set(opt).save()
         .then(() => {
           document.body.removeChild(tempContainer);
           toast.success('Digital Card PDF Downloaded!');
@@ -935,18 +954,16 @@ export default function CandidateDashboard() {
                       </div>
                     )}
 
-                    <div className={styles.cardContainer}>
-                      <div id="tss-id-card" className={styles.memberCardVirtual}>
-                        <div className={styles.cardGlow}></div>
-                        <div className={styles.meshBg}></div>
-                        
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2rem', justifyContent: 'center', marginBottom: '2rem' }}>
+                      {/* FRONT SIDE */}
+                      <div id="tss-id-card-front" className={styles.memberCardVirtual}>
                         <div className={styles.cardHeader}>
                           <div className={styles.cardLogo}>
                             <Award className={styles.cardLogoIcon} size={18} />
                             <span>THE STUDENT SPOT</span>
                           </div>
                           <div className={`${styles.cardStatusBadge} ${profile.status === 'Verified' ? styles.statusVerified : styles.statusPending}`} style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.7rem', fontWeight: 700, padding: '0.25rem 0.5rem', borderRadius: 'var(--radius-sm)' }}>
-                            <span className={styles.statusDot} style={{ width: '6px', height: '6px', backgroundColor: profile.status === 'Verified' ? 'var(--success)' : 'var(--secondary)', borderRadius: '50%' }}></span> {profile.status === 'Verified' ? 'VERIFIED MEMBER' : 'UNDER AUDIT'}
+                            <span className={styles.statusDot} style={{ width: '6px', height: '6px', backgroundColor: profile.status === 'Verified' ? 'var(--success)' : 'var(--secondary)', borderRadius: '50%' }}></span> {profile.status === 'Verified' ? `Verified ${profile.role}` : 'UNDER AUDIT'}
                           </div>
                         </div>
 
@@ -966,24 +983,19 @@ export default function CandidateDashboard() {
                           </div>
                           <div className={styles.cardProfileMeta}>
                             <h3 className={styles.memberName}>{profile.fullName}</h3>
-                            <span className={styles.memberRoleTag}>{profile.role}</span>
+                            <span className={styles.memberRoleTag} style={{ color: 'var(--text-muted)' }}>@{profile.username || 'username'}</span>
                           </div>
                         </div>
 
                         <div className={styles.cardFooterGrid}>
                           <div className={styles.detailsColumn}>
-                            <span className={styles.detailsLabel}>TSS MEMBER ID</span>
-                            <span className={styles.memberIdCode}>{profile.status === 'Verified' ? profile.memberId : 'PENDING AUDIT'}</span>
+                            <span className={styles.detailsLabel}>TSS LIFETIME ID</span>
+                            <span className={styles.memberIdCode} style={{ color: '#0071e3', fontSize: '1rem', fontWeight: 700 }}>{profile.status === 'Verified' ? profile.memberId : 'PENDING AUDIT'}</span>
                           </div>
                           
                           <div className={styles.detailsColumn}>
-                            <span className={styles.detailsLabel}>LOCATION</span>
-                            <span className={styles.detailsValue}>{profile.city}, {profile.state}</span>
-                          </div>
-
-                          <div className={styles.detailsColumn}>
-                            <span className={styles.detailsLabel}>{profile.status === 'Verified' ? 'VERIFIED ON' : 'SUBMITTED ON'}</span>
-                            <span className={styles.detailsValue}>{formatDate(profile.registrationDate)}</span>
+                            <span className={styles.detailsLabel}>ROLE CATEGORY</span>
+                            <span className={styles.detailsValue}>{profile.role}</span>
                           </div>
 
                           <div className={styles.qrCodeWrapper}>
@@ -998,6 +1010,54 @@ export default function CandidateDashboard() {
                               alt="QR Code" 
                             />
                           </div>
+                        </div>
+                      </div>
+
+                      {/* BACK SIDE */}
+                      <div id="tss-id-card-back" className={styles.memberCardVirtual} style={{ backgroundColor: '#1d1d1f', border: '1px solid rgba(255,255,255,0.1)' }}>
+                        <div className={styles.cardHeader} style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+                          <div className={styles.cardLogo}>
+                            <Award className={styles.cardLogoIcon} size={18} style={{ color: 'var(--text-muted)' }} />
+                            <span style={{ color: '#ffffff' }}>TSS LIFELONG IDENTITY</span>
+                          </div>
+                          <span style={{ fontSize: '0.62rem', color: 'var(--text-muted)', fontWeight: 700, letterSpacing: '0.05em' }}>BACK SIDE</span>
+                        </div>
+
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', padding: '1rem 0', flexGrow: 1 }}>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                            <div>
+                              <span style={{ display: 'block', fontSize: '0.62rem', color: 'var(--text-muted)', fontWeight: 600 }}>WEBSITE</span>
+                              <span style={{ fontSize: '0.8rem', color: '#ffffff' }}>thestudentspot.app</span>
+                            </div>
+                            <div>
+                              <span style={{ display: 'block', fontSize: '0.62rem', color: 'var(--text-muted)', fontWeight: 600 }}>MEMBER SINCE</span>
+                              <span style={{ fontSize: '0.8rem', color: '#ffffff' }}>{profile.memberSince || 'Jun 2026'}</span>
+                            </div>
+                            <div>
+                              <span style={{ display: 'block', fontSize: '0.62rem', color: 'var(--text-muted)', fontWeight: 600 }}>COMMUNITY SCORE</span>
+                              <span style={{ fontSize: '0.8rem', color: '#0071e3', fontWeight: 700 }}>{profile.communityScore || 20} pts (Level {profile.level || 'Explorer'})</span>
+                            </div>
+                          </div>
+                          
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                            <div>
+                              <span style={{ display: 'block', fontSize: '0.62rem', color: 'var(--text-muted)', fontWeight: 600 }}>EMERGENCY CONTACT</span>
+                              <span style={{ fontSize: '0.8rem', color: '#ffffff' }}>{profile.roleDetails?.emergencyContact || 'Parent / TSS Security Node'}</span>
+                            </div>
+                            <div>
+                              <span style={{ display: 'block', fontSize: '0.62rem', color: 'var(--text-muted)', fontWeight: 600 }}>OFFICIAL CONTACT</span>
+                              <span style={{ fontSize: '0.8rem', color: '#ffffff' }}>contact@thestudentspot.app</span>
+                            </div>
+                            <div>
+                              <span style={{ display: 'block', fontSize: '0.62rem', color: 'var(--text-muted)', fontWeight: 600 }}>PROGRAMS ACCESS</span>
+                              <span style={{ fontSize: '0.8rem', color: '#ffffff' }}>{profile.role === 'Student' ? 'BuildX Sandbox, 100X Students' : 'Ecosystem Partner'}</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className={styles.cardHeader} style={{ borderBottom: 'none', borderTop: '1px solid rgba(255,255,255,0.08)', paddingBottom: '0', paddingTop: '0.5rem' }}>
+                          <span style={{ fontSize: '0.62rem', color: 'var(--text-muted)' }}>Scan QR code on front side to verify status</span>
+                          <span style={{ fontSize: '0.62rem', color: 'var(--text-muted)', fontWeight: 600 }}>THE STUDENT SPOT</span>
                         </div>
                       </div>
                     </div>

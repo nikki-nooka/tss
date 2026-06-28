@@ -1,0 +1,106 @@
+{
+  "jobs": [
+    {
+      "id": "job-1",
+      "title": "Software Engineering Intern",
+      "companyName": "TechSpot Solutions",
+      "type": "Internship",
+      "location": "Hyderabad (Hybrid)",
+      "salaryRange": "₹25,000/month",
+      "description": "Looking for active student developers to build high-scale web platforms using Next.js, TypeScript, and Supabase. You will work directly with our core engineering team.",
+      "requirements": [
+        "React / Next.js experience",
+        "TypeScript knowledge",
+        "Basic database design",
+        "Good communication skills"
+      ],
+      "postedAt": "2026-06-24T16:17:38.801Z",
+      "status": "Closed"
+    },
+    {
+      "id": "job-2",
+      "title": "Associate Product Manager",
+      "companyName": "FounderX Lab",
+      "type": "Full-time",
+      "location": "Bengaluru",
+      "salaryRange": "₹8 - 12 LPA",
+      "description": "Own product lifecycle, draft PRDs, coordinate sprints with engineering, and work directly with founders to scale our B2B SaaS platform.",
+      "requirements": [
+        "Strong analytical capabilities",
+        "Familiarity with Figma / UI UX principles",
+        "Ability to communicate with technical teams"
+      ],
+      "postedAt": "2026-06-22T16:17:38.801Z",
+      "status": "Closed"
+    },
+    {
+      "id": "job-3",
+      "title": "HR & Talent Coordinator",
+      "companyName": "BuildX Partners",
+      "type": "Contract",
+      "location": "Remote",
+      "salaryRange": "₹30,000/month",
+      "description": "Source and screen verified candidates from the TSS network for corporate partner roles. Set up interview schedules and track feedback loop metrics.",
+      "requirements": [
+        "Basic screening / recruiting knowledge",
+        "High empathy and excellent communication",
+        "Active WhatsApp and Gmail usage"
+      ],
+      "postedAt": "2026-06-26T16:17:38.801Z",
+      "status": "Closed"
+    },
+    {
+      "id": "job-1782577401982-kn8m",
+      "title": "Associate Engineer",
+      "companyName": "Harman",
+      "type": "Full-time",
+      "location": "Remote",
+      "salaryRange": "",
+      "description": "*Company :Harman*                                                                                                                                             \n\n*Role : Associate Engineer - AI/ML with Python*\n                                                                     *About the Role*\n\n*We are seeking a highly enthusiastic Agentic AI Engineer with up to 1 year of experience, eager to work on next‑generation AI systems driven by autonomous agents and Large Language Models (LLMs). This role is ideal for fresh graduates or early‑career professionals passionate about AI, web technologies, and cloud‑native development, who want to build intelligent, scalable, and automated solutions.*\n                                                                                                    *Eligibility : Bachelor’s degree (or final‑year student) in Computer Science, AI/ML, Data Science, or a related field.*\n\n*Strong foundation in programming, data structures, and software engineering basics.*\n\n*Passion for AI, autonomous systems, and emerging technologies.*\n\n*Ability to learn quickly and work effectively in a fast‑paced, collaborative environment.*\n                                                                                                                               *What We Offer*\n\n- *Competitive salary and benefits package*\n\n- *Opportunities for professional growth and development*\n\n- *Collaborative and dynamic work environment*\n\n- *Access to cutting-edge technologies and tools*\n\n- *Recognition and rewards for outstanding performance through BeBrilliant*\n\n- *Chance to work with a renowned German OEM*\n\n- *You are expected to work all 5 days in a week in office*\n\n\n*Share the above with final year students and ensure all the eligible students apply.*\n\n*Regards*\n*T&P Dept*",
+      "requirements": [
+        "Company :Harman*",
+        "Role : Associate Engineer - AI/ML with Python*",
+        "About the Role*",
+        "We are seeking a highly enthusiastic Agentic AI Engineer with up to 1 year of experience",
+        "eager to work on next‑generation AI systems driven by autonomous agents and Large Language Models (LLMs). This role is ideal for fresh graduates or early‑career professionals passionate about AI",
+        "web technologies",
+        "and cloud‑native development",
+        "who want to build intelligent",
+        "scalable",
+        "and automated solutions.*",
+        "Eligibility : Bachelor’s degree (or final‑year student) in Computer Science",
+        "AI/ML",
+        "Data Science",
+        "or a related field.*",
+        "Strong foundation in programming",
+        "data structures",
+        "and software engineering basics.*"
+      ],
+      "postedAt": "2026-06-27T16:23:21.982Z",
+      "status": "Closed"
+    },
+    {
+      "id": "job-1782579279578-6mqy",
+      "title": "AI Engineer",
+      "companyName": "Ameliya",
+      "type": "Full-time",
+      "location": "Remote",
+      "salaryRange": "100000",
+      "description": "crazyy",
+      "requirements": [],
+      "postedAt": "2026-06-27T16:54:39.578Z",
+      "status": "Active",
+      "applyLink": "8309065513"
+    }
+  ],
+  "applications": [
+    {
+      "id": "app-1782577638450-ch9l",
+      "jobId": "job-1782577401982-kn8m",
+      "candidateId": "cand-1782463633487-t3qkd0",
+      "coverLetter": "",
+      "appliedAt": "2026-06-27T16:27:18.450Z",
+      "status": "Shortlisted"
+    }
+  ]
+}

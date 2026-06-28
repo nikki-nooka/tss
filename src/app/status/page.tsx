@@ -37,6 +37,11 @@ interface CandidateStatus {
   skills?: string[];
   college?: string | null;
   graduationYear?: number | null;
+  username?: string;
+  communityScore?: number;
+  level?: string;
+  memberSince?: string;
+  roleDetails?: any;
 }
 
 interface ResumeEdu {
@@ -491,16 +496,7 @@ export default function Status() {
     setSearched(true);
     try {
       const val = queryVal.trim();
-      let param = '';
-      if (val.toUpperCase().startsWith('TSS-')) {
-        param = `memberId=${encodeURIComponent(val)}`;
-      } else if (val.includes('@')) {
-        param = `email=${encodeURIComponent(val)}`;
-      } else {
-        param = `mobile=${encodeURIComponent(val)}`;
-      }
-      
-      const res = await fetch(`/api/status-check?${param}`);
+      const res = await fetch(`/api/status-check?query=${encodeURIComponent(val)}`);
       const data = await res.json();
 
       if (data.success) {
@@ -533,32 +529,44 @@ export default function Status() {
     script.onload = () => {
       // @ts-ignore
       const html2pdf = window.html2pdf;
-      const cardElement = document.getElementById('tss-id-card');
+      const frontElement = document.getElementById('tss-id-card-front');
+      const backElement = document.getElementById('tss-id-card-back');
       
-      if (!cardElement) {
-        toast.error('ID Card element not found.');
+      if (!frontElement || !backElement) {
+        toast.error('Card elements not found.');
         return;
       }
 
-      // Create an unscaled clone of the card to bypass mobile responsive transforms
-      const clone = cardElement.cloneNode(true) as HTMLElement;
-      clone.style.transform = 'none';
-      clone.style.width = '440px';
-      clone.style.height = '270px';
-      clone.style.margin = '0';
-      clone.style.position = 'relative';
+      const frontClone = frontElement.cloneNode(true) as HTMLElement;
+      frontClone.style.transform = 'none';
+      frontClone.style.width = '440px';
+      frontClone.style.height = '270px';
+      frontClone.style.margin = '0 0 20px 0';
+      frontClone.style.position = 'relative';
 
-      // Create a temporary container in the viewport but completely invisible (prevents scroll offset bugs)
+      const backClone = backElement.cloneNode(true) as HTMLElement;
+      backClone.style.transform = 'none';
+      backClone.style.width = '440px';
+      backClone.style.height = '270px';
+      backClone.style.margin = '0';
+      backClone.style.position = 'relative';
+
+      const wrapper = document.createElement('div');
+      wrapper.style.padding = '20px';
+      wrapper.style.backgroundColor = '#f5f5f7';
+      wrapper.appendChild(frontClone);
+      wrapper.appendChild(backClone);
+
       const tempContainer = document.createElement('div');
       tempContainer.style.position = 'fixed';
       tempContainer.style.top = '0';
       tempContainer.style.left = '0';
-      tempContainer.style.width = '440px';
-      tempContainer.style.height = '270px';
+      tempContainer.style.width = '480px';
+      tempContainer.style.height = '600px';
       tempContainer.style.opacity = '0';
       tempContainer.style.pointerEvents = 'none';
       tempContainer.style.zIndex = '-9999';
-      tempContainer.appendChild(clone);
+      tempContainer.appendChild(wrapper);
       document.body.appendChild(tempContainer);
       
       const opt = {
@@ -566,17 +574,14 @@ export default function Status() {
         filename: `TSS_Member_Card_${candidate.memberId}.pdf`,
         image: { type: 'jpeg', quality: 0.98 },
         html2canvas: { 
-          scale: 3, 
+          scale: 2.5, 
           useCORS: true, 
-          logging: false,
-          backgroundColor: '#0f172a',
-          scrollY: 0,
-          scrollX: 0
+          backgroundColor: '#f5f5f7' 
         },
-        jsPDF: { unit: 'px', format: [440, 270], orientation: 'landscape' }
+        jsPDF: { unit: 'px', format: [480, 600], orientation: 'portrait' }
       };
-      
-      html2pdf().from(clone).set(opt).save()
+
+      html2pdf().from(wrapper).set(opt).save()
         .then(() => {
           document.body.removeChild(tempContainer);
           toast.success('PDF Card Downloaded!');
@@ -720,25 +725,19 @@ export default function Status() {
                       </div>
                     </div>
 
-                    {/* Digital Membership Card Mockup */}
-                    <div id="print-area" className={styles.membershipCardWrapper}>
-                      <div id="tss-id-card" className={styles.memberCardVirtual}>
-                        {/* Background glowing gradients */}
-                        <div className={styles.cardGlow}></div>
-                        <div className={styles.meshBg}></div>
-                        
-                        {/* Header */}
+                    <div id="print-area" className={styles.membershipCardWrapper} style={{ display: 'flex', flexWrap: 'wrap', gap: '2rem', justifyContent: 'center', marginBottom: '2rem' }}>
+                      {/* FRONT SIDE */}
+                      <div id="tss-id-card-front" className={styles.memberCardVirtual}>
                         <div className={styles.cardHeader}>
                           <div className={styles.cardLogo}>
                             <Award className={styles.cardLogoIcon} size={18} />
                             <span>THE STUDENT SPOT</span>
                           </div>
-                          <div className={styles.cardStatusBadge}>
-                            <span className={styles.statusDot}></span> VERIFIED TALENT
+                          <div className={styles.cardStatusBadge} style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.7rem', fontWeight: 700, padding: '0.25rem 0.5rem', borderRadius: 'var(--radius-sm)' }}>
+                            <span className={styles.statusDot} style={{ width: '6px', height: '6px', backgroundColor: 'var(--success)', borderRadius: '50%' }}></span> Verified {candidate.role}
                           </div>
                         </div>
 
-                        {/* Middle: Profile Header */}
                         <div className={styles.cardProfileBlock}>
                           <div className={styles.cardPhotoWrapper}>
                             {candidate.photoPath ? (
@@ -755,25 +754,19 @@ export default function Status() {
                           </div>
                           <div className={styles.cardProfileMeta}>
                             <h3 className={styles.memberName}>{candidate.fullName}</h3>
-                            <span className={styles.memberRoleTag}>{candidate.role}</span>
+                            <span className={styles.memberRoleTag} style={{ color: 'var(--text-muted)' }}>@{candidate.username || 'username'}</span>
                           </div>
                         </div>
 
-                        {/* Bottom details & QR code */}
                         <div className={styles.cardFooterGrid}>
                           <div className={styles.detailsColumn}>
-                            <span className={styles.detailsLabel}>TSS MEMBER ID</span>
-                            <span className={styles.memberIdCode}>{candidate.memberId}</span>
+                            <span className={styles.detailsLabel}>TSS LIFETIME ID</span>
+                            <span className={styles.memberIdCode} style={{ color: '#0071e3', fontSize: '1rem', fontWeight: 700 }}>{candidate.memberId}</span>
                           </div>
                           
                           <div className={styles.detailsColumn}>
-                            <span className={styles.detailsLabel}>LOCATION</span>
-                            <span className={styles.detailsValue}>{candidate.city}, {candidate.state}</span>
-                          </div>
-
-                          <div className={styles.detailsColumn}>
-                            <span className={styles.detailsLabel}>VERIFIED ON</span>
-                            <span className={styles.detailsValue}>{formatDate(candidate.registrationDate)}</span>
+                            <span className={styles.detailsLabel}>ROLE CATEGORY</span>
+                            <span className={styles.detailsValue}>{candidate.role}</span>
                           </div>
 
                           <div className={styles.qrCodeWrapper}>
@@ -788,6 +781,54 @@ export default function Status() {
                               alt="QR Code" 
                             />
                           </div>
+                        </div>
+                      </div>
+
+                      {/* BACK SIDE */}
+                      <div id="tss-id-card-back" className={styles.memberCardVirtual} style={{ backgroundColor: '#1d1d1f', border: '1px solid rgba(255,255,255,0.1)' }}>
+                        <div className={styles.cardHeader} style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+                          <div className={styles.cardLogo}>
+                            <Award className={styles.cardLogoIcon} size={18} style={{ color: 'var(--text-muted)' }} />
+                            <span style={{ color: '#ffffff' }}>TSS LIFELONG IDENTITY</span>
+                          </div>
+                          <span style={{ fontSize: '0.62rem', color: 'var(--text-muted)', fontWeight: 700, letterSpacing: '0.05em' }}>BACK SIDE</span>
+                        </div>
+
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', padding: '1rem 0', flexGrow: 1 }}>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                            <div>
+                              <span style={{ display: 'block', fontSize: '0.62rem', color: 'var(--text-muted)', fontWeight: 600 }}>WEBSITE</span>
+                              <span style={{ fontSize: '0.8rem', color: '#ffffff' }}>thestudentspot.app</span>
+                            </div>
+                            <div>
+                              <span style={{ display: 'block', fontSize: '0.62rem', color: 'var(--text-muted)', fontWeight: 600 }}>MEMBER SINCE</span>
+                              <span style={{ fontSize: '0.8rem', color: '#ffffff' }}>{candidate.memberSince || 'Jun 2026'}</span>
+                            </div>
+                            <div>
+                              <span style={{ display: 'block', fontSize: '0.62rem', color: 'var(--text-muted)', fontWeight: 600 }}>COMMUNITY SCORE</span>
+                              <span style={{ fontSize: '0.8rem', color: '#0071e3', fontWeight: 700 }}>{candidate.communityScore || 20} pts (Level {candidate.level || 'Explorer'})</span>
+                            </div>
+                          </div>
+                          
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                            <div>
+                              <span style={{ display: 'block', fontSize: '0.62rem', color: 'var(--text-muted)', fontWeight: 600 }}>EMERGENCY CONTACT</span>
+                              <span style={{ fontSize: '0.8rem', color: '#ffffff' }}>{candidate.roleDetails?.emergencyContact || 'Parent / TSS Security Node'}</span>
+                            </div>
+                            <div>
+                              <span style={{ display: 'block', fontSize: '0.62rem', color: 'var(--text-muted)', fontWeight: 600 }}>OFFICIAL CONTACT</span>
+                              <span style={{ fontSize: '0.8rem', color: '#ffffff' }}>contact@thestudentspot.app</span>
+                            </div>
+                            <div>
+                              <span style={{ display: 'block', fontSize: '0.62rem', color: 'var(--text-muted)', fontWeight: 600 }}>PROGRAMS ACCESS</span>
+                              <span style={{ fontSize: '0.8rem', color: '#ffffff' }}>{candidate.role === 'Student' ? 'BuildX Sandbox, 100X Students' : 'Ecosystem Partner'}</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className={styles.cardHeader} style={{ borderBottom: 'none', borderTop: '1px solid rgba(255,255,255,0.08)', paddingBottom: '0', paddingTop: '0.5rem' }}>
+                          <span style={{ fontSize: '0.62rem', color: 'var(--text-muted)' }}>Scan QR code on front side to verify status</span>
+                          <span style={{ fontSize: '0.62rem', color: 'var(--text-muted)', fontWeight: 600 }}>THE STUDENT SPOT</span>
                         </div>
                       </div>
                     </div>

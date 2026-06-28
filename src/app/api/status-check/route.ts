@@ -4,33 +4,36 @@ import { getCandidates } from '@/lib/db';
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const email = searchParams.get('email') || '';
-    const mobile = searchParams.get('mobile') || '';
-    const memberId = searchParams.get('memberId') || '';
+    const query = (
+      searchParams.get('query') || 
+      searchParams.get('memberId') || 
+      searchParams.get('email') || 
+      searchParams.get('mobile') || 
+      ''
+    ).trim();
 
-    if (!email && !mobile && !memberId) {
-      return NextResponse.json({ error: 'Search parameter (email, mobile, or member ID) is required' }, { status: 400 });
+    if (!query) {
+      return NextResponse.json({ error: 'Search parameter is required' }, { status: 400 });
     }
 
     const candidates = await getCandidates();
-    let candidate = null;
+    const q = query.toLowerCase();
 
-    if (email) {
-      const e = email.trim().toLowerCase();
-      candidate = candidates.find((c) => c.email.toLowerCase() === e);
-    } else if (mobile) {
-      const m = mobile.replace(/\D/g, '');
-      candidate = candidates.find((c) => c.mobile.replace(/\D/g, '') === m);
-    } else if (memberId) {
-      const id = memberId.trim().toUpperCase();
-      candidate = candidates.find((c) => c.memberId === id);
-    }
+    // Match by exact memberId, username, email, phone, or partial name/role
+    const candidate = candidates.find(c => 
+      (c.memberId && c.memberId.toLowerCase() === q) ||
+      (c.username && c.username.toLowerCase() === q.replace(/^@/, '')) ||
+      c.email.toLowerCase() === q ||
+      c.mobile.replace(/\D/g, '') === q.replace(/\D/g, '') ||
+      c.fullName.toLowerCase().includes(q) ||
+      c.role.toLowerCase() === q
+    );
 
     if (!candidate) {
       return NextResponse.json({ success: false, error: 'No profile found matching these details.' });
     }
 
-    // Return public candidate status details
+    // Return public candidate status details including verification badges and scores
     return NextResponse.json({
       success: true,
       id: candidate.id,
@@ -51,7 +54,14 @@ export async function GET(request: Request) {
       portfolio: candidate.portfolio || null,
       skills: candidate.skills || [],
       college: candidate.college || null,
-      graduationYear: candidate.graduationYear || null
+      graduationYear: candidate.graduationYear || null,
+      
+      // Dynamic profile variables
+      username: candidate.username || '',
+      communityScore: candidate.communityScore !== undefined ? candidate.communityScore : 20,
+      level: candidate.level || 'Explorer',
+      memberSince: candidate.memberSince || 'Jun 2026',
+      roleDetails: candidate.roleDetails || {}
     });
 
   } catch (error) {

@@ -21,6 +21,7 @@ export async function POST(request: Request) {
     const instagram = (formData.get('instagram') as string || '').trim();
     const xTwitter = (formData.get('xTwitter') as string || '').trim();
     const declaration = formData.get('declaration') === 'true';
+    const username = (formData.get('username') as string || '').trim().replace(/^@/, '').toLowerCase();
 
     // --- Server-side Validations ---
     
@@ -76,8 +77,21 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'You must check the declaration to register' }, { status: 400 });
     }
 
-    // Duplicate email or phone check
+    // Duplicate email, phone, or username check
     const candidates = await getCandidates();
+
+    if (!username) {
+      return NextResponse.json({ error: 'Preferred Username is required' }, { status: 400 });
+    }
+    const usernameRegex = /^[a-z0-9._]+$/;
+    if (!usernameRegex.test(username)) {
+      return NextResponse.json({ error: 'Username can only contain lowercase letters, numbers, dots, and underscores' }, { status: 400 });
+    }
+    const isUsernameDuplicate = candidates.some(c => c.username && c.username.toLowerCase() === username && c.status !== 'Rejected');
+    if (isUsernameDuplicate) {
+      return NextResponse.json({ error: 'This username is already taken. Please choose another.' }, { status: 400 });
+    }
+
     const isEmailDuplicate = candidates.some(c => c.email.toLowerCase() === email.toLowerCase() && c.status !== 'Rejected');
     const isPhoneDuplicate = candidates.some(c => c.mobile === mobile && c.status !== 'Rejected');
     if (isEmailDuplicate) {
@@ -343,7 +357,11 @@ export async function POST(request: Request) {
       instagram: instagram || undefined,
       xTwitter: xTwitter || undefined,
       status: 'Pending',
-      registrationDate: new Date().toISOString()
+      registrationDate: new Date().toISOString(),
+      username: username,
+      communityScore: 20, // +20 points for registration!
+      level: 'Explorer',
+      memberSince: new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
     };
 
     await insertCandidate(newCandidate);
