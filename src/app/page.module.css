@@ -1,6 +1,14 @@
 .home {
-  background-color: var(--bg-void, #050810);
-  color: var(--text-primary, #E8ECFF);
+  --text-primary: #E8ECFF;
+  --text-secondary: #8895BB;
+  --text-muted: #6B7280;
+  --bg-card: #0D1120;
+  --bg-card-2: #111827;
+  --border-color: rgba(255, 255, 255, 0.08);
+  --text-main: #E8ECFF;
+
+  background-color: #050810;
+  color: var(--text-primary);
   font-family: 'DM Sans', sans-serif;
   min-height: 100vh;
   padding-bottom: 4rem;
@@ -433,6 +441,7 @@
   font-size: var(--text-2xl, 1.8rem);
   font-weight: 800;
   margin-bottom: 1rem;
+  color: var(--text-main);
 }
 
 .programsHeader p {
@@ -550,6 +559,7 @@
   font-size: var(--text-2xl, 1.8rem);
   font-weight: 800;
   margin-bottom: 1rem;
+  color: var(--text-main);
 }
 
 .communityHeader p {
