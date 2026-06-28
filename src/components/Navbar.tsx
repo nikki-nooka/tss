@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import styles from './Navbar.module.css';
@@ -8,7 +8,15 @@ import { ShieldCheck, Menu, X } from 'lucide-react';
 
 export const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const pathname = usePathname();
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const session = localStorage.getItem('tss_candidate_session');
+      setIsLoggedIn(!!session);
+    }
+  }, [pathname]);
 
   // Helper to determine if link is active
   const isActive = (path: string) => {
@@ -52,7 +60,7 @@ export const Navbar: React.FC = () => {
 
           <div className={styles.desktopNav} style={{ gap: '1.25rem' }}>
             <Link href="/dashboard" className={styles.navLink} style={{ fontWeight: 600, color: 'var(--text-main)' }}>
-              Sign In
+              {isLoggedIn ? 'Dashboard' : 'Sign In'}
             </Link>
             <Link href="/get-verified" className={styles.getVerifiedBtn}>
               Get Verified
@@ -91,7 +99,7 @@ export const Navbar: React.FC = () => {
               style={{ fontWeight: 600, color: 'var(--text-main)', marginTop: '0.5rem' }}
               onClick={closeMenu}
             >
-              Sign In
+              {isLoggedIn ? 'Dashboard' : 'Sign In'}
             </Link>
             <Link 
               href="/get-verified" 
