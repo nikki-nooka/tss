@@ -289,8 +289,25 @@ export async function updateCandidate(id: string, updates: Partial<Candidate>): 
 
   const roleDetails = { ...current.roleDetails, ...updates.roleDetails };
   if (updates.username !== undefined) roleDetails.username = updates.username;
-  if (updates.communityScore !== undefined) roleDetails.communityScore = updates.communityScore;
-  if (updates.level !== undefined) roleDetails.level = updates.level;
+  
+  if (updates.communityScore !== undefined) {
+    roleDetails.communityScore = updates.communityScore;
+    if (updates.communityScore < 50) {
+      roleDetails.level = 'Explorer';
+    } else if (updates.communityScore < 150) {
+      roleDetails.level = 'Builder';
+    } else if (updates.communityScore < 300) {
+      roleDetails.level = 'Creator';
+    } else if (updates.communityScore < 500) {
+      roleDetails.level = 'Leader';
+    } else {
+      roleDetails.level = 'Mentor';
+    }
+    updates.level = roleDetails.level;
+  } else if (updates.level !== undefined) {
+    roleDetails.level = updates.level;
+  }
+
   if (updates.memberSince !== undefined) roleDetails.memberSince = updates.memberSince;
 
   const dbUpdates = {
