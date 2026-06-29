@@ -307,7 +307,7 @@ export default function About() {
             </div>
           </ScrollReveal>
 
-          {/* Card 3: Tech Lead & Operations & Community Lead */}
+          {/* Card 3: Tech Lead */}
           <ScrollReveal direction="pop" delay={300} className={styles.founderFeaturedCard} style={{ marginTop: '3rem' }}>
             {/* Translucent quote mark overlay */}
             <div className={styles.quoteIconWrapper}>
@@ -316,7 +316,7 @@ export default function About() {
 
             <div className={styles.founderAvatarCol}>
               <div className={styles.photoContainer}>
-                <img src="/nikshith.png" alt="Nikshith Nooka - Tech Lead, Operations & Community Lead" className={styles.founderPhoto} style={{ objectPosition: 'center 20%' }} />
+                <img src="/nikshith.png" alt="Nikshith Nooka - Tech Lead" className={styles.founderPhoto} style={{ objectPosition: 'center 20%' }} />
                 <div className={styles.floatingSocials}>
                   <a href="https://www.linkedin.com/in/nikshith-nooka-2580302a7/" target="_blank" rel="noopener noreferrer" className={styles.floatingSocialBtn} title="LinkedIn">
                     <LinkedInIcon style={{ width: '16px', height: '16px' }} />
@@ -325,18 +325,18 @@ export default function About() {
               </div>
               <div className={styles.founderMeta}>
                 <h3>Nikshith Nooka</h3>
-                <span>Tech Lead, Operations & Community Lead</span>
+                <span>Tech Lead</span>
               </div>
             </div>
             <div className={styles.founderDesc}>
               <p className={styles.founderBio}>
-                <strong>Nikshith Nooka</strong> is the Tech Lead & Operations & Community Lead at The Student Spot, spearheading the engineering, system architecture, and operational development of the web portal and mobile app verification platforms.
+                <strong>Nikshith Nooka</strong> is the Tech Lead at The Student Spot, spearheading the engineering, system architecture, and development of the web portal and mobile app verification platforms.
               </p>
               <p className={styles.founderBio}>
-                He is passionate about creating clean, scalable interfaces, robust developer tooling, and optimized workflows that empower students and simplify candidate discovery for recruiters.
+                He is passionate about creating clean, scalable interfaces and robust developer tooling that empowers students and simplifies candidate discovery for recruiters.
               </p>
               <p className={styles.founderBio} style={{ fontStyle: 'italic', color: '#64748b' }}>
-                "We are engineering a high-performance verification engine and operational system that makes credential checks and profile discovery seamless. Our codebase is built to scale alongside India's largest student-to-founder ecosystem."
+                "We are engineering a high-performance verification engine that makes credential checks and profile discovery seamless. Our codebase is built to scale alongside India's largest student-to-founder ecosystem."
               </p>
             </div>
           </ScrollReveal>
@@ -448,12 +448,9 @@ export default function About() {
           </ScrollReveal>
 
           <ScrollReveal direction="pop" delay={450}>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', justifyContent: 'center' }}>
-              <a href="https://forms.gle/HJn2GQDYa64gmvnYA" target="_blank" rel="noopener noreferrer" className={styles.btnJoinNow} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none', padding: '1rem 2rem' }}>
-                Join Now <ArrowRight size={18} />
-              </a>
-              <Link href="/contact" className={styles.btnPartnerWithUs} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none', padding: '1rem 2rem' }}>
-                Become a Partner
+            <div style={{ display: 'flex', justifyContent: 'center' }}>
+              <Link href="/get-verified" className={styles.btnJoinNow} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none', padding: '1rem 2rem' }}>
+                Get Verified <ArrowRight size={18} />
               </Link>
             </div>
           </ScrollReveal>
