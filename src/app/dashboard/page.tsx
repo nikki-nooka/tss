@@ -87,6 +87,19 @@ interface ResumeData {
   projects: ResumeProj[];
 }
 
+const getSkillsString = (skills: any): string => {
+  if (!skills) return '';
+  if (Array.isArray(skills)) return skills.join(', ');
+  if (typeof skills === 'string') {
+    try {
+      const parsed = JSON.parse(skills);
+      if (Array.isArray(parsed)) return parsed.join(', ');
+    } catch {}
+    return skills;
+  }
+  return '';
+};
+
 export default function CandidateDashboard() {
   const toast = useToast();
   
@@ -275,7 +288,7 @@ export default function CandidateDashboard() {
         linkedin: profile.linkedin || '',
         github: profile.github || '',
         portfolio: profile.portfolio || '',
-        skills: Array.isArray(profile.skills) ? profile.skills.join(', ') : '',
+        skills: getSkillsString(profile.skills),
         education: [
           {
             institution: profile.college || 'My University',
@@ -490,7 +503,7 @@ export default function CandidateDashboard() {
       linkedin: profile.linkedin || '',
       github: profile.github || '',
       portfolio: profile.portfolio || '',
-      skills: Array.isArray(profile.skills) ? profile.skills.join(', ') : '',
+      skills: getSkillsString(profile.skills),
       education: [
         {
           institution: profile.college || 'My University',
