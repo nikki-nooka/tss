@@ -215,23 +215,25 @@ export default function Home() {
           <ScrollReveal direction="pop" delay={150} className={styles.heroVisualGrid}>
             <div className={styles.scanWrapper} style={{ marginBottom: 0 }}>
               <div className={styles.scanLine}></div>
-              <div className={styles.memberCard} style={{ opacity: 0.85, margin: '0 auto' }}>
-                <div className={styles.cardHeader}>
-                  <span className={styles.cardLogo}>TSS ⚡</span>
-                  <span className={styles.cardBadge}>VERIFIED</span>
-                </div>
-                <div className={styles.cardCenter}>
-                  <div className={styles.cardId}>TSS-ST-260618001</div>
-                  <div className={styles.cardSubtitle}>The Student Spot Ecosystem</div>
-                </div>
-                <div className={styles.cardFooter}>
-                  <div className={styles.cardHolder}>
-                    <span className={styles.holderName}>Rajkamal Panthagani</span>
-                    <span className={styles.holderRole}>Student · Software</span>
+              <Link href="/status?memberId=TSS-ST-260618001" style={{ textDecoration: 'none', display: 'block', width: 'fit-content', margin: '0 auto' }}>
+                <div className={styles.memberCard} style={{ opacity: 0.85, cursor: 'pointer' }}>
+                  <div className={styles.cardHeader}>
+                    <span className={styles.cardLogo}>TSS ⚡</span>
+                    <span className={styles.cardBadge}>VERIFIED</span>
                   </div>
-                  <span className={styles.cardMark}>⚡</span>
+                  <div className={styles.cardCenter}>
+                    <div className={styles.cardId}>TSS-ST-260618001</div>
+                    <div className={styles.cardSubtitle}>The Student Spot Ecosystem</div>
+                  </div>
+                  <div className={styles.cardFooter}>
+                    <div className={styles.cardHolder}>
+                      <span className={styles.holderName}>Rajkamal Panthagani</span>
+                      <span className={styles.holderRole}>Student · Software</span>
+                    </div>
+                    <span className={styles.cardMark}>⚡</span>
+                  </div>
                 </div>
-              </div>
+              </Link>
             </div>
           </ScrollReveal>
 
