@@ -50,7 +50,7 @@ export default function Programs() {
               <span className={styles.tagPill}>PREMIUM MEMBERSHIP</span>
               <span className={`${styles.tagPill} ${styles.tagPillPrimary}`} style={{ marginLeft: '0.5rem' }}>₹499/month</span>
               
-              <h2 className={styles.subHeading} style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--text-primary)', fontFamily: 'Syne, sans-serif' }}>
+              <h2 className={styles.subHeading} style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--text-main)', fontFamily: 'var(--font-heading)' }}>
                 The Career Accelerator for Students Who Mean Business.
               </h2>
               
@@ -273,10 +273,10 @@ export default function Programs() {
             {/* Left Column: Context */}
             <div className={styles.textCol}>
               <span className={`${styles.tagPill} ${styles.tagPillGreen}`}>FREE FOR ALL VERIFIED MEMBERS</span>
-              <h2 className={styles.subHeading} style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--text-primary)', fontFamily: 'Syne, sans-serif', marginTop: '0.5rem' }}>
+              <h2 className={styles.subHeading} style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--text-main)', fontFamily: 'var(--font-heading)', marginTop: '0.5rem' }}>
                 Your Resume, FAANG-Style. Free. In 5 Minutes.
               </h2>
-              <h3 className={styles.bodyText} style={{ fontSize: '1.1rem', color: 'var(--text-primary)' }}>
+              <h3 className={styles.bodyText} style={{ fontSize: '1.1rem', color: 'var(--text-main)' }}>
                 The resume format that actually gets shortlisted.
               </h3>
               
@@ -301,8 +301,8 @@ export default function Programs() {
             </div>
 
             {/* Right Column: Steps & Features */}
-            <div className={styles.textCol} style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '16px', padding: '2.5rem' }}>
-              <h3 style={{ fontFamily: 'Syne, sans-serif', fontSize: '1.25rem', fontWeight: 700, marginBottom: '2rem' }}>How It Works</h3>
+            <div className={styles.textCol} style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '16px', padding: '2.5rem' }}>
+              <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.25rem', fontWeight: 700, marginBottom: '2rem' }}>How It Works</h3>
               
               <div className={styles.featureList} style={{ margin: 0 }}>
                 <div className={`${styles.featureRow} ${styles.featureRowGreen}`}>
@@ -338,12 +338,12 @@ export default function Programs() {
 
               <div className={styles.thinDivider} style={{ margin: '2rem 0' }}></div>
 
-              <h4 style={{ fontFamily: 'Syne, sans-serif', fontSize: '0.95rem', fontWeight: 700, marginBottom: '1rem' }}>TSS EXCLUSIVE ADVANTAGES</h4>
+              <h4 style={{ fontFamily: 'var(--font-heading)', fontSize: '0.95rem', fontWeight: 700, marginBottom: '1rem' }}>TSS EXCLUSIVE ADVANTAGES</h4>
               <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                <li style={{ display: 'flex', gap: '0.5rem', fontSize: '0.82rem', color: 'var(--text-secondary)' }}><Check size={14} style={{ color: 'var(--green-light)', flexShrink: 0 }} /> Achievement-first bullet suggestions</li>
-                <li style={{ display: 'flex', gap: '0.5rem', fontSize: '0.82rem', color: 'var(--text-secondary)' }}><Check size={14} style={{ color: 'var(--green-light)', flexShrink: 0 }} /> Strictly ATS-friendly single-column layout</li>
-                <li style={{ display: 'flex', gap: '0.5rem', fontSize: '0.82rem', color: 'var(--text-secondary)' }}><Check size={14} style={{ color: 'var(--green-light)', flexShrink: 0 }} /> Permanent QR code & Member ID integration</li>
-                <li style={{ display: 'flex', gap: '0.5rem', fontSize: '0.82rem', color: 'var(--text-secondary)' }}><Check size={14} style={{ color: 'var(--green-light)', flexShrink: 0 }} /> 100% PDF downloads without hidden paywalls</li>
+                <li style={{ display: 'flex', gap: '0.5rem', fontSize: '0.82rem', color: 'var(--text-muted)' }}><Check size={14} style={{ color: 'var(--success)', flexShrink: 0 }} /> Achievement-first bullet suggestions</li>
+                <li style={{ display: 'flex', gap: '0.5rem', fontSize: '0.82rem', color: 'var(--text-muted)' }}><Check size={14} style={{ color: 'var(--success)', flexShrink: 0 }} /> Strictly ATS-friendly single-column layout</li>
+                <li style={{ display: 'flex', gap: '0.5rem', fontSize: '0.82rem', color: 'var(--text-muted)' }}><Check size={14} style={{ color: 'var(--success)', flexShrink: 0 }} /> Permanent QR code & Member ID integration</li>
+                <li style={{ display: 'flex', gap: '0.5rem', fontSize: '0.82rem', color: 'var(--text-muted)' }}><Check size={14} style={{ color: 'var(--success)', flexShrink: 0 }} /> 100% PDF downloads without hidden paywalls</li>
               </ul>
             </div>
 
