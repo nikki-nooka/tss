@@ -285,17 +285,10 @@ export default function Home() {
             </div>
           </ScrollReveal>
 
-          {/* Right Visual: Telangana node dot map */}
-          <ScrollReveal direction="pop" delay={150} className={styles.mapVisual}>
-            <div className={styles.mapCard}>
-              {/* Spreading nodes from center */}
-              <div className={styles.mapNode} style={{ top: '50%', left: '50%' }}></div>
-              <div className={styles.mapNode} style={{ top: '35%', left: '42%', animationDelay: '0.4s' }}></div>
-              <div className={styles.mapNode} style={{ top: '65%', left: '55%', animationDelay: '0.8s' }}></div>
-              <div className={styles.mapNode} style={{ top: '40%', left: '60%', animationDelay: '1.2s' }}></div>
-              <div className={styles.mapNode} style={{ top: '60%', left: '38%', animationDelay: '1.6s' }}></div>
-              
-              <span className={styles.mapLabel}> Telangana Node Spreading to 100+ Campuses</span>
+          {/* Right Visual: TSS Logo */}
+          <ScrollReveal direction="pop" delay={150} className={styles.mapVisual} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div className={styles.logoCard} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '3rem', backgroundColor: 'var(--bg-card)', borderRadius: '24px', border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-md)', width: '100%', maxWidth: '380px', margin: '0 auto', aspectRatio: '1.5 / 1' }}>
+              <img src="/logo.png" alt="The Student Spot Logo" style={{ maxHeight: '90px', width: 'auto', objectFit: 'contain' }} />
             </div>
           </ScrollReveal>
 
