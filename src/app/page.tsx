@@ -178,17 +178,9 @@ export default function Home() {
             <p className={styles.subheadline}>
               We connect students, colleges, companies, startups, incubators, recruiters, mentors, and speakers into one powerful, outcome-driven ecosystem.
             </p>
-
-            <div className={styles.heroBulletList}>
-              <p>Build skills.</p>
-              <p>Build proof.</p>
-              <p className={styles.bulletActive}>Build startups.</p>
-              <p className={styles.bulletActive}>Build careers.</p>
-            </div>
-            
-            <div className={styles.heroActions}>
+            <div className={styles.heroActions} style={{ marginTop: '2rem' }}>
               <Link href="/get-verified" className={styles.btnJoinNow}>
-                Join Now &rarr;
+                Get Verified
               </Link>
               <Link href="/contact" className={styles.btnPartnerWithUs}>
                 Partner With Us
