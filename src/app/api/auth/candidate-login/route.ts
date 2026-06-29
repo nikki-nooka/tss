@@ -41,7 +41,12 @@ export async function POST(request: Request) {
         github: candidate.github || null,
         portfolio: candidate.portfolio || null,
         photoPath: candidate.photoPath || null,
-        registrationDate: candidate.registrationDate
+        registrationDate: candidate.registrationDate,
+        username: candidate.username || null,
+        communityScore: candidate.communityScore || 20,
+        level: candidate.level || 'Explorer',
+        memberSince: candidate.memberSince || null,
+        roleDetails: candidate.roleDetails || {}
       }
     });
 

@@ -33,9 +33,8 @@
 }
 
 .logoText {
-  background: linear-gradient(135deg, var(--secondary) 0%, var(--primary) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  display: flex;
+  align-items: center;
 }
 
 .logoBadge {

@@ -114,26 +114,26 @@
 }
 
 .btnJoinNow {
-  background: var(--gradient-accent); /* Crimson gradient */
+  background-color: var(--secondary); /* Brand crimson */
   color: #ffffff !important;
-  border-radius: 9999px;
-  padding: 0.85rem 2rem;
+  border-radius: 20px;
+  padding: 1.1rem 2.8rem;
   font-family: var(--font-heading);
-  font-weight: 600;
-  font-size: 0.95rem;
+  font-weight: 700;
+  font-size: 1.15rem;
   text-decoration: none;
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
   cursor: pointer;
   border: none;
-  box-shadow: 0 4px 15px rgba(193, 18, 31, 0.15);
+  box-shadow: 0 10px 25px rgba(193, 18, 31, 0.2);
   transition: var(--transition);
 }
 
 .btnJoinNow:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(193, 18, 31, 0.3);
+  box-shadow: 0 14px 30px rgba(193, 18, 31, 0.35);
 }
 
 .btnJoinNow:active {
@@ -141,26 +141,29 @@
 }
 
 .btnPartnerWithUs {
-  background-color: #ffffff;
-  border: 1.5px solid var(--primary);
+  background-color: #faf8f5;
+  border: 2px solid var(--primary);
   color: var(--primary) !important;
-  border-radius: 9999px;
-  padding: 0.85rem 2rem;
+  border-radius: 20px;
+  padding: 1.1rem 2.8rem;
   font-family: var(--font-heading);
-  font-weight: 600;
-  font-size: 0.95rem;
+  font-weight: 700;
+  font-size: 1.15rem;
   text-decoration: none;
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
+  justify-content: center;
   cursor: pointer;
   transition: var(--transition);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.02);
 }
 
 .btnPartnerWithUs:hover {
   transform: translateY(-2px);
   background-color: var(--accent-light);
+}
+
+.btnPartnerWithUs:active {
+  transform: scale(0.98);
 }
 
 .btnPartnerWithUs:active {

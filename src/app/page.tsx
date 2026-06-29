@@ -21,6 +21,7 @@ import {
   Sparkles
 } from 'lucide-react';
 import { useToast } from '@/components/Toast';
+import { ScrollReveal, CountUp } from '@/components/AnimatedReveal';
 
 interface Stats {
   communityMembers: number;
@@ -165,9 +166,10 @@ export default function Home() {
         <div className={`${styles.heroContainer} container`}>
           
           {/* Left Column */}
-          <div className={styles.heroContent}>
-            <div className={styles.eyebrowBadge}>
-              <span>⚡ India's Growing Student Ecosystem</span>
+          <ScrollReveal direction="pop" className={styles.heroContent}>
+            <div className={styles.eyebrowBadge} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', backgroundColor: 'rgba(247, 127, 0, 0.08)', color: 'var(--primary)', border: 'none' }}>
+              <Sparkles size={14} style={{ fill: 'currentColor' }} />
+              <span>India's Growing Student Ecosystem</span>
             </div>
             <h1 className={styles.headline}>
               From Students<br />
@@ -177,12 +179,12 @@ export default function Home() {
               We connect students, colleges, companies, startups, incubators, recruiters, mentors, and speakers into one powerful, outcome-driven ecosystem.
             </p>
 
-            <ul className={styles.heroBulletList}>
-              <li><span className={styles.bulletDot}>•</span> Build skills.</li>
-              <li><span className={styles.bulletDot}>•</span> Build proof.</li>
-              <li><span className={styles.bulletDot} style={{ color: 'var(--primary)' }}>•</span> <strong style={{ color: 'var(--primary)' }}>Build startups.</strong></li>
-              <li><span className={styles.bulletDot} style={{ color: 'var(--primary)' }}>•</span> <strong style={{ color: 'var(--primary)' }}>Build careers.</strong></li>
-            </ul>
+            <div className={styles.heroBulletList}>
+              <p>Build skills.</p>
+              <p>Build proof.</p>
+              <p className={styles.bulletActive}>Build startups.</p>
+              <p className={styles.bulletActive}>Build careers.</p>
+            </div>
             
             <div className={styles.heroActions}>
               <Link href="/get-verified" className={styles.btnJoinNow}>
@@ -207,10 +209,10 @@ export default function Home() {
                 <span>Pan-India Network</span>
               </div>
             </div>
-          </div>
+          </ScrollReveal>
 
           {/* Right Column: Hero Grid Cards */}
-          <div className={styles.heroVisualGrid}>
+          <ScrollReveal direction="pop" delay={150} className={styles.heroVisualGrid}>
             <div className={styles.heroCardsGrid}>
               {/* Card 1: Career Clarity */}
               <div className={styles.heroCardLight}>
@@ -258,7 +260,7 @@ export default function Home() {
                 </div>
               </div>
             </div>
-          </div>
+          </ScrollReveal>
 
         </div>
       </section>
@@ -267,19 +269,27 @@ export default function Home() {
       <section className={styles.statsBar}>
         <div className={`${styles.statsGrid} container`}>
           <div>
-            <span className={styles.statVal}>{isLoadingStats ? '...' : stats.communityMembers.toLocaleString()}+</span>
+            <span className={styles.statVal}>
+              {isLoadingStats ? '...' : <CountUp value={stats.communityMembers} suffix="+" />}
+            </span>
             <span className={styles.statLabel}>Community Members</span>
           </div>
           <div>
-            <span className={styles.statVal}>100+</span>
+            <span className={styles.statVal}>
+              <CountUp value={100} suffix="+" />
+            </span>
             <span className={styles.statLabel}>Campuses Reached</span>
           </div>
           <div>
-            <span className={styles.statVal}>{isLoadingStats ? '...' : stats.opportunitiesShared.toLocaleString()}+</span>
+            <span className={styles.statVal}>
+              {isLoadingStats ? '...' : <CountUp value={stats.opportunitiesShared} suffix="+" />}
+            </span>
             <span className={styles.statLabel}>Placements in 6 Months</span>
           </div>
           <div>
-            <span className={styles.statVal}>{isLoadingStats ? '...' : stats.recruiterNetwork.toLocaleString()}+</span>
+            <span className={styles.statVal}>
+              {isLoadingStats ? '...' : <CountUp value={stats.recruiterNetwork} suffix="+" />}
+            </span>
             <span className={styles.statLabel}>Recruiter Connections</span>
           </div>
         </div>
@@ -290,7 +300,7 @@ export default function Home() {
         <div className={`${styles.introSplit} container`}>
           
           {/* Left Text */}
-          <div className={styles.heroContent}>
+          <ScrollReveal direction="up" className={styles.heroContent}>
             <span className={styles.eyebrow}>WHO WE ARE</span>
             <h2 className={styles.sectionHeading}>
               Not Another Student Group. A System That Actually Moves You Forward.
@@ -306,10 +316,10 @@ export default function Home() {
                 Started in Karimnagar, Telangana, we've grown organically to 100+ campuses across India. High trust, no spam.
               </p>
             </div>
-          </div>
+          </ScrollReveal>
 
           {/* Right Visual: Telangana node dot map */}
-          <div className={styles.mapVisual}>
+          <ScrollReveal direction="pop" delay={150} className={styles.mapVisual}>
             <div className={styles.mapCard}>
               {/* Spreading nodes from center */}
               <div className={styles.mapNode} style={{ top: '50%', left: '50%' }}></div>
@@ -318,9 +328,9 @@ export default function Home() {
               <div className={styles.mapNode} style={{ top: '40%', left: '60%', animationDelay: '1.2s' }}></div>
               <div className={styles.mapNode} style={{ top: '60%', left: '38%', animationDelay: '1.6s' }}></div>
               
-              <span className={styles.mapLabel}> Telengana Node Spreading to 100+ Campuses</span>
+              <span className={styles.mapLabel}> Telangana Node Spreading to 100+ Campuses</span>
             </div>
-          </div>
+          </ScrollReveal>
 
         </div>
       </section>
@@ -328,18 +338,18 @@ export default function Home() {
       {/* 1D. PROGRAMS SECTION */}
       <section className={styles.programsSection}>
         <div className="container">
-          <div className={styles.programsHeader}>
+          <ScrollReveal direction="up" className={styles.programsHeader}>
             <span className={styles.eyebrow}>WHAT WE OFFER</span>
             <h2>Three Programs. One Direction.</h2>
             <p>
               Whether you want to get hired, build something real, or craft the resume that actually gets read — there's a TSS program for exactly where you are.
             </p>
-          </div>
+          </ScrollReveal>
 
           <div className={styles.programsGrid}>
             
             {/* Card 1: 100x Students */}
-            <div className={styles.programCard} style={{ borderLeft: '3px solid var(--primary)' }}>
+            <ScrollReveal direction="pop" delay={0} className={styles.programCard} style={{ borderLeft: '3px solid var(--primary)' }}>
               <div>
                 <div className={styles.progHeader}>
                   <span className={`${styles.progBadge} ${styles.progBadgePrimary}`}>PREMIUM MEMBERSHIP</span>
@@ -353,10 +363,10 @@ export default function Home() {
               <Link href="/programs#100x-students" className={styles.progCta}>
                 Join 100x Students <ArrowRight size={14} />
               </Link>
-            </div>
+            </ScrollReveal>
 
             {/* Card 2: BuildX */}
-            <div className={styles.programCard} style={{ borderLeft: '3px solid var(--accent)' }}>
+            <ScrollReveal direction="pop" delay={100} className={styles.programCard} style={{ borderLeft: '3px solid var(--accent)' }}>
               <div>
                 <div className={styles.progHeader}>
                   <span className={`${styles.progBadge} ${styles.progBadgeAmber}`}>BUILDER PROGRAM</span>
@@ -370,10 +380,10 @@ export default function Home() {
               <Link href="/programs#buildx" className={styles.progCta}>
                 Register for BuildX <ArrowRight size={14} />
               </Link>
-            </div>
+            </ScrollReveal>
 
             {/* Card 3: Resume Studio */}
-            <div className={styles.programCard} style={{ borderLeft: '3px solid var(--green-light)' }}>
+            <ScrollReveal direction="pop" delay={200} className={styles.programCard} style={{ borderLeft: '3px solid var(--green-light)' }}>
               <div>
                 <div className={styles.progHeader}>
                   <span className={`${styles.progBadge} ${styles.progBadgeGreen}`}>FREE FOR ALL MEMBERS</span>
@@ -387,7 +397,7 @@ export default function Home() {
               <Link href="/programs#resume-studio" className={styles.progCta}>
                 Launch Resume Studio <ArrowRight size={14} />
               </Link>
-            </div>
+            </ScrollReveal>
 
           </div>
         </div>
@@ -396,29 +406,36 @@ export default function Home() {
       {/* 1E. COMMUNITY PROOF SECTION */}
       <section id="community-section" className={styles.communitySection}>
         <div className="container">
-          <div className={styles.communityHeader}>
+          <ScrollReveal direction="up" className={styles.communityHeader}>
             <span className={styles.eyebrow}>THE NUMBERS</span>
             <h2>A Community That Ships, Not Just Scrolls.</h2>
             <p>
               Every number here is a real person verified to prevent placement spam. Access to community channels is locked until your Member ID is approved.
             </p>
-          </div>
+          </ScrollReveal>
 
           <div className={styles.platformGrid}>
-            {platforms.map((plat, idx) => (
-              <div key={idx} className={styles.platformCard}>
-                <div className={styles.platHeader}>
-                  <span>⚡</span>
-                  <span>{plat.name}</span>
-                </div>
-                <span className={styles.platNum}>{plat.count}</span>
-                <span className={styles.platLabel}>{plat.desc}</span>
-              </div>
-            ))}
+            {platforms.map((plat, idx) => {
+              const numericCount = parseInt(plat.count.replace(/[^0-9]/g, ''), 10);
+              const isPlus = plat.count.includes('+');
+              const suffix = plat.count.includes('Followers') ? ' Followers' : plat.count.includes('Members') ? ' Members' : plat.count.includes('Subscribers') ? ' Subscribers' : '';
+              return (
+                <ScrollReveal key={idx} direction="pop" delay={idx * 50} className={styles.platformCard}>
+                  <div className={styles.platHeader}>
+                    <span>⚡</span>
+                    <span>{plat.name}</span>
+                  </div>
+                  <span className={styles.platNum}>
+                    <CountUp value={numericCount} suffix={isPlus ? '+' : ''} />{suffix}
+                  </span>
+                  <span className={styles.platLabel}>{plat.desc}</span>
+                </ScrollReveal>
+              );
+            })}
           </div>
 
           {/* Interactive Member ID Unlock Widget */}
-          <div className={styles.verifUnlockWidget}>
+          <ScrollReveal direction="up" className={styles.verifUnlockWidget}>
             <h3>Verify Member ID to Unlock Official Links</h3>
             <p>
               Approved members can enter their unique ID below to unlock WhatsApp channels, Telegram handles, and direct access links.
@@ -470,19 +487,19 @@ export default function Home() {
                 [Demo Bypass Access]
               </button>
             </div>
-          </div>
+          </ScrollReveal>
 
-          <div className={styles.quoteBlock}>
+          <ScrollReveal direction="up" className={styles.quoteBlock}>
             "Most communities measure followers. We measure verified members. That's who actually shows up."
             <span className={styles.quoteAuthor}>— Rajkamal Panthagani, Founder</span>
-          </div>
+          </ScrollReveal>
 
         </div>
       </section>
 
       {/* 1F. VERIFICATION CTA SECTION */}
       <section className={styles.ctaSection}>
-        <div className="container">
+        <ScrollReveal direction="up" className="container">
           <div className={styles.scanWrapper}>
             <div className={styles.scanLine}></div>
             <div className={styles.memberCard} style={{ opacity: 0.85 }}>
@@ -517,12 +534,12 @@ export default function Home() {
             </Link>
           </div>
           <span className={styles.helperNote}>* Requires verification via college email, ID card, or verified portfolio link.</span>
-        </div>
+        </ScrollReveal>
       </section>
 
       {/* 1G. FINAL SECTION */}
       <section className={styles.finalSection}>
-        <div className="container">
+        <ScrollReveal direction="pop" className="container">
           <h2 className={styles.finalHeading}>Stop Waiting. Start Building.</h2>
           <p className={styles.finalDesc}>20,000+ students already inside. Your Member ID is waiting.</p>
           <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap' }}>
@@ -533,7 +550,7 @@ export default function Home() {
               Contact Us
             </Link>
           </div>
-        </div>
+        </ScrollReveal>
       </section>
 
     </div>

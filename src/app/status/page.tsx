@@ -519,85 +519,130 @@ export default function Status() {
 
 
   // Dynamic script loader for html2pdf.js to save card as PDF
-  const handleDownloadPdf = () => {
-    if (!candidate || !candidate.memberId) return;
-    
+  const handleDownloadPdf = async () => {
+    const printElement = document.getElementById('print-area');
+    if (!printElement) {
+      toast.error('Card print area not found.');
+      return;
+    }
+
     toast.info('Preparing your Digital ID card PDF...');
 
-    const script = document.createElement('script');
-    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
-    script.onload = () => {
+    // Save original styles of the live container and children
+    const originalDisplay = printElement.style.display;
+    const originalFlexWrap = printElement.style.flexWrap;
+    const originalGap = printElement.style.gap;
+    const originalJustify = printElement.style.justifyContent;
+    const originalWidth = printElement.style.width;
+    const originalPadding = printElement.style.padding;
+    const originalBg = printElement.style.backgroundColor;
+    const originalMargin = printElement.style.margin;
+
+    const frontCard = document.getElementById('tss-id-card-front');
+    const backCard = document.getElementById('tss-id-card-back');
+
+    const originalFrontMargin = frontCard ? frontCard.style.margin : '';
+    const originalFrontDisplay = frontCard ? frontCard.style.display : '';
+    const originalFrontWidth = frontCard ? frontCard.style.width : '';
+    const originalFrontHeight = frontCard ? frontCard.style.height : '';
+
+    const originalBackMargin = backCard ? backCard.style.margin : '';
+    const originalBackDisplay = backCard ? backCard.style.display : '';
+    const originalBackWidth = backCard ? backCard.style.width : '';
+    const originalBackHeight = backCard ? backCard.style.height : '';
+
+    // Apply temporary layout overrides to stack cards vertically inside a 440px viewport block
+    printElement.style.display = 'block';
+    printElement.style.width = '440px';
+    printElement.style.padding = '20px';
+    printElement.style.backgroundColor = '#f5f5f7';
+    printElement.style.margin = '0 auto';
+
+    if (frontCard) {
+      frontCard.style.margin = '0 0 20px 0';
+      frontCard.style.display = 'block';
+      frontCard.style.width = '440px';
+      frontCard.style.height = '270px';
+    }
+    if (backCard) {
+      backCard.style.margin = '0';
+      backCard.style.display = 'block';
+      backCard.style.width = '440px';
+      backCard.style.height = '270px';
+    }
+
+    try {
+      // Dynamically import local package client-side
       // @ts-ignore
-      const html2pdf = window.html2pdf;
-      const frontElement = document.getElementById('tss-id-card-front');
-      const backElement = document.getElementById('tss-id-card-back');
-      
-      if (!frontElement || !backElement) {
-        toast.error('Card elements not found.');
-        return;
-      }
+      const html2pdfModule = await import('html2pdf.js');
+      const html2pdf = html2pdfModule.default;
 
-      const frontClone = frontElement.cloneNode(true) as HTMLElement;
-      frontClone.style.transform = 'none';
-      frontClone.style.width = '440px';
-      frontClone.style.height = '270px';
-      frontClone.style.margin = '0 0 20px 0';
-      frontClone.style.position = 'relative';
-
-      const backClone = backElement.cloneNode(true) as HTMLElement;
-      backClone.style.transform = 'none';
-      backClone.style.width = '440px';
-      backClone.style.height = '270px';
-      backClone.style.margin = '0';
-      backClone.style.position = 'relative';
-
-      const wrapper = document.createElement('div');
-      wrapper.style.padding = '20px';
-      wrapper.style.backgroundColor = '#f5f5f7';
-      wrapper.appendChild(frontClone);
-      wrapper.appendChild(backClone);
-
-      const tempContainer = document.createElement('div');
-      tempContainer.style.position = 'fixed';
-      tempContainer.style.top = '0';
-      tempContainer.style.left = '0';
-      tempContainer.style.width = '480px';
-      tempContainer.style.height = '600px';
-      tempContainer.style.opacity = '0';
-      tempContainer.style.pointerEvents = 'none';
-      tempContainer.style.zIndex = '-9999';
-      tempContainer.appendChild(wrapper);
-      document.body.appendChild(tempContainer);
-      
       const opt = {
-        margin: 0,
-        filename: `TSS_Member_Card_${candidate.memberId}.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { 
+        margin:       10,
+        filename:     `TSS_Member_Card_${candidate?.memberId || 'Card'}.pdf`,
+        image:        { type: 'jpeg' as const, quality: 0.98 },
+        html2canvas:  { 
           scale: 2.5, 
           useCORS: true, 
-          backgroundColor: '#f5f5f7' 
+          backgroundColor: '#f5f5f7',
+          logging: false
         },
-        jsPDF: { unit: 'px', format: [480, 600], orientation: 'portrait' }
+        jsPDF:        { unit: 'mm' as const, format: 'a4' as const, orientation: 'portrait' as const }
       };
 
-      html2pdf().from(wrapper).set(opt).save()
-        .then(() => {
-          document.body.removeChild(tempContainer);
-          toast.success('PDF Card Downloaded!');
-        })
-        .catch((err: any) => {
-          console.error(err);
-          if (document.body.contains(tempContainer)) {
-            document.body.removeChild(tempContainer);
-          }
-          toast.error('Failed to generate PDF download.');
-        });
-    };
-    script.onerror = () => {
-      toast.error('Failed to load PDF export library.');
-    };
-    document.body.appendChild(script);
+      await html2pdf().from(printElement).set(opt).save();
+
+      // Restore original styles of container and children
+      printElement.style.display = originalDisplay;
+      printElement.style.flexWrap = originalFlexWrap;
+      printElement.style.gap = originalGap;
+      printElement.style.justifyContent = originalJustify;
+      printElement.style.width = originalWidth;
+      printElement.style.padding = originalPadding;
+      printElement.style.backgroundColor = originalBg;
+      printElement.style.margin = originalMargin;
+
+      if (frontCard) {
+        frontCard.style.margin = originalFrontMargin;
+        frontCard.style.display = originalFrontDisplay;
+        frontCard.style.width = originalFrontWidth;
+        frontCard.style.height = originalFrontHeight;
+      }
+      if (backCard) {
+        backCard.style.margin = originalBackMargin;
+        backCard.style.display = originalBackDisplay;
+        backCard.style.width = originalBackWidth;
+        backCard.style.height = originalBackHeight;
+      }
+
+      toast.success('PDF Card Downloaded!');
+    } catch (err) {
+      console.error(err);
+      // Restore original styles on error
+      printElement.style.display = originalDisplay;
+      printElement.style.flexWrap = originalFlexWrap;
+      printElement.style.gap = originalGap;
+      printElement.style.justifyContent = originalJustify;
+      printElement.style.width = originalWidth;
+      printElement.style.padding = originalPadding;
+      printElement.style.backgroundColor = originalBg;
+      printElement.style.margin = originalMargin;
+
+      if (frontCard) {
+        frontCard.style.margin = originalFrontMargin;
+        frontCard.style.display = originalFrontDisplay;
+        frontCard.style.width = originalFrontWidth;
+        frontCard.style.height = originalFrontHeight;
+      }
+      if (backCard) {
+        backCard.style.margin = originalBackMargin;
+        backCard.style.display = originalBackDisplay;
+        backCard.style.width = originalBackWidth;
+        backCard.style.height = originalBackHeight;
+      }
+
+      toast.error('Failed to generate PDF download.');
+    }
   };
 
   const formatDate = (dateStr: string) => {
@@ -727,10 +772,17 @@ export default function Status() {
 
                     <div id="print-area" className={styles.membershipCardWrapper} style={{ display: 'flex', flexWrap: 'wrap', gap: '2rem', justifyContent: 'center', marginBottom: '2rem' }}>
                       {/* FRONT SIDE */}
-                      <div id="tss-id-card-front" className={styles.memberCardVirtual}>
-                        <div className={styles.cardHeader}>
+                      <Link 
+                        href={`/status?memberId=${candidate.memberId}`}
+                        id="tss-id-card-front" 
+                        className={styles.memberCardVirtual}
+                        style={{ cursor: 'pointer', textDecoration: 'none' }}
+                      >
+                        <div className={styles.cardGlow}></div>
+                        <div className={styles.meshBg}></div>
+                        <div className={styles.cardHeader} style={{ zIndex: 2 }}>
                           <div className={styles.cardLogo}>
-                            <Award className={styles.cardLogoIcon} size={18} />
+                            <img src="/logo.png" alt="TSS Logo" style={{ height: '18px', width: 'auto', marginRight: '0.35rem', objectFit: 'contain' }} />
                             <span>THE STUDENT SPOT</span>
                           </div>
                           <div className={styles.cardStatusBadge} style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.7rem', fontWeight: 700, padding: '0.25rem 0.5rem', borderRadius: 'var(--radius-sm)' }}>
@@ -738,7 +790,7 @@ export default function Status() {
                           </div>
                         </div>
 
-                        <div className={styles.cardProfileBlock}>
+                        <div className={styles.cardProfileBlock} style={{ zIndex: 2 }}>
                           <div className={styles.cardPhotoWrapper}>
                             {candidate.photoPath ? (
                               <img 
@@ -754,14 +806,14 @@ export default function Status() {
                           </div>
                           <div className={styles.cardProfileMeta}>
                             <h3 className={styles.memberName}>{candidate.fullName}</h3>
-                            <span className={styles.memberRoleTag} style={{ color: 'var(--text-muted)' }}>@{candidate.username || 'username'}</span>
+                            <span className={styles.memberRoleTag} style={{ color: '#94a3b8' }}>@{candidate.username || 'username'}</span>
                           </div>
                         </div>
 
-                        <div className={styles.cardFooterGrid}>
+                        <div className={styles.cardFooterGrid} style={{ zIndex: 2 }}>
                           <div className={styles.detailsColumn}>
                             <span className={styles.detailsLabel}>TSS LIFETIME ID</span>
-                            <span className={styles.memberIdCode} style={{ color: 'var(--primary)', fontSize: '1rem', fontWeight: 700 }}>{candidate.memberId}</span>
+                            <span className={styles.memberIdCode} style={{ color: '#f77f00', fontSize: '1rem', fontWeight: 700 }}>{candidate.memberId}</span>
                           </div>
                           
                           <div className={styles.detailsColumn}>
@@ -782,55 +834,62 @@ export default function Status() {
                             />
                           </div>
                         </div>
-                      </div>
+                      </Link>
 
                       {/* BACK SIDE */}
-                      <div id="tss-id-card-back" className={styles.memberCardVirtual} style={{ backgroundColor: '#1d1d1f', border: '1px solid rgba(255,255,255,0.1)' }}>
-                        <div className={styles.cardHeader} style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+                      <Link 
+                        href={`/status?memberId=${candidate.memberId}`}
+                        id="tss-id-card-back" 
+                        className={styles.memberCardVirtual}
+                        style={{ border: '1px solid rgba(255,255,255,0.15)', paddingTop: '1rem', paddingBottom: '1rem', cursor: 'pointer', textDecoration: 'none' }}
+                      >
+                        <div className={styles.cardGlow}></div>
+                        <div className={styles.meshBg}></div>
+                        <div className={styles.cardHeader} style={{ borderBottom: '1px solid rgba(255,255,255,0.08)', zIndex: 2, paddingBottom: '0.4rem' }}>
                           <div className={styles.cardLogo}>
-                            <Award className={styles.cardLogoIcon} size={18} style={{ color: 'var(--text-muted)' }} />
+                            <img src="/logo.png" alt="TSS Logo" style={{ height: '18px', width: 'auto', marginRight: '0.35rem', objectFit: 'contain' }} />
                             <span style={{ color: '#ffffff' }}>TSS LIFELONG IDENTITY</span>
                           </div>
-                          <span style={{ fontSize: '0.62rem', color: 'var(--text-muted)', fontWeight: 700, letterSpacing: '0.05em' }}>BACK SIDE</span>
+                          <span style={{ fontSize: '0.62rem', color: '#94a3b8', fontWeight: 700, letterSpacing: '0.05em' }}>BACK SIDE</span>
                         </div>
 
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', padding: '1rem 0', flexGrow: 1 }}>
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', padding: '0.4rem 0', flexGrow: 1, zIndex: 2 }}>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
                             <div>
-                              <span style={{ display: 'block', fontSize: '0.62rem', color: 'var(--text-muted)', fontWeight: 600 }}>WEBSITE</span>
+                              <span style={{ display: 'block', fontSize: '0.62rem', color: '#94a3b8', fontWeight: 600 }}>WEBSITE</span>
                               <span style={{ fontSize: '0.8rem', color: '#ffffff' }}>thestudentspot.app</span>
                             </div>
                             <div>
-                              <span style={{ display: 'block', fontSize: '0.62rem', color: 'var(--text-muted)', fontWeight: 600 }}>MEMBER SINCE</span>
+                              <span style={{ display: 'block', fontSize: '0.62rem', color: '#94a3b8', fontWeight: 600 }}>MEMBER SINCE</span>
                               <span style={{ fontSize: '0.8rem', color: '#ffffff' }}>{candidate.memberSince || 'Jun 2026'}</span>
                             </div>
                             <div>
-                              <span style={{ display: 'block', fontSize: '0.62rem', color: 'var(--text-muted)', fontWeight: 600 }}>COMMUNITY SCORE</span>
-                              <span style={{ fontSize: '0.8rem', color: 'var(--primary)', fontWeight: 700 }}>{candidate.communityScore || 20} pts (Level {candidate.level || 'Explorer'})</span>
+                              <span style={{ display: 'block', fontSize: '0.62rem', color: '#94a3b8', fontWeight: 600 }}>COMMUNITY SCORE</span>
+                              <span style={{ fontSize: '0.8rem', color: '#f77f00', fontWeight: 700 }}>{candidate.communityScore || 20} pts (Level {candidate.level || 'Explorer'})</span>
                             </div>
                           </div>
                           
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
                             <div>
-                              <span style={{ display: 'block', fontSize: '0.62rem', color: 'var(--text-muted)', fontWeight: 600 }}>EMERGENCY CONTACT</span>
+                              <span style={{ display: 'block', fontSize: '0.62rem', color: '#94a3b8', fontWeight: 600 }}>EMERGENCY CONTACT</span>
                               <span style={{ fontSize: '0.8rem', color: '#ffffff' }}>{candidate.roleDetails?.emergencyContact || 'Parent / TSS Security Node'}</span>
                             </div>
                             <div>
-                              <span style={{ display: 'block', fontSize: '0.62rem', color: 'var(--text-muted)', fontWeight: 600 }}>OFFICIAL CONTACT</span>
+                              <span style={{ display: 'block', fontSize: '0.62rem', color: '#94a3b8', fontWeight: 600 }}>OFFICIAL CONTACT</span>
                               <span style={{ fontSize: '0.8rem', color: '#ffffff' }}>contact@thestudentspot.app</span>
                             </div>
                             <div>
-                              <span style={{ display: 'block', fontSize: '0.62rem', color: 'var(--text-muted)', fontWeight: 600 }}>PROGRAMS ACCESS</span>
+                              <span style={{ display: 'block', fontSize: '0.62rem', color: '#94a3b8', fontWeight: 600 }}>PROGRAMS ACCESS</span>
                               <span style={{ fontSize: '0.8rem', color: '#ffffff' }}>{candidate.role === 'Student' ? 'BuildX Sandbox, 100X Students' : 'Ecosystem Partner'}</span>
                             </div>
                           </div>
                         </div>
 
-                        <div className={styles.cardHeader} style={{ borderBottom: 'none', borderTop: '1px solid rgba(255,255,255,0.08)', paddingBottom: '0', paddingTop: '0.5rem' }}>
-                          <span style={{ fontSize: '0.62rem', color: 'var(--text-muted)' }}>Scan QR code on front side to verify status</span>
-                          <span style={{ fontSize: '0.62rem', color: 'var(--text-muted)', fontWeight: 600 }}>THE STUDENT SPOT</span>
+                        <div className={styles.cardHeader} style={{ borderBottom: 'none', borderTop: '1px solid rgba(255,255,255,0.08)', paddingBottom: '0', paddingTop: '0.4rem', zIndex: 2 }}>
+                          <span style={{ fontSize: '0.62rem', color: '#94a3b8' }}>Scan QR code on front side to verify status</span>
+                          <span style={{ fontSize: '0.62rem', color: '#94a3b8', fontWeight: 600 }}>THE STUDENT SPOT</span>
                         </div>
-                      </div>
+                      </Link>
                     </div>
 
                     {/* Card Actions */}

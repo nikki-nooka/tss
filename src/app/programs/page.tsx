@@ -16,13 +16,14 @@ import {
   Code,
   ArrowUpRight
 } from 'lucide-react';
+import { ScrollReveal, CountUp } from '@/components/AnimatedReveal';
 
 export default function Programs() {
   return (
     <div className={styles.programsPage}>
       {/* 3A. PAGE HEADER */}
       <section className={styles.pageHeader}>
-        <div className={styles.container}>
+        <ScrollReveal direction="pop" className={styles.container}>
           <span className={styles.label}>WHAT WE OFFER</span>
           <h1 className={styles.heading}>Three Programs. One Direction.</h1>
           <p className={styles.description}>
@@ -35,7 +36,7 @@ export default function Programs() {
             <a href="#buildx" className={styles.jumpLink}>BuildX Sandbox</a>
             <a href="#resume-studio" className={styles.jumpLink}>Resume Studio</a>
           </div>
-        </div>
+        </ScrollReveal>
       </section>
 
       <div className={styles.thinDivider}></div>
@@ -46,7 +47,7 @@ export default function Programs() {
           <div className={styles.splitGrid}>
             
             {/* Left Column: Text & Features */}
-            <div className={styles.textCol}>
+            <ScrollReveal direction="up" className={styles.textCol}>
               <span className={styles.tagPill}>PREMIUM MEMBERSHIP</span>
               <span className={`${styles.tagPill} ${styles.tagPillPrimary}`} style={{ marginLeft: '0.5rem' }}>₹499/month</span>
               
@@ -130,11 +131,10 @@ export default function Programs() {
                   <div className={styles.whoItem}><Check size={14} /> Grads Seeking First Roles</div>
                 </div>
               </div>
-
-            </div>
+            </ScrollReveal>
 
             {/* Right Column: Visual Stack card fan */}
-            <div className={styles.visualCol}>
+            <ScrollReveal direction="pop" delay={150} className={styles.visualCol}>
               <div className={styles.stackWrapper}>
                 <div className={`${styles.fanCard} ${styles.fanCard1}`}>
                   <div className={styles.fanCardTitle}>EXPERT SESSION · TECH</div>
@@ -152,14 +152,18 @@ export default function Programs() {
                   <p className={styles.fanCardBody}>Bypass public queues directly to WhatsApp channels of hiring partners.</p>
                 </div>
               </div>
-            </div>
+            </ScrollReveal>
 
           </div>
 
           {/* Pricing Card */}
-          <div className={styles.pricingCard}>
-            <div className={styles.priceValue}>₹499 / month</div>
-            <div className={styles.priceSub}>or ₹2,999 / year</div>
+          <ScrollReveal direction="pop" className={styles.pricingCard}>
+            <div className={styles.priceValue}>
+              ₹<CountUp value={499} /> / month
+            </div>
+            <div className={styles.priceSub}>
+              or ₹<CountUp value={2999} /> / year
+            </div>
             <div className={styles.saveBadge}>Save ₹2,989/yr</div>
             <div style={{ margin: '1.5rem 0' }}>
               <Link href="/register" className={styles.btnAccent} style={{ width: '100%', justifyContent: 'center' }}>
@@ -169,15 +173,15 @@ export default function Programs() {
             <div className={styles.pricingDesc}>
               Founding member pricing • Limited seats at this rate
             </div>
-          </div>
+          </ScrollReveal>
 
         </div>
       </section>
 
       {/* 3C. PROGRAM 2 — BUILDX */}
-      <section id="buildx" className={styles.programSection} style={{ backgroundColor: 'rgba(13, 17, 32, 0.4)' }}>
+      <section id="buildx" className={styles.programSection} style={{ backgroundColor: 'var(--bg-card-2)' }}>
         <div className={styles.container}>
-          <div className={styles.timelineHeadingBlock}>
+          <ScrollReveal direction="up" className={styles.timelineHeadingBlock}>
             <span className={`${styles.tagPill} ${styles.tagPillPrimary}`}>MONTHLY BUILDER PROGRAM</span>
             <span className={`${styles.tagPill} ${styles.tagPillPrimary}`} style={{ marginLeft: '0.5rem' }}>🚀 Launching July 2026</span>
             
@@ -185,82 +189,82 @@ export default function Programs() {
             <p>
               This is not a hackathon for certificates. This is not content for TSS to post and forget. This is how founders actually get built.
             </p>
-          </div>
+          </ScrollReveal>
 
-          <div className={styles.bodyText} style={{ textAlign: 'center', maxWidth: '800px', margin: '0 auto 4rem' }}>
+          <ScrollReveal direction="up" className={styles.bodyText} style={{ textAlign: 'center', maxWidth: '800px', margin: '0 auto 4rem' }}>
             <p>
               Every month, TSS opens the floor to our entire community: what problem in your daily life is genuinely broken and genuinely fixable? We collect them all. We screen them honestly. We pick 3.
             </p>
             <p>
               Then you have 30 days to build the solution — with mentors checking in every week, your community watching, and TSS amplifying your work at every step of the way.
             </p>
-          </div>
+          </ScrollReveal>
 
           {/* The 30-Day Cycle — 4 phase cards */}
           <div className={styles.phaseGrid}>
             
-            <div className={styles.phaseCard}>
+            <ScrollReveal direction="pop" delay={0} className={styles.phaseCard}>
               <span className={styles.phaseNumber}>01</span>
               <span className={styles.phaseDays}>Days 1–5</span>
               <h4 className={styles.phaseTitle}>Intake Phase</h4>
               <p className={styles.phaseDesc}>
                 Post your real problem in the BuildX group — not a business idea, a genuine daily-life frustration that you know others face too. We run a Google Form tracker so nothing gets lost.
               </p>
-            </div>
+            </ScrollReveal>
 
-            <div className={styles.phaseCard}>
+            <ScrollReveal direction="pop" delay={100} className={styles.phaseCard}>
               <span className={styles.phaseNumber}>02</span>
               <span className={styles.phaseDays}>Days 6–7</span>
               <h4 className={styles.phaseTitle}>Selection</h4>
               <p className={styles.phaseDesc}>
                 We screen every submission against 3 filters: Is it real? Is it buildable solo or in a small team in 30 days? Does it fit TSS's strongest domains? We publish our final 3 picks publicly with explanations.
               </p>
-            </div>
+            </ScrollReveal>
 
-            <div className={styles.phaseCard}>
+            <ScrollReveal direction="pop" delay={200} className={styles.phaseCard}>
               <span className={styles.phaseNumber}>03</span>
               <span className={styles.phaseDays}>Days 8–28</span>
               <h4 className={styles.phaseTitle}>The Build</h4>
               <p className={styles.phaseDesc}>
                 You own the build. Pull in any TSS member to help. Every Sunday: 20-minute Google Meet status review per problem. Midpoint updates go out to the whole community.
               </p>
-            </div>
+            </ScrollReveal>
 
-            <div className={styles.phaseCard}>
+            <ScrollReveal direction="pop" delay={300} className={styles.phaseCard}>
               <span className={styles.phaseNumber}>04</span>
               <span className={styles.phaseDays}>Days 29–30</span>
               <h4 className={styles.phaseTitle}>Demo Day</h4>
               <p className={styles.phaseDesc}>
                 Live demo on Google Meet. Even rough builds get shown. Every builder gets TSS project verification, a LinkedIn feature, and direct recruiter/mentor introductions for startup-ready teams.
               </p>
-            </div>
+            </ScrollReveal>
 
           </div>
 
           {/* The Hackathon Track */}
-          <div className={styles.hackathonBand}>
-            <h3>After 10 Builds: The Offline Hackathon</h3>
+          <ScrollReveal direction="up" className={styles.hackathonBand}>
+            <h3>After <CountUp value={10} /> Builds: The Offline Hackathon</h3>
             <p>
               When BuildX completes 10 monthly cycles, TSS runs its first offline hackathon — larger problems, real judges from our recruiter and mentor network, and 90-day dedicated follow-up support and resources for the strongest teams. That's your incubator runway.
             </p>
-          </div>
+          </ScrollReveal>
 
           {/* The Non-Negotiable Callout */}
-          <div className={styles.glowCallout}>
+          <ScrollReveal direction="pop" className={styles.glowCallout}>
             <h3>TSS never takes equity in what you build.</h3>
             <p>
               Your idea. Your product. Your company. We give you the community, the mentors, and the visibility. The rest is yours.
             </p>
-          </div>
+          </ScrollReveal>
 
-          <div style={{ textAlign: 'center', marginTop: '2rem' }}>
+          <ScrollReveal direction="up" style={{ textAlign: 'center', marginTop: '2rem' }}>
             <Link href="/register" className={styles.btnPrimary}>
-              Register for BuildX <ArrowRight size={16} />
+Register for BuildX <ArrowRight size={16} />
             </Link>
             <div className={styles.pricingDesc} style={{ marginTop: '0.75rem' }}>
               * Must be a verified TSS member to participate
             </div>
-          </div>
+          </ScrollReveal>
 
         </div>
       </section>
@@ -271,7 +275,7 @@ export default function Programs() {
           <div className={styles.splitGrid} style={{ alignItems: 'flex-start' }}>
             
             {/* Left Column: Context */}
-            <div className={styles.textCol}>
+            <ScrollReveal direction="up" className={styles.textCol}>
               <span className={`${styles.tagPill} ${styles.tagPillGreen}`}>FREE FOR ALL VERIFIED MEMBERS</span>
               <h2 className={styles.subHeading} style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--text-main)', fontFamily: 'var(--font-heading)', marginTop: '0.5rem' }}>
                 Your Resume, FAANG-Style. Free. In 5 Minutes.
@@ -298,10 +302,10 @@ export default function Programs() {
                 </Link>
                 <span className={styles.ctaNote}>Available immediately after your Member ID is approved. Free forever.</span>
               </div>
-            </div>
+            </ScrollReveal>
 
             {/* Right Column: Steps & Features */}
-            <div className={styles.textCol} style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '16px', padding: '2.5rem' }}>
+            <ScrollReveal direction="pop" delay={150} className={styles.textCol} style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '16px', padding: '2.5rem' }}>
               <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.25rem', fontWeight: 700, marginBottom: '2rem' }}>How It Works</h3>
               
               <div className={styles.featureList} style={{ margin: 0 }}>
@@ -345,7 +349,7 @@ export default function Programs() {
                 <li style={{ display: 'flex', gap: '0.5rem', fontSize: '0.82rem', color: 'var(--text-muted)' }}><Check size={14} style={{ color: 'var(--success)', flexShrink: 0 }} /> Permanent QR code & Member ID integration</li>
                 <li style={{ display: 'flex', gap: '0.5rem', fontSize: '0.82rem', color: 'var(--text-muted)' }}><Check size={14} style={{ color: 'var(--success)', flexShrink: 0 }} /> 100% PDF downloads without hidden paywalls</li>
               </ul>
-            </div>
+            </ScrollReveal>
 
           </div>
         </div>
