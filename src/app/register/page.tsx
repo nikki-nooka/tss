@@ -16,7 +16,8 @@ import {
   Lock,
   Sparkles,
   Search,
-  Plus
+  Plus,
+  ChevronDown
 } from 'lucide-react';
 import { useToast } from '@/components/Toast';
 
@@ -39,6 +40,8 @@ export default function Register() {
   const toast = useToast();
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Card Selector & Username secures
   const [selectedRole, setSelectedRole] = useState('Student');
@@ -108,6 +111,19 @@ export default function Register() {
     socialLink: '',
     skillsInterests: ''
   });
+
+  // Close dropdown on click outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   // Check Username uniqueness with debounce
   useEffect(() => {
@@ -410,17 +426,44 @@ export default function Register() {
             <div className="fade-in">
               <h2 className={styles.stepTitle}>Select Your Role & Secure Username</h2>
               
-              <div className={styles.roleGrid}>
-                {ROLE_OPTIONS.map((opt) => (
-                  <div 
-                    key={opt.name}
-                    className={`${styles.roleCard} ${selectedRole === opt.name ? styles.roleCardActive : ''}`}
-                    onClick={() => setSelectedRole(opt.name)}
-                  >
-                    <h3>{opt.name}</h3>
-                    <p>{opt.desc}</p>
+              {/* Dropdown Role Selector */}
+              <div ref={dropdownRef} className={styles.dropdownContainer}>
+                <label className={styles.label}>Choose Your Role <span style={{ color: 'red' }}>*</span></label>
+                <div 
+                  className={styles.dropdownToggle}
+                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                >
+                  <div className={styles.dropdownSelectedInfo}>
+                    <span className={styles.selectedRoleName}>
+                      {selectedRole}
+                    </span>
+                    <span className={styles.selectedRoleDesc}>
+                      {ROLE_OPTIONS.find(r => r.name === selectedRole)?.desc}
+                    </span>
                   </div>
-                ))}
+                  <ChevronDown className={`${styles.dropdownChevron} ${isDropdownOpen ? styles.chevronOpen : ''}`} size={20} />
+                </div>
+
+                {isDropdownOpen && (
+                  <div className={styles.dropdownMenu}>
+                    {ROLE_OPTIONS.map((opt) => (
+                      <div 
+                        key={opt.name}
+                        className={`${styles.dropdownItem} ${selectedRole === opt.name ? styles.dropdownItemActive : ''}`}
+                        onClick={() => {
+                          setSelectedRole(opt.name);
+                          setIsDropdownOpen(false);
+                        }}
+                      >
+                        <div className={styles.itemMeta}>
+                          <span className={styles.itemName}>{opt.name}</span>
+                          <span className={styles.itemDesc}>{opt.desc}</span>
+                        </div>
+                        {selectedRole === opt.name && <Check size={16} className={styles.checkIcon} />}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Secure Username */}
