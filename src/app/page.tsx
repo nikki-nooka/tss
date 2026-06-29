@@ -288,7 +288,7 @@ export default function Home() {
           {/* Right Visual: TSS Logo */}
           <ScrollReveal direction="pop" delay={150} className={styles.mapVisual}>
             <div className={styles.mapCard}>
-              <img src="/logo.png" alt="The Student Spot Logo" style={{ maxHeight: '65px', width: 'auto', objectFit: 'contain', zIndex: 10 }} />
+              <img src="/logo.png" alt="The Student Spot Logo" style={{ maxHeight: '110px', width: 'auto', objectFit: 'contain', zIndex: 10 }} />
             </div>
           </ScrollReveal>
 
