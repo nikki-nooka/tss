@@ -282,7 +282,7 @@ export default function About() {
 
             <div className={styles.founderAvatarCol}>
               <div className={styles.photoContainer}>
-                <img src="/priya.png" alt="Priya - Growth & Partnership Lead" className={styles.founderPhoto} />
+                <img src="/priya.png" alt="Priya - Growth & Partnership Lead" className={styles.founderPhoto} style={{ objectPosition: 'center 15%' }} />
                 <div className={styles.floatingSocials}>
                   <a href="https://www.linkedin.com/in/lakshmipp1" target="_blank" rel="noopener noreferrer" className={styles.floatingSocialBtn} title="LinkedIn">
                     <LinkedInIcon style={{ width: '16px', height: '16px' }} />
