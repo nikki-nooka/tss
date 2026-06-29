@@ -137,6 +137,29 @@ export default function Home() {
   return (
     <div className={styles.home}>
       
+      {/* Floating Vertical Social Bar */}
+      <div className={styles.floatingShareBar}>
+        <a href="https://www.instagram.com/the_studentspot" target="_blank" rel="noopener noreferrer" className={styles.shareBtnInsta} title="Instagram">
+          <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+            <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+            <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+          </svg>
+        </a>
+        <a href="https://www.linkedin.com/company/thestudentspot/" target="_blank" rel="noopener noreferrer" className={styles.shareBtnLink} title="LinkedIn">
+          <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
+            <rect x="2" y="9" width="4" height="12" />
+            <circle cx="4" cy="4" r="2" />
+          </svg>
+        </a>
+        <a href="https://whatsapp.com/channel/0029Vb6ft6072WTxJ5eMKA2I" target="_blank" rel="noopener noreferrer" className={styles.shareBtnWhats} title="WhatsApp Channel">
+          <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
+          </svg>
+        </a>
+      </div>
+
       {/* 1A. HERO SECTION */}
       <section className={styles.hero}>
         <div className={`${styles.heroContainer} container`}>
@@ -144,63 +167,96 @@ export default function Home() {
           {/* Left Column */}
           <div className={styles.heroContent}>
             <div className={styles.eyebrowBadge}>
-              <span>20,000+ Verified Members</span>
+              <span>⚡ India's Growing Student Ecosystem</span>
             </div>
             <h1 className={styles.headline}>
-              Build Your Identity. Build Your Future.
+              From Students<br />
+              <span className={styles.highlightText}>To Founders</span>
             </h1>
             <p className={styles.subheadline}>
-              The Student Spot helps ambitious students, founders, recruiters and professionals build one verified identity to access opportunities, careers, startups, mentorship and community throughout their journey.
+              We connect students, colleges, companies, startups, incubators, recruiters, mentors, and speakers into one powerful, outcome-driven ecosystem.
             </p>
+
+            <ul className={styles.heroBulletList}>
+              <li><span className={styles.bulletDot}>•</span> Build skills.</li>
+              <li><span className={styles.bulletDot}>•</span> Build proof.</li>
+              <li><span className={styles.bulletDot} style={{ color: 'var(--primary)' }}>•</span> <strong style={{ color: 'var(--primary)' }}>Build startups.</strong></li>
+              <li><span className={styles.bulletDot} style={{ color: 'var(--primary)' }}>•</span> <strong style={{ color: 'var(--primary)' }}>Build careers.</strong></li>
+            </ul>
             
             <div className={styles.heroActions}>
-              <Link href="/get-verified" className={styles.btnAccent}>
-                Get Verified <ArrowRight size={16} />
+              <Link href="/get-verified" className={styles.btnJoinNow}>
+                Join Now &rarr;
               </Link>
-              <Link href="/programs" className={styles.btnOutline}>
-                Explore Programs
+              <Link href="/contact" className={styles.btnPartnerWithUs}>
+                Partner With Us
               </Link>
             </div>
 
-            <div className={styles.trustSignals}>
-              <span>One Identity.</span>
-              <span>•</span>
-              <span>Lifetime Verification.</span>
-              <span>•</span>
-              <span>Endless Opportunities.</span>
+            <div className={styles.statsDotsRow}>
+              <div className={styles.statDotItem}>
+                <span className={styles.greenDot}></span>
+                <span>20,000+ Students</span>
+              </div>
+              <div className={styles.statDotItem}>
+                <span className={styles.greenDot}></span>
+                <span>50+ Colleges</span>
+              </div>
+              <div className={styles.statDotItem}>
+                <span className={styles.greenDot}></span>
+                <span>Pan-India Network</span>
+              </div>
             </div>
           </div>
 
-          {/* Right Column: Stylized Floating ID Card */}
-          <div className={styles.heroVisual}>
-            <div className={styles.cardGlowContainer}>
-              <div className={styles.memberCard}>
-                
-                {/* Top header */}
-                <div className={styles.cardHeader}>
-                  <span className={styles.cardLogo}>TSS</span>
-                  <span className={styles.cardBadge} style={{ backgroundColor: 'var(--primary-light)', borderColor: 'rgba(var(--primary-rgb), 0.35)', color: 'var(--primary)' }}>VERIFIED</span>
+          {/* Right Column: Hero Grid Cards */}
+          <div className={styles.heroVisualGrid}>
+            <div className={styles.heroCardsGrid}>
+              {/* Card 1: Career Clarity */}
+              <div className={styles.heroCardLight}>
+                <div className={styles.cardIconWrapper} style={{ backgroundColor: 'rgba(247, 127, 0, 0.08)', color: 'var(--primary)' }}>
+                  <Compass size={20} />
                 </div>
-
-                {/* Center ID */}
-                <div className={styles.cardCenter}>
-                  <div className={styles.cardId}>TSS-000257</div>
-                  <div className={styles.cardSubtitle}>One Identity. Lifetime Verification.</div>
+                <div>
+                  <h4 className={styles.cardTitle}>Career Clarity</h4>
+                  <p className={styles.cardDesc}>Know exactly what path to take</p>
                 </div>
-
-                {/* Bottom footer */}
-                <div className={styles.cardFooter}>
-                  <div className={styles.cardHolder}>
-                    <span className={styles.holderName}>Ananya Sharma</span>
-                    <span className={styles.holderRole}>Founder</span>
-                  </div>
-                  <span className={styles.cardMark} style={{ color: 'var(--text-muted)' }}>TSS</span>
-                </div>
-
               </div>
-            </div>
-            <div className={styles.cardUndertext}>
-              Your unique, permanent TSS identity
+
+              {/* Card 2: Real Skills */}
+              <div className={styles.heroCardLight}>
+                <div className={styles.cardIconWrapper} style={{ backgroundColor: 'rgba(193, 18, 31, 0.08)', color: 'var(--secondary)' }}>
+                  <Zap size={20} />
+                </div>
+                <div>
+                  <h4 className={styles.cardTitle}>Real Skills</h4>
+                  <p className={styles.cardDesc}>Industry-ready training</p>
+                </div>
+              </div>
+
+              {/* Card 3: Network */}
+              <div className={styles.heroCardLight}>
+                <div className={styles.cardIconWrapper} style={{ backgroundColor: 'rgba(22, 163, 74, 0.08)', color: '#16a34a' }}>
+                  <Users size={20} />
+                </div>
+                <div>
+                  <h4 className={styles.cardTitle}>Network</h4>
+                  <p className={styles.cardDesc}>Connect with industry</p>
+                </div>
+              </div>
+
+              {/* Card 4: Opportunities */}
+              <div className={styles.heroCardGradient}>
+                <div className={styles.cardIconWrapper} style={{ backgroundColor: 'rgba(255, 255, 255, 0.2)', color: '#ffffff' }}>
+                  <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                    <polygon points="5 3 19 12 5 21 5 3" />
+                  </svg>
+                </div>
+                <div>
+                  <h4 className={styles.cardTitle} style={{ color: '#ffffff' }}>Opportunities</h4>
+                  <p className={styles.cardDesc} style={{ color: 'rgba(255, 255, 255, 0.85)' }}>Jobs & internships</p>
+                </div>
+              </div>
             </div>
           </div>
 
