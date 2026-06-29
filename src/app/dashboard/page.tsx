@@ -476,6 +476,47 @@ export default function CandidateDashboard() {
     }
   };
 
+  const handleResetResume = () => {
+    if (!profile) return;
+    const confirmReset = window.confirm(
+      "Are you sure you want to reset your resume details to default profile values?"
+    );
+    if (!confirmReset) return;
+
+    setResumeData({
+      fullName: profile.fullName || '',
+      email: profile.email || '',
+      mobile: profile.mobile || '',
+      linkedin: profile.linkedin || '',
+      github: profile.github || '',
+      portfolio: profile.portfolio || '',
+      skills: Array.isArray(profile.skills) ? profile.skills.join(', ') : '',
+      education: [
+        {
+          institution: profile.college || 'My University',
+          degree: profile.highestQualification || 'Bachelor of Technology',
+          year: profile.graduationYear ? String(profile.graduationYear) : '2026'
+        }
+      ],
+      experience: [
+        {
+          company: 'The Student Spot (TSS)',
+          role: 'Ecosystem Collaborator',
+          duration: 'June 2026 - Present',
+          description: 'Collaborated on deploying verified student identity features and networking systems.\nAssisted in building proof-of-work project sandboxes and organizing community cohorts.'
+        }
+      ],
+      projects: [
+        {
+          title: 'TSS Innovate Portal',
+          tech: 'React, Next.js, PostgreSQL, Supabase',
+          description: 'Engineered a vetted credentials showcase for young founders, campus ambassadors, and partners.\nImplemented a dynamic multi-step verification and lookup engine.'
+        }
+      ]
+    });
+    toast.success('Resume details reset successfully.');
+  };
+
   const handleAtsAnalysis = () => {
     if (!jdInput.trim() || !resumeData) {
       toast.error('Please paste a Job Description and ensure resume details are filled.');
@@ -1789,6 +1830,17 @@ export default function CandidateDashboard() {
                                   </div>
                                 </div>
                               ))}
+                            </div>
+
+                            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1.5rem', borderTop: '1px dashed rgba(0, 0, 0, 0.06)', paddingTop: '1.25rem' }}>
+                              <button 
+                                type="button" 
+                                onClick={handleResetResume} 
+                                className="btn btn-light btn-sm"
+                                style={{ color: 'var(--danger)', border: '1px solid rgba(239, 68, 68, 0.2)', backgroundColor: 'rgba(239, 68, 68, 0.05)' }}
+                              >
+                                Reset Resume to Default
+                              </button>
                             </div>
                           </div>
                         ) : (
