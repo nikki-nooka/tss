@@ -5,10 +5,27 @@
   min-height: 100vh;
 }
 
+.dashboardContainer {
+  width: 100%;
+  max-width: 100%;
+  padding-left: 3rem;
+  padding-right: 3rem;
+  margin-left: auto;
+  margin-right: auto;
+  box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+  .dashboardContainer {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}
+
 /* Header Banner - aligns with cream brand gradient */
 .dashboardHeader {
   background: var(--gradient-header);
-  padding: 4.5rem 0 3.5rem 0;
+  padding: 9.5rem 0 3.5rem 0;
   border-bottom: 1px solid rgba(0, 0, 0, 0.05);
   text-align: center;
 }
@@ -138,7 +155,7 @@
 .dashboardLayout {
   display: grid;
   grid-template-columns: 240px 1fr;
-  gap: 2.5rem;
+  gap: 1.5rem;
   align-items: start;
 }
 
@@ -231,7 +248,7 @@
   background-color: var(--bg-card);
   border: 1px solid rgba(0, 0, 0, 0.06);
   border-radius: var(--radius-lg);
-  padding: 2.5rem;
+  padding: 2rem;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.02);
   text-align: left;
 }
@@ -692,8 +709,8 @@
 
 .studioGrid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 2rem;
+  grid-template-columns: 460px 1fr;
+  gap: 2.5rem;
   align-items: start;
 }
 
@@ -820,7 +837,7 @@
 
 .resumePaper {
   width: 100%;
-  min-width: 580px;
+  max-width: 794px;
   background-color: #ffffff;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02);
   border: 1px solid rgba(0, 0, 0, 0.06);

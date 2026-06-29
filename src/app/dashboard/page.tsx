@@ -1140,7 +1140,7 @@ export default function CandidateDashboard() {
     <div className={styles.dashboardPage}>
       {/* Dynamic Header Banner */}
       <section className={styles.dashboardHeader}>
-        <div className="container">
+        <div className={styles.dashboardContainer}>
           <span className={styles.subTitle}>TSS Candidate Portal</span>
           <h1>{profile ? `Welcome Back, ${profile.fullName}` : 'Sign In to Your Workspace'}</h1>
           <p className={styles.tagline}>
@@ -1152,7 +1152,7 @@ export default function CandidateDashboard() {
       </section>
 
       <section className={styles.dashboardContent}>
-        <div className="container">
+        <div className={styles.dashboardContainer}>
           
           {/* 1. SIGN IN INTERFACE */}
           {!profile ? (
