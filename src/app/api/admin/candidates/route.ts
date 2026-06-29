@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getCandidates, getCandidateById, updateCandidate, logAdminAction, Candidate } from '@/lib/db';
+import { getCandidates, getCandidateById, updateCandidate, deleteCandidate, logAdminAction, Candidate } from '@/lib/db';
 import { getSessionUser } from '@/lib/auth';
 import { sendEmail } from '@/lib/email';
 
@@ -122,7 +122,7 @@ export async function PUT(request: Request) {
     }
 
     const body = await request.json();
-    const { candidateId, action, notes } = body;
+    const { candidateId, action, notes, reasons, checklist } = body;
 
     if (!candidateId || !action) {
       return NextResponse.json({ error: 'Candidate ID and Action are required' }, { status: 400 });
@@ -134,32 +134,60 @@ export async function PUT(request: Request) {
     }
 
     const updates: Partial<Candidate> = {};
+    const roleDetails = candidate.roleDetails || {};
+    const auditLogs = roleDetails.auditLogs || [];
+
+    const logHistory = (eventText: string) => {
+      auditLogs.push({
+        date: new Date().toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' }),
+        event: eventText,
+        admin: admin.email
+      });
+      roleDetails.auditLogs = auditLogs;
+      updates.roleDetails = roleDetails;
+    };
 
     if (action === 'review') {
       updates.status = 'Under Review';
       if (notes !== undefined) updates.notes = notes;
-      
+      logHistory('Moved candidate to Under Review');
+
       await logAdminAction(
         admin.email,
         'CANDIDATE_UNDER_REVIEW',
         `Moved candidate ${candidate.fullName} (${candidate.email}) to Under Review.`
       );
     } 
+    else if (action === 'request_changes') {
+      updates.status = 'Needs Changes';
+      if (notes !== undefined) updates.notes = notes;
+      logHistory(`Requested changes: ${notes || 'check checklist details'}`);
+
+      await logAdminAction(
+        admin.email,
+        'CANDIDATE_NEEDS_CHANGES',
+        `Requested profile changes for candidate ${candidate.fullName} (${candidate.email}).`
+      );
+    }
     else if (action === 'approve') {
-      // Generate Member ID if not already generated
       if (!candidate.memberId) {
         const allCandidates = await getCandidates();
         updates.memberId = generateMemberId(candidate, allCandidates);
-        candidate.memberId = updates.memberId; // update local ref
+        candidate.memberId = updates.memberId;
       }
       updates.status = 'Verified';
-      
-      // Update community score (+100 points for verification approval!)
+
+      // Merge draft update if present
+      if (roleDetails.draftUpdate) {
+        Object.assign(updates, roleDetails.draftUpdate);
+        delete roleDetails.draftUpdate;
+      }
+
       const currentScore = candidate.communityScore !== undefined ? candidate.communityScore : 20;
       updates.communityScore = currentScore + 100;
-      updates.level = 'Builder'; // Advance level to Builder!
 
       if (notes !== undefined) updates.notes = notes;
+      logHistory(`Verification Approved. Generated TSS ID: ${candidate.memberId}`);
 
       await logAdminAction(
         admin.email,
@@ -167,7 +195,6 @@ export async function PUT(request: Request) {
         `Approved candidate ${candidate.fullName} (${candidate.email}). Generated Member ID: ${candidate.memberId}`
       );
 
-      // Send Verification Approval email (Nodemailer dispatcher)
       await sendEmail({
         to: candidate.email,
         subject: `Welcome to the Spot! Your TSS Member ID is Verified`,
@@ -192,16 +219,57 @@ The Student Spot Team`
     } 
     else if (action === 'reject') {
       updates.status = 'Rejected';
+      roleDetails.rejectionReasons = Array.isArray(reasons) ? reasons : ['Fake Information'];
+      roleDetails.rejectionDate = new Date().toISOString();
+      delete roleDetails.draftUpdate; // clear staged updates on reject
+
       if (notes !== undefined) updates.notes = notes;
+      logHistory(`Profile Rejected. Reasons: ${roleDetails.rejectionReasons.join(', ')}`);
 
       await logAdminAction(
         admin.email,
         'CANDIDATE_REJECTED',
-        `Rejected candidate ${candidate.fullName} (${candidate.email}). Notes: ${notes || 'None'}`
+        `Rejected candidate ${candidate.fullName} (${candidate.email}). Reasons: ${roleDetails.rejectionReasons.join(', ')}`
       );
     } 
+    else if (action === 'suspend') {
+      updates.status = 'Suspended';
+      logHistory('Verification Suspended');
+
+      await logAdminAction(
+        admin.email,
+        'CANDIDATE_SUSPENDED',
+        `Suspended verification for candidate ${candidate.fullName} (${candidate.email}).`
+      );
+    }
+    else if (action === 'delete') {
+      await deleteCandidate(candidateId);
+
+      await logAdminAction(
+        admin.email,
+        'CANDIDATE_DELETED',
+        `Permanently deleted candidate profile ${candidate.fullName} (${candidate.email}).`
+      );
+
+      return NextResponse.json({
+        success: true,
+        message: `Candidate profile deleted permanently`
+      });
+    }
+    else if (action === 'allow_early_reapply') {
+      delete roleDetails.rejectionDate;
+      roleDetails.allowEarlyReapply = true;
+      logHistory('Allowed early reapplication');
+
+      await logAdminAction(
+        admin.email,
+        'CANDIDATE_EARLY_REAPPLY_ALLOWED',
+        `Allowed early reapplication for candidate ${candidate.fullName} (${candidate.email}).`
+      );
+    }
     else if (action === 'update_notes') {
       updates.notes = notes;
+      logHistory('Updated Admin Vetting Notes');
 
       await logAdminAction(
         admin.email,
@@ -209,17 +277,26 @@ The Student Spot Team`
         `Updated notes for candidate ${candidate.fullName} (${candidate.email}).`
       );
     } 
+    else if (action === 'update_checklist') {
+      roleDetails.checklist = checklist || {};
+      updates.roleDetails = roleDetails;
+
+      await logAdminAction(
+        admin.email,
+        'CANDIDATE_CHECKLIST_UPDATE',
+        `Updated validation checklist for candidate ${candidate.fullName} (${candidate.email}).`
+      );
+    }
     else {
       return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
     }
 
-    // Save changes to Supabase
     await updateCandidate(candidateId, updates);
-    const updatedCandidate = { ...candidate, ...updates };
+    const updatedCandidate = await getCandidateById(candidateId);
 
     return NextResponse.json({
       success: true,
-      message: `Candidate status updated successfully to ${updatedCandidate.status}`,
+      message: `Candidate status updated successfully`,
       candidate: updatedCandidate
     });
 

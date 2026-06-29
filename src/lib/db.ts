@@ -37,7 +37,7 @@ export interface Candidate {
   portfolio?: string;
   instagram?: string;
   xTwitter?: string;
-  status: 'Pending' | 'Under Review' | 'Verified' | 'Rejected';
+  status: 'Submitted' | 'Pending' | 'Under Review' | 'Needs Changes' | 'Resubmitted' | 'Verified' | 'Rejected' | 'Suspended' | 'Deleted';
   memberId?: string; // Format: TSS-000000
   notes?: string;
   registrationDate: string; // ISO String
@@ -323,6 +323,15 @@ export async function updateCandidate(id: string, updates: Partial<Candidate>): 
   const { error } = await supabase
     .from('candidates')
     .update(dbUpdates)
+    .eq('id', id);
+
+  if (error) throw error;
+}
+
+export async function deleteCandidate(id: string): Promise<void> {
+  const { error } = await supabase
+    .from('candidates')
+    .delete()
     .eq('id', id);
 
   if (error) throw error;

@@ -44,11 +44,14 @@ interface CandidateProfile {
   github?: string | null;
   portfolio?: string | null;
   photoPath?: string | null;
+  resumePath?: string | null;
+  resumeLink?: string | null;
   registrationDate: string;
   username?: string;
   communityScore?: number;
   level?: string;
   memberSince?: string;
+  notes?: string | null;
   roleDetails?: any;
 }
 
@@ -109,6 +112,8 @@ export default function CandidateDashboard() {
   const [editLinkedin, setEditLinkedin] = useState('');
   const [editGithub, setEditGithub] = useState('');
   const [editPortfolio, setEditPortfolio] = useState('');
+  const [editResumeLink, setEditResumeLink] = useState('');
+  const [editPhotoPath, setEditPhotoPath] = useState('');
   const [isUpdatingSettings, setIsUpdatingSettings] = useState(false);
   
   // Build Challenge state
@@ -250,6 +255,8 @@ export default function CandidateDashboard() {
     setEditLinkedin(p.linkedin || '');
     setEditGithub(p.github || '');
     setEditPortfolio(p.portfolio || '');
+    setEditResumeLink(p.resumeLink || p.resumePath || '');
+    setEditPhotoPath(p.photoPath || '');
   };
 
   // Sync resume builder with current profile values
@@ -352,7 +359,9 @@ export default function CandidateDashboard() {
         skills: editSkills,
         linkedin: editLinkedin,
         github: editGithub,
-        portfolio: editPortfolio
+        portfolio: editPortfolio,
+        resumeLink: editResumeLink,
+        photoPath: editPhotoPath
       };
 
       const res = await fetch('/api/auth/update-candidate', {
@@ -362,18 +371,20 @@ export default function CandidateDashboard() {
       });
       const data = await res.json();
 
-      if (data.success) {
+      if (data.success && data.candidate) {
+        toast.success(data.message || 'Profile settings updated successfully!');
+        localStorage.setItem('tss_candidate_session', JSON.stringify(data.candidate));
+        setProfile(data.candidate);
+      } else if (data.success) {
         toast.success('Profile settings updated successfully!');
-        
-        // Update local session state
-        const updatedProfile: CandidateProfile = {
+        const updatedProfile = {
           ...profile,
           ...updates,
           graduationYear: editGraduationYear ? Number(editGraduationYear) : null,
           skills: editSkills.split(',').map(s => s.trim()).filter(Boolean)
         };
         localStorage.setItem('tss_candidate_session', JSON.stringify(updatedProfile));
-        setProfile(updatedProfile);
+        setProfile(updatedProfile as any);
       } else {
         toast.error(data.error || 'Failed to save updates.');
       }
@@ -383,6 +394,181 @@ export default function CandidateDashboard() {
     } finally {
       setIsUpdatingSettings(false);
     }
+  };
+
+  const getReapplyCountdown = () => {
+    if (!profile || profile.status !== 'Rejected') return null;
+    const rejDateStr = profile.roleDetails?.rejectionDate;
+    if (!rejDateStr) return null;
+
+    if (profile.roleDetails?.allowEarlyReapply) return null;
+
+    const rejTime = new Date(rejDateStr).getTime();
+    const now = Date.now();
+    const threeDaysMs = 3 * 24 * 60 * 60 * 1000;
+    const remaining = rejTime + threeDaysMs - now;
+
+    if (remaining <= 0) return null;
+
+    const days = Math.floor(remaining / (24 * 60 * 60 * 1000));
+    const hours = Math.floor((remaining % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000));
+    const minutes = Math.floor((remaining % (60 * 60 * 1000)) / (60 * 1000));
+
+    return { days, hours, minutes, remaining };
+  };
+
+  const handleReapplySubmit = async () => {
+    if (!profile) return;
+    
+    setIsUpdatingSettings(true);
+    try {
+      const res = await fetch('/api/admin/candidates', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          candidateId: profile.id,
+          action: 'review'
+        })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        toast.success('Your profile reapplication has been successfully submitted.');
+        localStorage.setItem('tss_candidate_session', JSON.stringify(data.candidate));
+        setProfile(data.candidate);
+      } else {
+        toast.error(data.error || 'Failed to submit reapplication.');
+      }
+    } catch {
+      toast.error('Network connection error.');
+    } finally {
+      setIsUpdatingSettings(false);
+    }
+  };
+
+  const handleDeleteProfile = async () => {
+    if (!profile) return;
+    const confirmDelete = window.confirm(
+      "Deleting your TSS profile will permanently remove:\n- Personal Information\n- Verification Status\n- Resume Link\n- TSS ID\n- Digital ID Card\n\nThis action cannot be undone. Are you sure you want to proceed?"
+    );
+    if (!confirmDelete) return;
+
+    try {
+      const res = await fetch('/api/admin/candidates', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ candidateId: profile.id, action: 'delete' })
+      });
+      if (res.ok) {
+        toast.success('Your TSS profile has been permanently deleted.');
+        localStorage.removeItem('tss_candidate_session');
+        window.location.href = '/';
+      } else {
+        toast.error('Failed to delete profile.');
+      }
+    } catch (err) {
+      toast.error('Network connection error.');
+    }
+  };
+
+  const renderStatusBanner = () => {
+    if (!profile) return null;
+    
+    const status = profile.status;
+    if (status === 'Verified') return null;
+
+    let bannerColor = 'rgba(0, 113, 227, 0.08)';
+    let borderColor = 'rgba(0, 113, 227, 0.2)';
+    let textColor = 'var(--text-main)';
+    let title = 'Account Submitted';
+    let desc = 'Your registration parameters are currently queued for vetting review.';
+
+    if (status === 'Under Review') {
+      bannerColor = 'rgba(249, 115, 22, 0.08)';
+      borderColor = 'rgba(249, 115, 22, 0.2)';
+      title = 'Account Under Review';
+      desc = 'Our admin verification team is actively auditing your portfolios and credentials details.';
+    } else if (status === 'Needs Changes') {
+      bannerColor = 'rgba(234, 179, 8, 0.08)';
+      borderColor = 'rgba(234, 179, 8, 0.2)';
+      title = 'Action Required: Profile Changes Requested';
+      desc = `The review board requested changes: "${profile.notes || 'Please ensure your resume link is public and accessible.'}" Update your settings parameters below to resubmit.`;
+    } else if (status === 'Resubmitted') {
+      bannerColor = 'rgba(37, 99, 235, 0.08)';
+      borderColor = 'rgba(37, 99, 235, 0.2)';
+      title = 'Profile Updates Resubmitted';
+      desc = 'Your updated parameters have been successfully queued for audit review.';
+    } else if (status === 'Suspended') {
+      bannerColor = 'rgba(107, 114, 128, 0.08)';
+      borderColor = 'rgba(107, 114, 128, 0.2)';
+      title = 'Verification Suspended';
+      desc = 'Your TSS account verification audit has been suspended. Please check notes or contact support.';
+    } else if (status === 'Deleted') {
+      bannerColor = 'rgba(0, 0, 0, 0.08)';
+      borderColor = 'rgba(0, 0, 0, 0.2)';
+      title = 'Profile Marked Deleted';
+      desc = 'Your TSS profile details have been scheduled for deletion removal.';
+    } else if (status === 'Rejected') {
+      bannerColor = 'rgba(239, 68, 68, 0.08)';
+      borderColor = 'rgba(239, 68, 68, 0.2)';
+      title = 'Profile Verification Rejected';
+      
+      const reasons = profile.roleDetails?.rejectionReasons || [];
+      const countdown = getReapplyCountdown();
+      
+      return (
+        <div style={{ backgroundColor: bannerColor, border: `1px solid ${borderColor}`, borderRadius: '12px', padding: '1.5rem', marginBottom: '1.5rem', color: textColor }}>
+          <strong style={{ display: 'block', fontSize: '1rem', fontWeight: 700, marginBottom: '0.4rem', color: '#ef4444' }}>
+            {title}
+          </strong>
+          
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', fontSize: '0.85rem' }}>
+            <p style={{ margin: 0 }}>Your profile vetting could not be verified.</p>
+            {reasons.length > 0 && (
+              <div>
+                <strong>Reasons:</strong>
+                <ul style={{ margin: '0.25rem 0 0 1.25rem', paddingLeft: 0 }}>
+                  {reasons.map((r: string) => <li key={r}>{r}</li>)}
+                </ul>
+              </div>
+            )}
+            {profile.notes && (
+              <p style={{ margin: 0 }}>
+                <strong>Additional Notes:</strong> {profile.notes}
+              </p>
+            )}
+
+            {countdown ? (
+              <div style={{ marginTop: '0.75rem', padding: '0.75rem', border: '1px solid rgba(239, 68, 68, 0.2)', borderRadius: '8px', backgroundColor: 'rgba(239, 68, 68, 0.04)' }}>
+                <strong>Reapplication Locked:</strong> You can edit your profile details and reapply after the cooling period ends in:{' '}
+                <span style={{ fontWeight: 700, color: '#ef4444' }}>
+                  {countdown.days}d {countdown.hours}h {countdown.minutes}m
+                </span>
+              </div>
+            ) : (
+              <div style={{ marginTop: '0.75rem' }}>
+                <button 
+                  onClick={handleReapplySubmit}
+                  className="btn btn-primary btn-sm"
+                  style={{ backgroundColor: '#0071e3', borderColor: '#0071e3', color: '#ffffff' }}
+                >
+                  Submit Reapplication Now
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div style={{ backgroundColor: bannerColor, border: `1px solid ${borderColor}`, borderRadius: '12px', padding: '1.25rem', marginBottom: '1.5rem', display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
+        <ShieldAlert style={{ color: borderColor.includes('249') ? '#f97316' : '#0071e3', flexShrink: 0, marginTop: '0.15rem' }} size={24} />
+        <div>
+          <strong style={{ display: 'block', color: 'var(--text-main)', marginBottom: '0.2rem', fontWeight: 700 }}>{title}</strong>
+          <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{desc}</span>
+        </div>
+      </div>
+    );
   };
 
   const fetchJobsData = async () => {
@@ -1002,17 +1188,7 @@ export default function CandidateDashboard() {
                     <h2>Digital Membership Card</h2>
                     <p>Your verified credentials card represents high-trust security. Once verified, download it or share the QR validation code.</p>
                     
-                    {profile.status !== 'Verified' && (
-                      <div className={styles.pendingBanner} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', padding: '1rem', marginBottom: '1.5rem' }}>
-                        <ShieldAlert className={styles.pendingIcon} style={{ color: 'var(--primary)' }} size={24} />
-                        <div>
-                          <strong style={{ display: 'block', color: 'var(--text-main)', marginBottom: '0.2rem' }}>Account Vetting in Progress</strong>
-                          <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                            Your profile is currently under manual audit. The verified resume studio, vetting levels logs, and Build sandbox submission features will unlock automatically once an administrator approves your registration.
-                          </span>
-                        </div>
-                      </div>
-                    )}
+                    {renderStatusBanner()}
 
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2rem', justifyContent: 'center', marginBottom: '2rem' }}>
                       {/* FRONT SIDE */}
@@ -1658,6 +1834,18 @@ export default function CandidateDashboard() {
                     <h2>Account Settings</h2>
                     <p>Update your registration parameters. These changes sync with the database and dynamically update your resume builder.</p>
                     
+                    {profile.roleDetails?.draftUpdate && (
+                      <div className={styles.pendingBanner} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', backgroundColor: 'rgba(234, 179, 8, 0.08)', border: '1px solid rgba(234, 179, 8, 0.2)', borderRadius: 'var(--radius-md)', padding: '1rem', marginBottom: '1.5rem' }}>
+                        <ShieldAlert style={{ color: '#eab308' }} size={24} />
+                        <div>
+                          <strong style={{ display: 'block', color: 'var(--text-main)', marginBottom: '0.2rem' }}>Profile Changes Pending Review</strong>
+                          <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                            Your recent profile updates are currently queued for administrator approval. Your previously verified parameters remain active.
+                          </span>
+                        </div>
+                      </div>
+                    )}
+
                     <div className={styles.settingsGrid}>
                       <div className={styles.formField}>
                         <label className={styles.formLabel}>Full Name</label>
@@ -1743,11 +1931,43 @@ export default function CandidateDashboard() {
                           className={styles.formInput}
                         />
                       </div>
+
+                      <div className={styles.formField}>
+                        <label className={styles.formLabel}>Profile Photo URL</label>
+                        <input 
+                          type="url" 
+                          placeholder="e.g. https://example.com/photo.jpg" 
+                          value={editPhotoPath}
+                          onChange={(e) => setEditPhotoPath(e.target.value)}
+                          className={styles.formInput}
+                        />
+                      </div>
+
+                      <div className={styles.formField}>
+                        <label className={styles.formLabel}>Resume Link (Google Drive URL only)</label>
+                        <input 
+                          type="url" 
+                          placeholder="https://drive.google.com/..." 
+                          value={editResumeLink}
+                          onChange={(e) => setEditResumeLink(e.target.value)}
+                          className={styles.formInput}
+                        />
+                      </div>
                     </div>
 
-                    <button type="submit" disabled={isUpdatingSettings} className="btn btn-primary" style={{ marginTop: '1.5rem' }}>
-                      {isUpdatingSettings ? 'Saving Settings...' : 'Save Profile Changes'}
-                    </button>
+                    <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'center', marginTop: '1.5rem' }}>
+                      <button type="submit" disabled={isUpdatingSettings} className="btn btn-primary">
+                        {isUpdatingSettings ? 'Saving Settings...' : 'Save Profile Changes'}
+                      </button>
+                      <button 
+                        type="button" 
+                        onClick={handleDeleteProfile} 
+                        className="btn btn-light"
+                        style={{ color: 'var(--danger)', border: '1px solid rgba(239, 68, 68, 0.2)', backgroundColor: 'rgba(239, 68, 68, 0.05)', marginLeft: 'auto' }}
+                      >
+                        Delete Profile Permanently
+                      </button>
+                    </div>
                   </form>
                 )}
 

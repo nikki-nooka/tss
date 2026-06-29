@@ -109,6 +109,57 @@ export default function AdminDashboard() {
   const [adminNotes, setAdminNotes] = useState('');
   const [candidateFwdLogs, setCandidateFwdLogs] = useState<ForwardLog[]>([]);
 
+  // Checklist & Rejection States
+  const [checklistState, setChecklistState] = useState<Record<string, boolean>>({});
+  const [showRejectModal, setShowRejectModal] = useState(false);
+  const [selectedRejectionReasons, setSelectedRejectionReasons] = useState<string[]>([]);
+
+  const calculateProfileCompleteness = (cand: Candidate) => {
+    let score = 0;
+    // Personal Details (Name, Email, Phone, Location) = 20%
+    if (cand.fullName && cand.email && cand.mobile && cand.city && cand.state) {
+      score += 20;
+    } else if (cand.fullName) {
+      score += 10;
+    }
+    
+    // Education details = 20%
+    const roleDetails = cand.roleDetails || {};
+    if (cand.college && cand.graduationYear && (roleDetails.degree || cand.highestQualification) && (roleDetails.specialization || roleDetails.branch)) {
+      score += 20;
+    } else if (cand.college) {
+      score += 10;
+    }
+
+    // Skills = 15%
+    if (cand.skills && cand.skills.length > 0) score += 15;
+
+    // Resume = 15%
+    if (cand.resumePath || roleDetails.resumeLink) score += 15;
+
+    // Portfolio links = 15%
+    if (cand.linkedin) score += 15;
+
+    // Profile photo = 15%
+    if (cand.photoPath) score += 15;
+
+    return score;
+  };
+
+  const renderChecklistItem = (key: string, label: string) => {
+    const isChecked = !!checklistState[key];
+    return (
+      <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.78rem', margin: '0.25rem 0', cursor: 'pointer', color: 'var(--text-main)' }}>
+        <input 
+          type="checkbox" 
+          checked={isChecked}
+          onChange={(e) => handleChecklistChange(key, e.target.checked)} 
+        />
+        <span>{label}</span>
+      </label>
+    );
+  };
+
   // Jobs Board Admin States
   const [adminJobs, setAdminJobs] = useState<any[]>([]);
   const [adminApps, setAdminApps] = useState<any[]>([]);
@@ -588,6 +639,9 @@ export default function AdminDashboard() {
   const handleOpenCandidate = async (candidate: Candidate) => {
     setSelectedCandidate(candidate);
     setAdminNotes(candidate.notes || '');
+    setChecklistState(candidate.roleDetails?.checklist || {});
+    setSelectedRejectionReasons([]);
+    setShowRejectModal(false);
     setShowFwdForm(false);
     
     // Fetch forwarding history for this specific candidate
@@ -602,8 +656,18 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleUpdateStatus = async (action: 'approve' | 'reject' | 'review') => {
+  const handleUpdateStatus = async (
+    action: 'approve' | 'reject' | 'review' | 'request_changes' | 'suspend' | 'delete' | 'allow_early_reapply',
+    customReasons?: string[]
+  ) => {
     if (!selectedCandidate) return;
+
+    if (action === 'delete') {
+      const confirmDelete = window.confirm(
+        "Permanently deleting this profile will remove:\n- Personal Information\n- Verification Status\n- Resume Link\n- TSS ID\n- Digital ID Card\n\nThis action cannot be undone. Are you sure?"
+      );
+      if (!confirmDelete) return;
+    }
 
     try {
       const res = await fetch('/api/admin/candidates', {
@@ -612,16 +676,22 @@ export default function AdminDashboard() {
         body: JSON.stringify({
           candidateId: selectedCandidate.id,
           action,
-          notes: adminNotes
+          notes: adminNotes,
+          reasons: customReasons || selectedRejectionReasons,
+          checklist: checklistState
         })
       });
       const data = await res.json();
       
       if (res.ok && data.success) {
-        toast.success(`Candidate status updated to ${data.candidate.status}`);
-        
-        // Refresh local items
-        setSelectedCandidate(data.candidate);
+        if (action === 'delete') {
+          toast.success('Candidate profile deleted permanently.');
+          setSelectedCandidate(null);
+        } else {
+          toast.success(`Candidate status updated successfully.`);
+          setSelectedCandidate(data.candidate);
+        }
+        setShowRejectModal(false);
         loadCandidates();
         loadStats();
         loadLogs();
@@ -652,6 +722,37 @@ export default function AdminDashboard() {
       }
     } catch {
       toast.error('Failed to save notes.');
+    }
+  };
+
+  const handleChecklistChange = async (key: string, val: boolean) => {
+    if (!selectedCandidate) return;
+    const newChecklist = { ...checklistState, [key]: val };
+    setChecklistState(newChecklist);
+    
+    try {
+      const res = await fetch('/api/admin/candidates', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          candidateId: selectedCandidate.id,
+          action: 'update_checklist',
+          checklist: newChecklist
+        })
+      });
+      if (res.ok) {
+        const updatedCand = {
+          ...selectedCandidate,
+          roleDetails: {
+            ...selectedCandidate.roleDetails,
+            checklist: newChecklist
+          }
+        };
+        setSelectedCandidate(updatedCand);
+        setCandidates(prev => prev.map(c => c.id === selectedCandidate.id ? updatedCand : c));
+      }
+    } catch (err) {
+      console.error(err);
     }
   };
 
@@ -805,14 +906,49 @@ export default function AdminDashboard() {
     toast.success('Candidate spreadsheet downloaded successfully');
   };
 
-  const getStatusBadge = (status: Candidate['status']) => {
-    switch (status) {
-      case 'Pending': return <span className="badge badge-pending">Pending</span>;
-      case 'Under Review': return <span className="badge badge-review">Under Review</span>;
-      case 'Verified': return <span className="badge badge-verified">Verified</span>;
-      case 'Rejected': return <span className="badge badge-rejected">Rejected</span>;
-      default: return <span className="badge">{status}</span>;
+  const getStatusBadge = (status: Candidate['status'] | string) => {
+    let bg = '#0071e3'; // Blue
+    let fg = '#ffffff';
+    let label = status || 'Submitted';
+
+    if (status === 'Submitted' || status === 'Pending') {
+      bg = '#0071e3'; 
+      label = 'Submitted';
+    } else if (status === 'Under Review') {
+      bg = '#f97316'; // Orange
+    } else if (status === 'Needs Changes') {
+      bg = '#eab308'; // Yellow
+      fg = '#1d1d1f';
+    } else if (status === 'Resubmitted') {
+      bg = '#2563eb'; // Royal Blue
+      label = 'Resubmitted';
+    } else if (status === 'Verified') {
+      bg = '#10b981'; // Green
+    } else if (status === 'Rejected') {
+      bg = '#ef4444'; // Red
+    } else if (status === 'Suspended') {
+      bg = '#6b7280'; // Gray
+    } else if (status === 'Deleted') {
+      bg = '#000000'; // Black
     }
+
+    return (
+      <span 
+        style={{ 
+          backgroundColor: bg, 
+          color: fg, 
+          padding: '0.25rem 0.6rem', 
+          borderRadius: '4px',
+          fontWeight: 700,
+          fontSize: '0.72rem',
+          textTransform: 'uppercase',
+          letterSpacing: '0.04em',
+          display: 'inline-block'
+        }}
+      >
+        {label}
+      </span>
+    );
   };
 
   if (isLoading) {
@@ -1003,7 +1139,12 @@ export default function AdminDashboard() {
                               <td className={styles.idCol}>{c.memberId || <span style={{color:'var(--text-muted)'}}>Pending</span>}</td>
                               <td>
                                 <div className={styles.nameLabel}>{c.fullName}</div>
-                                <small className={styles.expTag}>{c.experienceLevel || 'N/A'}</small>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginTop: '0.15rem' }}>
+                                  <small className={styles.expTag}>{c.experienceLevel || 'N/A'}</small>
+                                  <span style={{ fontSize: '0.7rem', color: '#10b981', fontWeight: 700 }}>
+                                    {calculateProfileCompleteness(c)}% complete
+                                  </span>
+                                </div>
                               </td>
                               <td>
                                 <span className={styles.adminRole} style={{ backgroundColor: 'var(--primary-light)', color: 'var(--primary)' }}>
@@ -1885,61 +2026,214 @@ export default function AdminDashboard() {
               <div className={styles.modalRightCol}>
                 
                 {/* Vetting Status Update Box */}
-                <div className={styles.vettingCtrlCard}>
-                  <h3>Admin Vetting Control</h3>
-                  <div className={styles.currentStatusBadgeRow}>
-                    <span>Current Vetting Status:</span>
-                    {getStatusBadge(selectedCandidate.status)}
+                <div className={styles.vettingCtrlCard} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                  <div>
+                    <h3 style={{ margin: '0 0 0.5rem 0' }}>Admin Vetting Control</h3>
+                    <div className={styles.currentStatusBadgeRow} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span>Current Vetting Status:</span>
+                      {getStatusBadge(selectedCandidate.status)}
+                    </div>
+                    {selectedCandidate.memberId && (
+                      <div className={styles.verifiedIdRow} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.5rem' }}>
+                        <span>TSS Member ID:</span>
+                        <strong>{selectedCandidate.memberId}</strong>
+                      </div>
+                    )}
                   </div>
-                  
-                  {selectedCandidate.memberId && (
-                    <div className={styles.verifiedIdRow}>
-                      <span>TSS Member ID:</span>
-                      <strong>{selectedCandidate.memberId}</strong>
+
+                  {/* Profile Completeness Indicator */}
+                  <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '0.75rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', fontWeight: 700, marginBottom: '0.4rem' }}>
+                      <span>Profile Completeness</span>
+                      <span>{calculateProfileCompleteness(selectedCandidate)}%</span>
+                    </div>
+                    <div style={{ width: '100%', height: '6px', backgroundColor: 'var(--border-color)', borderRadius: '3px', overflow: 'hidden' }}>
+                      <div 
+                        style={{ 
+                          height: '100%', 
+                          backgroundColor: calculateProfileCompleteness(selectedCandidate) === 100 ? 'var(--success)' : 'var(--primary)', 
+                          width: `${calculateProfileCompleteness(selectedCandidate)}%`,
+                          transition: 'width 0.3s ease'
+                        }}
+                      ></div>
+                    </div>
+                  </div>
+
+                  {/* Pending Draft Updates Box */}
+                  {selectedCandidate.roleDetails?.draftUpdate && (
+                    <div style={{ padding: '0.75rem', border: '1px solid #0071e3', borderRadius: '6px', backgroundColor: 'rgba(0, 113, 227, 0.04)' }}>
+                      <h4 style={{ margin: '0 0 0.5rem 0', fontSize: '0.75rem', fontWeight: 700, color: '#0071e3', textTransform: 'uppercase' }}>Pending Profile Updates</h4>
+                      <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', margin: '0 0 0.5rem 0' }}>Approved updates automatically replace previous verified information:</p>
+                      <div style={{ display: 'grid', gap: '0.4rem', fontSize: '0.7rem', maxHeight: '180px', overflowY: 'auto' }}>
+                        {Object.entries(selectedCandidate.roleDetails.draftUpdate).map(([key, val]: [string, any]) => {
+                          const orig = (selectedCandidate as any)[key];
+                          return (
+                            <div key={key} style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: '0.2rem' }}>
+                              <strong style={{ textTransform: 'capitalize' }}>{key.replace(/([A-Z])/g, ' $1')}:</strong>
+                              <div style={{ color: 'var(--text-muted)', textDecoration: 'line-through' }}>{Array.isArray(orig) ? orig.join(', ') : String(orig || 'N/A')}</div>
+                              <div style={{ color: '#10b981', fontWeight: 700 }}>{Array.isArray(val) ? val.join(', ') : String(val || 'N/A')}</div>
+                            </div>
+                          );
+                        })}
+                      </div>
                     </div>
                   )}
 
-                  <div className="form-group" style={{ marginTop: '1rem' }}>
-                    <label className="form-label">Administrative / HR Vetting Notes</label>
+                  {/* Candidate Validation Checklist */}
+                  <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '0.75rem' }}>
+                    <h4 style={{ margin: '0 0 0.5rem 0', fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase' }}>Vetting Validation Checklist</h4>
+                    
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', maxHeight: '240px', overflowY: 'auto', paddingRight: '0.25rem' }}>
+                      <div>
+                        <strong style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Identity</strong>
+                        {renderChecklistItem('fullName', 'Full Name Valid')}
+                        {renderChecklistItem('email', 'Email Address Valid')}
+                        {renderChecklistItem('mobile', 'Phone Number Valid')}
+                        {renderChecklistItem('photo', 'Profile Photo Approved')}
+                      </div>
+                      <div>
+                        <strong style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Education</strong>
+                        {renderChecklistItem('college', 'College Verified')}
+                        {renderChecklistItem('degree', 'Degree Details Complete')}
+                        {renderChecklistItem('branch', 'Branch / Specialization Match')}
+                        {renderChecklistItem('gradYear', 'Graduation Year Valid')}
+                      </div>
+                      <div>
+                        <strong style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Resume</strong>
+                        {renderChecklistItem('resumeLink', 'Resume Link Accessible')}
+                        {renderChecklistItem('resumeAts', 'ATS Friendly File Format')}
+                        {renderChecklistItem('resumeComplete', 'Resume Experience Complete')}
+                        {renderChecklistItem('resumeProjects', 'Projects Listed Verified')}
+                      </div>
+                      <div>
+                        <strong style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Skills</strong>
+                        {renderChecklistItem('skillsMatch', 'Skills Match Resume')}
+                        {renderChecklistItem('skillsProjects', 'Projects Codebase Match')}
+                        {renderChecklistItem('skillsGithub', 'GitHub Repos Verified')}
+                        {renderChecklistItem('skillsPortfolio', 'Portfolio Experience Match')}
+                      </div>
+                      <div>
+                        <strong style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Social Links</strong>
+                        {renderChecklistItem('linkLinkedin', 'LinkedIn Authenticated')}
+                        {renderChecklistItem('linkGithub', 'GitHub Link Matches')}
+                        {renderChecklistItem('linkPortfolio', 'Portfolio Link Verified')}
+                      </div>
+                      <div>
+                        <strong style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Verification</strong>
+                        {renderChecklistItem('verifiedValid', 'Everything Validated')}
+                        {renderChecklistItem('verifiedReady', 'Ready for Member ID Generation')}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Admin Notes Box */}
+                  <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '0.75rem' }}>
+                    <h4 style={{ margin: '0 0 0.25rem 0', fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase' }}>Admin Vetting Notes</h4>
+                    <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', margin: '0 0 0.5rem 0', lineHeight: 1.3 }}>
+                      Add internal verification notes, resume quality observations, duplicate record information, communication history, validation comments, or rejection notes. Invisible to general members.
+                    </p>
                     <textarea
                       value={adminNotes}
                       onChange={e => setAdminNotes(e.target.value)}
-                      placeholder="Type details about candidate validation, resume check, or rejection reasons..."
-                      rows={4}
+                      placeholder="Type internal vetting logs or comments..."
+                      rows={3}
                       className="form-textarea"
+                      style={{ fontSize: '0.8rem' }}
                     />
+                    <button 
+                      onClick={handleSaveNotesOnly} 
+                      className="btn btn-light btn-sm"
+                      style={{ width: '100%', marginTop: '0.4rem', fontSize: '0.75rem' }}
+                    >
+                      Save Vetting Notes Only
+                    </button>
                   </div>
 
-                  <div className={styles.controlButtons}>
-                    <button 
-                      onClick={() => handleUpdateStatus('approve')} 
-                      className="btn btn-primary btn-sm"
-                      style={{ backgroundColor: 'var(--success)' }}
-                    >
-                      Approve & Verify ID
-                    </button>
-                    <button 
-                      onClick={() => handleUpdateStatus('review')} 
-                      className="btn btn-outline btn-sm"
-                      style={{ color: 'var(--primary)', borderColor: 'var(--primary)' }}
-                    >
-                      Move to Review
-                    </button>
-                    <button 
-                      onClick={() => handleUpdateStatus('reject')} 
-                      className="btn btn-outline btn-sm"
-                      style={{ color: 'var(--danger)', borderColor: 'var(--danger)' }}
-                    >
-                      Reject Profile
-                    </button>
+                  {/* Action Buttons Panel */}
+                  <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '0.75rem' }}>
+                    <h4 style={{ margin: '0 0 0.5rem 0', fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase' }}>Verification Actions</h4>
+                    
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '0.5rem' }}>
+                      <button 
+                        onClick={() => handleUpdateStatus('approve')} 
+                        className="btn btn-primary btn-sm"
+                        style={{ backgroundColor: 'var(--success)', borderColor: 'var(--success)' }}
+                      >
+                        Approve & Generate TSS ID
+                      </button>
+
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+                        <button 
+                          onClick={() => handleUpdateStatus('request_changes')} 
+                          className="btn btn-outline btn-sm"
+                          style={{ color: '#d97706', borderColor: '#d97706' }}
+                        >
+                          Request Profile Changes
+                        </button>
+                        <button 
+                          onClick={() => handleUpdateStatus('review')} 
+                          className="btn btn-outline btn-sm"
+                          style={{ color: '#0071e3', borderColor: '#0071e3' }}
+                        >
+                          Move to Manual Review
+                        </button>
+                      </div>
+
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+                        <button 
+                          onClick={() => setShowRejectModal(true)} 
+                          className="btn btn-outline btn-sm"
+                          style={{ color: 'var(--danger)', borderColor: 'var(--danger)' }}
+                        >
+                          Reject Profile
+                        </button>
+                        <button 
+                          onClick={() => handleUpdateStatus('suspend')} 
+                          className="btn btn-outline btn-sm"
+                          style={{ color: '#6b7280', borderColor: '#6b7280' }}
+                        >
+                          Suspend Verification
+                        </button>
+                      </div>
+
+                      <button 
+                        onClick={() => handleUpdateStatus('delete')} 
+                        className="btn btn-light btn-sm"
+                        style={{ color: 'var(--danger)', border: '1px solid rgba(239, 68, 68, 0.2)', backgroundColor: 'rgba(239, 68, 68, 0.05)' }}
+                      >
+                        Delete Profile Permanently
+                      </button>
+
+                      {selectedCandidate.roleDetails?.rejectionDate && (
+                        <button 
+                          onClick={() => handleUpdateStatus('allow_early_reapply')} 
+                          className="btn btn-outline btn-sm"
+                          style={{ color: '#10b981', borderColor: '#10b981', marginTop: '0.25rem' }}
+                        >
+                          Allow Early Reapplication ✓
+                        </button>
+                      )}
+                    </div>
                   </div>
-                  <button 
-                    onClick={handleSaveNotesOnly} 
-                    className="btn btn-light btn-sm"
-                    style={{ width: '100%', marginTop: '0.75rem' }}
-                  >
-                    Save Vetting Notes Only
-                  </button>
+
+                  {/* Verification History Logs List */}
+                  <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '0.75rem' }}>
+                    <h4 style={{ margin: '0 0 0.5rem 0', fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase' }}>Verification History Log</h4>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', maxHeight: '180px', overflowY: 'auto' }}>
+                      {(selectedCandidate.roleDetails?.auditLogs || []).map((log: any, idx: number) => (
+                        <div key={idx} style={{ padding: '0.4rem', border: '1px solid var(--border-color)', borderRadius: '4px', fontSize: '0.7rem', backgroundColor: 'var(--bg-main)' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 600, color: 'var(--text-main)' }}>
+                            <span>{log.event}</span>
+                            <span>{log.date}</span>
+                          </div>
+                          <div style={{ color: 'var(--text-muted)', fontSize: '0.65rem', marginTop: '0.1rem' }}>Admin: {log.admin}</div>
+                        </div>
+                      ))}
+                      {(selectedCandidate.roleDetails?.auditLogs || []).length === 0 && (
+                        <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontStyle: 'italic', margin: 0 }}>No vetting history logs registered.</p>
+                      )}
+                    </div>
+                  </div>
                 </div>
 
                 {/* Recruiter Forwarding Panel */}
@@ -2023,6 +2317,79 @@ export default function AdminDashboard() {
 
             </div>
 
+          </div>
+        </div>
+      )}
+
+      {/* --- PREDEFINED REJECTION REASONS MODAL --- */}
+      {showRejectModal && (
+        <div className={styles.modalOverlay} style={{ zIndex: 1100 }} onClick={() => setShowRejectModal(false)}>
+          <div className={styles.modalBody} style={{ maxWidth: '480px', width: '90%' }} onClick={e => e.stopPropagation()}>
+            <div className={styles.modalHeader}>
+              <h2 style={{ fontSize: '1.25rem', fontWeight: 700 }}>Reject Candidate Profile</h2>
+              <button onClick={() => setShowRejectModal(false)} className={styles.closeModalBtn}>
+                <X size={20} />
+              </button>
+            </div>
+            
+            <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: 0 }}>
+                Select one or more predefined rejection reasons to communicate to the candidate:
+              </p>
+              
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '0.5rem', maxHeight: '200px', overflowY: 'auto', padding: '0.75rem', border: '1px solid var(--border-color)', borderRadius: '6px', backgroundColor: 'var(--bg-main)' }}>
+                {[
+                  'Incomplete Profile', 'Invalid Resume', 'Duplicate Registration', 'Low Quality Resume',
+                  'Missing Portfolio', 'Missing Contact Details', 'Invalid Email', 'Role Mismatch',
+                  'Incomplete Education Details', 'Fake Information', 'Already Registered', 'Other'
+                ].map(reason => {
+                  const isChecked = selectedRejectionReasons.includes(reason);
+                  return (
+                    <label key={reason} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem', cursor: 'pointer', color: 'var(--text-main)' }}>
+                      <input 
+                        type="checkbox" 
+                        checked={isChecked}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setSelectedRejectionReasons(prev => [...prev, reason]);
+                          } else {
+                            setSelectedRejectionReasons(prev => prev.filter(r => r !== reason));
+                          }
+                        }}
+                      />
+                      <span>{reason}</span>
+                    </label>
+                  );
+                })}
+              </div>
+
+              <div className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                <label className="form-label">Additional Comments / Feedback</label>
+                <textarea
+                  value={adminNotes}
+                  onChange={e => setAdminNotes(e.target.value)}
+                  placeholder="Provide detailed feedback or steps to help the candidate reapply successfully..."
+                  rows={3}
+                  className="form-textarea"
+                  style={{ fontSize: '0.8rem' }}
+                />
+              </div>
+
+              <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end', marginTop: '0.5rem' }}>
+                <button type="button" onClick={() => setShowRejectModal(false)} className="btn btn-outline btn-sm">
+                  Cancel
+                </button>
+                <button 
+                  type="button" 
+                  disabled={selectedRejectionReasons.length === 0}
+                  onClick={() => handleUpdateStatus('reject')} 
+                  className="btn btn-primary btn-sm"
+                  style={{ backgroundColor: 'var(--danger)', borderColor: 'var(--danger)', color: '#ffffff' }}
+                >
+                  Confirm Rejection
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
