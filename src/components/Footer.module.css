@@ -1,8 +1,8 @@
 .footer {
   position: relative;
-  background-color: #030509;
-  color: var(--text-secondary, #8895BB);
-  border-top: 1px solid var(--border, #1B2240);
+  background-color: #0d0c0a; /* Rich brand black-brown */
+  color: var(--text-muted);
+  border-top: 1px solid var(--border-color);
   padding: 64px 24px 32px;
   margin-top: auto;
   overflow: hidden;
@@ -44,28 +44,28 @@
 }
 
 .logoText {
-  font-family: 'Syne', sans-serif;
+  font-family: var(--font-heading);
   font-weight: 800;
   font-size: 1.25rem;
-  color: var(--text-primary, #E8ECFF);
+  color: var(--text-inverse);
   line-height: 1.1;
   letter-spacing: -0.01em;
 }
 
 .logoSubtitle {
-  font-family: 'Space Mono', monospace;
+  font-family: var(--font-body);
   font-size: 0.65rem;
   font-weight: 700;
-  color: var(--accent, #F59E0B);
+  color: var(--primary);
   letter-spacing: 0.05em;
   text-transform: uppercase;
   margin-top: 0.15rem;
 }
 
 .brandDesc {
-  font-size: var(--text-sm, 0.82rem);
+  font-size: 0.82rem;
   line-height: 1.6;
-  color: var(--text-secondary, #8895BB);
+  color: var(--text-muted);
   max-width: 320px;
 }
 
@@ -82,17 +82,18 @@
   width: 36px;
   height: 36px;
   border-radius: 8px;
-  background-color: var(--bg-card, #0D1120);
-  border: 1px solid var(--border, #1B2240);
-  color: var(--text-secondary, #8895BB);
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-muted);
   transition: all 0.2s ease;
   text-decoration: none;
 }
 
 .socialIconBtn:hover {
-  border-color: var(--primary-light, #8B5CF6);
-  color: var(--text-primary, #E8ECFF);
+  border-color: var(--primary);
+  color: var(--text-inverse);
   transform: translateY(-2px);
+  background-color: rgba(255, 255, 255, 0.08);
 }
 
 .linkGroup {
@@ -102,8 +103,8 @@
 }
 
 .groupTitle {
-  color: var(--text-primary, #E8ECFF);
-  font-family: 'Syne', sans-serif;
+  color: var(--text-inverse);
+  font-family: var(--font-heading);
   font-size: 0.78rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -117,8 +118,8 @@
 }
 
 .link {
-  font-size: var(--text-sm, 0.82rem);
-  color: var(--text-secondary, #8895BB);
+  font-size: 0.82rem;
+  color: var(--text-muted);
   transition: all 0.2s ease;
   text-decoration: none;
   display: flex;
@@ -127,14 +128,14 @@
 }
 
 .link:hover {
-  color: var(--primary-pale, #A78BFA);
+  color: var(--primary);
   transform: translateX(4px);
 }
 
 /* Bottom Bar */
 .bottomBar {
-  background-color: #020306;
-  border-top: 1px solid var(--border, #1B2240);
+  background-color: #080706;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
   padding: 1.5rem 0;
 }
 
@@ -150,14 +151,14 @@
 }
 
 .copyright {
-  font-size: var(--text-xs, 0.72rem);
-  color: var(--text-muted, #3D4A6E);
+  font-size: 0.72rem;
+  color: var(--text-muted);
 }
 
 .disclaimer {
-  font-size: var(--text-xs, 0.72rem);
+  font-size: 0.72rem;
   font-weight: 600;
-  color: var(--accent, #F59E0B);
+  color: var(--secondary-light);
 }
 
 @media (max-width: 900px) {

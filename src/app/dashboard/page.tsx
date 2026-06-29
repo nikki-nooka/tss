@@ -605,8 +605,8 @@ export default function CandidateDashboard() {
     const status = profile.status;
     if (status === 'Verified') return null;
 
-    let bannerColor = 'rgba(0, 113, 227, 0.08)';
-    let borderColor = 'rgba(0, 113, 227, 0.2)';
+    let bannerColor = 'var(--primary-light)';
+    let borderColor = 'rgba(var(--primary-rgb), 0.2)';
     let textColor = 'var(--text-main)';
     let title = 'Account Submitted';
     let desc = 'Your registration parameters are currently queued for vetting review.';

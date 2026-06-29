@@ -197,9 +197,9 @@
   font-family: var(--font-body);
   font-size: 0.875rem;
   font-weight: 600;
-  padding: 0.55rem 1.1rem;
-  background: linear-gradient(110deg, var(--accent, #F59E0B), var(--accent-light, #FCD34D));
-  color: #050810 !important;
+  padding: 0.55rem 1.25rem;
+  background: var(--gradient-primary);
+  color: #ffffff !important;
   border: none;
   border-radius: 10px;
   text-decoration: none;
@@ -208,13 +208,12 @@
   gap: 0.5rem;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 4px 15px rgba(245, 158, 11, 0.2);
+  box-shadow: 0 4px 15px rgba(247, 127, 0, 0.2);
 }
 
 .getVerifiedBtn:hover {
   transform: scale(1.02);
-  filter: brightness(1.1);
-  box-shadow: 0 6px 20px rgba(245, 158, 11, 0.35);
+  box-shadow: 0 6px 20px rgba(247, 127, 0, 0.3);
 }
 
 .getVerifiedBtn:active {
