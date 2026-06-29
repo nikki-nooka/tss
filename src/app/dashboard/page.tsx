@@ -115,6 +115,12 @@ export default function CandidateDashboard() {
   const [editResumeLink, setEditResumeLink] = useState('');
   const [editPhotoPath, setEditPhotoPath] = useState('');
   const [isUpdatingSettings, setIsUpdatingSettings] = useState(false);
+
+  // ATS Optimizer states
+  const [jdInput, setJdInput] = useState('');
+  const [atsAnalysis, setAtsAnalysis] = useState<any | null>(null);
+  const [isAnalyzingAts, setIsAnalyzingAts] = useState(false);
+  const [resumeSubTab, setResumeSubTab] = useState<'edit' | 'ats'>('edit');
   
   // Build Challenge state
   const [buildProblemPitch, setBuildProblemPitch] = useState('');
@@ -468,6 +474,75 @@ export default function CandidateDashboard() {
     } catch (err) {
       toast.error('Network connection error.');
     }
+  };
+
+  const handleAtsAnalysis = () => {
+    if (!jdInput.trim() || !resumeData) {
+      toast.error('Please paste a Job Description and ensure resume details are filled.');
+      return;
+    }
+    setIsAnalyzingAts(true);
+    
+    setTimeout(() => {
+      const jdClean = jdInput.toLowerCase();
+      const commonTechKeywords = [
+        'react', 'next.js', 'typescript', 'javascript', 'python', 'django', 'flask', 'fastapi',
+        'node.js', 'express', 'postgresql', 'supabase', 'mongodb', 'docker', 'kubernetes', 'aws',
+        'azure', 'gcp', 'graphql', 'rest api', 'git', 'ci/cd', 'testing', 'cypress', 'jest',
+        'tailwind', 'css', 'html', 'java', 'spring boot', 'c++', 'go', 'rust', 'ruby', 'rails',
+        'redux', 'sql', 'nosql', 'redis', 'elasticsearch', 'machine learning', 'ai', 'devops',
+        'agile', 'scrum', 'system design', 'microservices'
+      ];
+      
+      const foundInJd = commonTechKeywords.filter(kw => jdClean.includes(kw));
+      
+      const resumeContent = [
+        resumeData.fullName.toLowerCase(),
+        resumeData.skills.toLowerCase(),
+        ...resumeData.education.map(e => e.institution.toLowerCase() + ' ' + e.degree.toLowerCase()),
+        ...resumeData.experience.map(e => e.company.toLowerCase() + ' ' + e.role.toLowerCase() + ' ' + e.description.toLowerCase()),
+        ...resumeData.projects.map(p => p.title.toLowerCase() + ' ' + p.tech.toLowerCase() + ' ' + p.description.toLowerCase())
+      ].join(' ');
+
+      const matched = foundInJd.filter(kw => resumeContent.includes(kw));
+      const missing = foundInJd.filter(kw => !resumeContent.includes(kw));
+
+      let score = 50; 
+      if (foundInJd.length > 0) {
+        score += Math.round((matched.length / foundInJd.length) * 40);
+      } else {
+        score += 30; 
+      }
+
+      const hasLinkedIn = !!resumeData.linkedin;
+      const hasGitHub = !!resumeData.github;
+      const hasPortfolio = !!resumeData.portfolio;
+      const bulletsCount = resumeData.experience.reduce((acc, exp) => acc + exp.description.split('\n').filter(Boolean).length, 0);
+
+      if (hasLinkedIn) score += 3;
+      if (hasGitHub) score += 3;
+      if (hasPortfolio) score += 4;
+      
+      score = Math.min(100, score);
+
+      setAtsAnalysis({
+        score,
+        matched,
+        missing,
+        hasLinkedIn,
+        hasGitHub,
+        hasPortfolio,
+        bulletsCount,
+        recommendations: [
+          missing.length > 0 ? `Incorporate missing keywords: ${missing.slice(0, 4).join(', ')} directly into your skills block.` : 'Great job! You match all the key terms extracted from the description.',
+          bulletsCount < 4 ? 'Add more metrics-driven bullets in your Experience section (e.g. "Improved performance by 15%").' : 'Experience section bullets are descriptive and complete.',
+          !hasGitHub ? 'Provide a public GitHub link to increase credibility for developer/engineering roles.' : 'GitHub profile is connected.',
+          !hasPortfolio ? 'Include a personal portfolio web URL to showcase live deployment projects.' : 'Portfolio website is configured.'
+        ]
+      });
+      setIsAnalyzingAts(false);
+      toast.success('ATS match analysis completed! Review findings.');
+    }, 800);
   };
 
   const renderStatusBanner = () => {
@@ -1475,227 +1550,352 @@ export default function CandidateDashboard() {
                     <div className={styles.studioGrid}>
                       {/* Left: Editor */}
                       <div className={styles.editorPanel}>
-                        <h3>1. Edit Resume Details</h3>
-
-                        <div className={styles.editorGroup}>
-                          <h4>Contact Information</h4>
-                          <div className={styles.formRow}>
-                            <div className={styles.formField}>
-                              <label className={styles.formLabel}>Full Name</label>
-                              <input
-                                type="text"
-                                value={resumeData?.fullName || ''}
-                                onChange={(e) => handleFieldChange('fullName', e.target.value)}
-                                className={styles.formInput}
-                              />
-                            </div>
-                          </div>
-                          <div className={styles.formGrid2}>
-                            <div className={styles.formField}>
-                              <label className={styles.formLabel}>Email</label>
-                              <input
-                                type="email"
-                                value={resumeData?.email || ''}
-                                onChange={(e) => handleFieldChange('email', e.target.value)}
-                                className={styles.formInput}
-                              />
-                            </div>
-                            <div className={styles.formField}>
-                              <label className={styles.formLabel}>Mobile</label>
-                              <input
-                                type="text"
-                                value={resumeData?.mobile || ''}
-                                onChange={(e) => handleFieldChange('mobile', e.target.value)}
-                                className={styles.formInput}
-                              />
-                            </div>
-                          </div>
-                          <div className={styles.formGrid3}>
-                            <div className={styles.formField}>
-                              <label className={styles.formLabel}>LinkedIn</label>
-                              <input
-                                type="text"
-                                value={resumeData?.linkedin || ''}
-                                onChange={(e) => handleFieldChange('linkedin', e.target.value)}
-                                className={styles.formInput}
-                              />
-                            </div>
-                            <div className={styles.formField}>
-                              <label className={styles.formLabel}>GitHub</label>
-                              <input
-                                type="text"
-                                value={resumeData?.github || ''}
-                                onChange={(e) => handleFieldChange('github', e.target.value)}
-                                className={styles.formInput}
-                              />
-                            </div>
-                            <div className={styles.formField}>
-                              <label className={styles.formLabel}>Portfolio</label>
-                              <input
-                                type="text"
-                                value={resumeData?.portfolio || ''}
-                                onChange={(e) => handleFieldChange('portfolio', e.target.value)}
-                                className={styles.formInput}
-                              />
-                            </div>
-                          </div>
+                        <div style={{ display: 'flex', gap: '1rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.75rem', marginBottom: '1.25rem' }}>
+                          <button
+                            type="button"
+                            onClick={() => setResumeSubTab('edit')}
+                            style={{
+                              background: 'none',
+                              border: 'none',
+                              fontWeight: 700,
+                              fontSize: '0.9rem',
+                              color: resumeSubTab === 'edit' ? '#0071e3' : 'var(--text-muted)',
+                              borderBottom: resumeSubTab === 'edit' ? '2px solid #0071e3' : 'none',
+                              paddingBottom: '0.25rem',
+                              cursor: 'pointer'
+                            }}
+                          >
+                            1. Edit Details
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setResumeSubTab('ats')}
+                            style={{
+                              background: 'none',
+                              border: 'none',
+                              fontWeight: 700,
+                              fontSize: '0.9rem',
+                              color: resumeSubTab === 'ats' ? '#0071e3' : 'var(--text-muted)',
+                              borderBottom: resumeSubTab === 'ats' ? '2px solid #0071e3' : 'none',
+                              paddingBottom: '0.25rem',
+                              cursor: 'pointer'
+                            }}
+                          >
+                            2. ATS Match Checker
+                          </button>
                         </div>
 
-                        <div className={styles.editorGroup}>
-                          <h4>Skills</h4>
-                          <div className={styles.formField}>
-                            <label className={styles.formLabel}>Skills (comma separated)</label>
-                            <input
-                              type="text"
-                              value={resumeData?.skills || ''}
-                              onChange={(e) => handleFieldChange('skills', e.target.value)}
-                              className={styles.formInput}
+                        {resumeSubTab === 'edit' ? (
+                          <div className="fade-in">
+                            <div className={styles.editorGroup}>
+                              <h4>Contact Information</h4>
+                              <div className={styles.formRow}>
+                                <div className={styles.formField}>
+                                  <label className={styles.formLabel}>Full Name</label>
+                                  <input
+                                    type="text"
+                                    value={resumeData?.fullName || ''}
+                                    onChange={(e) => handleFieldChange('fullName', e.target.value)}
+                                    className={styles.formInput}
+                                  />
+                                </div>
+                              </div>
+                              <div className={styles.formGrid2}>
+                                <div className={styles.formField}>
+                                  <label className={styles.formLabel}>Email</label>
+                                  <input
+                                    type="email"
+                                    value={resumeData?.email || ''}
+                                    onChange={(e) => handleFieldChange('email', e.target.value)}
+                                    className={styles.formInput}
+                                  />
+                                </div>
+                                <div className={styles.formField}>
+                                  <label className={styles.formLabel}>Mobile</label>
+                                  <input
+                                    type="text"
+                                    value={resumeData?.mobile || ''}
+                                    onChange={(e) => handleFieldChange('mobile', e.target.value)}
+                                    className={styles.formInput}
+                                  />
+                                </div>
+                              </div>
+                              <div className={styles.formGrid3}>
+                                <div className={styles.formField}>
+                                  <label className={styles.formLabel}>LinkedIn</label>
+                                  <input
+                                    type="text"
+                                    value={resumeData?.linkedin || ''}
+                                    onChange={(e) => handleFieldChange('linkedin', e.target.value)}
+                                    className={styles.formInput}
+                                  />
+                                </div>
+                                <div className={styles.formField}>
+                                  <label className={styles.formLabel}>GitHub</label>
+                                  <input
+                                    type="text"
+                                    value={resumeData?.github || ''}
+                                    onChange={(e) => handleFieldChange('github', e.target.value)}
+                                    className={styles.formInput}
+                                  />
+                                </div>
+                                <div className={styles.formField}>
+                                  <label className={styles.formLabel}>Portfolio</label>
+                                  <input
+                                    type="text"
+                                    value={resumeData?.portfolio || ''}
+                                    onChange={(e) => handleFieldChange('portfolio', e.target.value)}
+                                    className={styles.formInput}
+                                  />
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className={styles.editorGroup}>
+                              <h4>Skills</h4>
+                              <div className={styles.formField}>
+                                <label className={styles.formLabel}>Skills (comma separated)</label>
+                                <input
+                                  type="text"
+                                  value={resumeData?.skills || ''}
+                                  onChange={(e) => handleFieldChange('skills', e.target.value)}
+                                  className={styles.formInput}
+                                />
+                              </div>
+                            </div>
+
+                            <div className={styles.editorGroup}>
+                              <div className={styles.groupHeader}>
+                                <h4>Education</h4>
+                                <button type="button" onClick={() => addListItem('education')} className={styles.addBtn}>+ Add</button>
+                              </div>
+                              {resumeData?.education.map((edu, index) => (
+                                <div key={index} className={styles.listItemForm}>
+                                  <div className={styles.listItemHeader}>
+                                    <span>Education #{index + 1}</span>
+                                    {resumeData.education.length > 1 && (
+                                      <button type="button" onClick={() => deleteListItem('education', index)} className={styles.deleteBtn}>Remove</button>
+                                    )}
+                                  </div>
+                                  <div className={styles.formField}>
+                                    <label className={styles.formLabel}>Institution / College</label>
+                                    <input
+                                      type="text"
+                                      value={edu.institution}
+                                      onChange={(e) => handleNestedChange('education', index, 'institution', e.target.value)}
+                                      className={styles.formInput}
+                                    />
+                                  </div>
+                                  <div className={styles.formGrid2}>
+                                    <div className={styles.formField}>
+                                      <label className={styles.formLabel}>Degree</label>
+                                      <input
+                                        type="text"
+                                        value={edu.degree}
+                                        onChange={(e) => handleNestedChange('education', index, 'degree', e.target.value)}
+                                        className={styles.formInput}
+                                      />
+                                    </div>
+                                    <div className={styles.formField}>
+                                      <label className={styles.formLabel}>Graduation Year</label>
+                                      <input
+                                        type="text"
+                                        value={edu.year}
+                                        onChange={(e) => handleNestedChange('education', index, 'year', e.target.value)}
+                                        className={styles.formInput}
+                                      />
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+
+                            <div className={styles.editorGroup}>
+                              <div className={styles.groupHeader}>
+                                <h4>Experience</h4>
+                                <button type="button" onClick={() => addListItem('experience')} className={styles.addBtn}>+ Add</button>
+                              </div>
+                              {resumeData?.experience.map((exp, index) => (
+                                <div key={index} className={styles.listItemForm}>
+                                  <div className={styles.listItemHeader}>
+                                    <span>Experience #{index + 1}</span>
+                                    <button type="button" onClick={() => deleteListItem('experience', index)} className={styles.deleteBtn}>Remove</button>
+                                  </div>
+                                  <div className={styles.formGrid2}>
+                                    <div className={styles.formField}>
+                                      <label className={styles.formLabel}>Company</label>
+                                      <input
+                                        type="text"
+                                        value={exp.company}
+                                        onChange={(e) => handleNestedChange('experience', index, 'company', e.target.value)}
+                                        className={styles.formInput}
+                                      />
+                                    </div>
+                                    <div className={styles.formField}>
+                                      <label className={styles.formLabel}>Role</label>
+                                      <input
+                                        type="text"
+                                        value={exp.role}
+                                        onChange={(e) => handleNestedChange('experience', index, 'role', e.target.value)}
+                                        className={styles.formInput}
+                                      />
+                                    </div>
+                                  </div>
+                                  <div className={styles.formField}>
+                                    <label className={styles.formLabel}>Duration</label>
+                                    <input
+                                      type="text"
+                                      value={exp.duration}
+                                      onChange={(e) => handleNestedChange('experience', index, 'duration', e.target.value)}
+                                      className={styles.formInput}
+                                    />
+                                  </div>
+                                  <div className={styles.formField}>
+                                    <label className={styles.formLabel}>Description (one bullet per line)</label>
+                                    <textarea
+                                      value={exp.description}
+                                      onChange={(e) => handleNestedChange('experience', index, 'description', e.target.value)}
+                                      className={styles.formTextarea}
+                                      rows={3}
+                                    />
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+
+                            <div className={styles.editorGroup}>
+                              <div className={styles.groupHeader}>
+                                <h4>Projects</h4>
+                                <button type="button" onClick={() => addListItem('projects')} className={styles.addBtn}>+ Add</button>
+                              </div>
+                              {resumeData?.projects.map((proj, index) => (
+                                <div key={index} className={styles.listItemForm}>
+                                  <div className={styles.listItemHeader}>
+                                    <span>Project #{index + 1}</span>
+                                    <button type="button" onClick={() => deleteListItem('projects', index)} className={styles.deleteBtn}>Remove</button>
+                                  </div>
+                                  <div className={styles.formGrid2}>
+                                    <div className={styles.formField}>
+                                      <label className={styles.formLabel}>Title</label>
+                                      <input
+                                        type="text"
+                                        value={proj.title}
+                                        onChange={(e) => handleNestedChange('projects', index, 'title', e.target.value)}
+                                        className={styles.formInput}
+                                      />
+                                    </div>
+                                    <div className={styles.formField}>
+                                      <label className={styles.formLabel}>Tech Stack</label>
+                                      <input
+                                        type="text"
+                                        value={proj.tech}
+                                        onChange={(e) => handleNestedChange('projects', index, 'tech', e.target.value)}
+                                        className={styles.formInput}
+                                      />
+                                    </div>
+                                  </div>
+                                  <div className={styles.formField}>
+                                    <label className={styles.formLabel}>Description (one bullet per line)</label>
+                                    <textarea
+                                      value={proj.description}
+                                      onChange={(e) => handleNestedChange('projects', index, 'description', e.target.value)}
+                                      className={styles.formTextarea}
+                                      rows={3}
+                                    />
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        ) : (
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }} className="fade-in">
+                            <div>
+                              <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '1rem', fontWeight: 700 }}>Job Description Analyzer</h3>
+                              <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: 0 }}>Paste the description of your target job below to run real-time keyword matching and format audits.</p>
+                            </div>
+                            
+                            <textarea
+                              value={jdInput}
+                              onChange={(e) => setJdInput(e.target.value)}
+                              placeholder="Paste the target Job Description (JD) text here..."
+                              rows={8}
+                              className="form-textarea"
+                              style={{ fontSize: '0.825rem', fontFamily: 'var(--font-main)' }}
                             />
-                          </div>
-                        </div>
 
-                        <div className={styles.editorGroup}>
-                          <div className={styles.groupHeader}>
-                            <h4>Education</h4>
-                            <button type="button" onClick={() => addListItem('education')} className={styles.addBtn}>+ Add</button>
-                          </div>
-                          {resumeData?.education.map((edu, index) => (
-                            <div key={index} className={styles.listItemForm}>
-                              <div className={styles.listItemHeader}>
-                                <span>Education #{index + 1}</span>
-                                {resumeData.education.length > 1 && (
-                                  <button type="button" onClick={() => deleteListItem('education', index)} className={styles.deleteBtn}>Remove</button>
-                                )}
-                              </div>
-                              <div className={styles.formField}>
-                                <label className={styles.formLabel}>Institution / College</label>
-                                <input
-                                  type="text"
-                                  value={edu.institution}
-                                  onChange={(e) => handleNestedChange('education', index, 'institution', e.target.value)}
-                                  className={styles.formInput}
-                                />
-                              </div>
-                              <div className={styles.formGrid2}>
-                                <div className={styles.formField}>
-                                  <label className={styles.formLabel}>Degree</label>
-                                  <input
-                                    type="text"
-                                    value={edu.degree}
-                                    onChange={(e) => handleNestedChange('education', index, 'degree', e.target.value)}
-                                    className={styles.formInput}
-                                  />
-                                </div>
-                                <div className={styles.formField}>
-                                  <label className={styles.formLabel}>Graduation Year</label>
-                                  <input
-                                    type="text"
-                                    value={edu.year}
-                                    onChange={(e) => handleNestedChange('education', index, 'year', e.target.value)}
-                                    className={styles.formInput}
-                                  />
-                                </div>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
+                            <button 
+                              type="button"
+                              onClick={handleAtsAnalysis} 
+                              disabled={isAnalyzingAts || !jdInput.trim()}
+                              className="btn btn-primary"
+                              style={{ width: '100%' }}
+                            >
+                              {isAnalyzingAts ? 'Analyzing Keywords...' : 'Verify ATS Compatibility Score'}
+                            </button>
 
-                        <div className={styles.editorGroup}>
-                          <div className={styles.groupHeader}>
-                            <h4>Experience</h4>
-                            <button type="button" onClick={() => addListItem('experience')} className={styles.addBtn}>+ Add</button>
-                          </div>
-                          {resumeData?.experience.map((exp, index) => (
-                            <div key={index} className={styles.listItemForm}>
-                              <div className={styles.listItemHeader}>
-                                <span>Experience #{index + 1}</span>
-                                <button type="button" onClick={() => deleteListItem('experience', index)} className={styles.deleteBtn}>Remove</button>
-                              </div>
-                              <div className={styles.formGrid2}>
-                                <div className={styles.formField}>
-                                  <label className={styles.formLabel}>Company</label>
-                                  <input
-                                    type="text"
-                                    value={exp.company}
-                                    onChange={(e) => handleNestedChange('experience', index, 'company', e.target.value)}
-                                    className={styles.formInput}
-                                  />
+                            {/* ATS Analysis Scorecard Details */}
+                            {atsAnalysis && (
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', border: '1px solid var(--border-color)', borderRadius: '12px', padding: '1.25rem', backgroundColor: 'var(--bg-card)' }} className="fade-in">
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                  <span style={{ fontWeight: 700, fontSize: '0.9rem' }}>ATS Match Score:</span>
+                                  <span 
+                                    style={{ 
+                                      fontSize: '1.5rem', 
+                                      fontWeight: 800, 
+                                      color: atsAnalysis.score >= 80 ? 'var(--success)' : atsAnalysis.score >= 60 ? '#f59e0b' : '#ef4444' 
+                                    }}
+                                  >
+                                    {atsAnalysis.score}%
+                                  </span>
                                 </div>
-                                <div className={styles.formField}>
-                                  <label className={styles.formLabel}>Role</label>
-                                  <input
-                                    type="text"
-                                    value={exp.role}
-                                    onChange={(e) => handleNestedChange('experience', index, 'role', e.target.value)}
-                                    className={styles.formInput}
-                                  />
-                                </div>
-                              </div>
-                              <div className={styles.formField}>
-                                <label className={styles.formLabel}>Duration</label>
-                                <input
-                                  type="text"
-                                  value={exp.duration}
-                                  onChange={(e) => handleNestedChange('experience', index, 'duration', e.target.value)}
-                                  className={styles.formInput}
-                                />
-                              </div>
-                              <div className={styles.formField}>
-                                <label className={styles.formLabel}>Description (one bullet per line)</label>
-                                <textarea
-                                  value={exp.description}
-                                  onChange={(e) => handleNestedChange('experience', index, 'description', e.target.value)}
-                                  className={styles.formTextarea}
-                                  rows={3}
-                                />
-                              </div>
-                            </div>
-                          ))}
-                        </div>
 
-                        <div className={styles.editorGroup}>
-                          <div className={styles.groupHeader}>
-                            <h4>Projects</h4>
-                            <button type="button" onClick={() => addListItem('projects')} className={styles.addBtn}>+ Add</button>
+                                <div style={{ width: '100%', height: '8px', backgroundColor: 'var(--border-color)', borderRadius: '4px', overflow: 'hidden' }}>
+                                  <div 
+                                    style={{ 
+                                      height: '100%', 
+                                      backgroundColor: atsAnalysis.score >= 80 ? 'var(--success)' : atsAnalysis.score >= 60 ? '#f59e0b' : '#ef4444',
+                                      width: `${atsAnalysis.score}%`,
+                                      transition: 'width 0.4s ease'
+                                    }}
+                                  ></div>
+                                </div>
+
+                                <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '0.75rem' }}>
+                                  <strong style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)' }}>Matched Tech Keywords ({atsAnalysis.matched.length})</strong>
+                                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', marginTop: '0.5rem' }}>
+                                    {atsAnalysis.matched.map((kw: string) => (
+                                      <span key={kw} style={{ backgroundColor: 'rgba(16, 185, 129, 0.1)', color: 'var(--success)', padding: '0.15rem 0.5rem', borderRadius: '4px', fontSize: '0.72rem', fontWeight: 600 }}>
+                                        {kw} ✓
+                                      </span>
+                                    ))}
+                                    {atsAnalysis.matched.length === 0 && <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>None matched.</span>}
+                                  </div>
+                                </div>
+
+                                <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '0.75rem' }}>
+                                  <strong style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)' }}>Missing Key Skills ({atsAnalysis.missing.length})</strong>
+                                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', marginTop: '0.5rem' }}>
+                                    {atsAnalysis.missing.map((kw: string) => (
+                                      <span key={kw} style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', padding: '0.15rem 0.5rem', borderRadius: '4px', fontSize: '0.72rem', fontWeight: 600 }}>
+                                        + {kw}
+                                      </span>
+                                    ))}
+                                    {atsAnalysis.missing.length === 0 && <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>No missing key terms!</span>}
+                                  </div>
+                                </div>
+
+                                <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '0.75rem' }}>
+                                  <strong style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)' }}>Optimization Suggestions</strong>
+                                  <ul style={{ margin: '0.5rem 0 0 1rem', paddingLeft: 0, fontSize: '0.78rem', color: 'var(--text-main)', display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                                    {atsAnalysis.recommendations.map((rec: string, idx: number) => (
+                                      <li key={idx}>{rec}</li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              </div>
+                            )}
                           </div>
-                          {resumeData?.projects.map((proj, index) => (
-                            <div key={index} className={styles.listItemForm}>
-                              <div className={styles.listItemHeader}>
-                                <span>Project #{index + 1}</span>
-                                <button type="button" onClick={() => deleteListItem('projects', index)} className={styles.deleteBtn}>Remove</button>
-                              </div>
-                              <div className={styles.formGrid2}>
-                                <div className={styles.formField}>
-                                  <label className={styles.formLabel}>Title</label>
-                                  <input
-                                    type="text"
-                                    value={proj.title}
-                                    onChange={(e) => handleNestedChange('projects', index, 'title', e.target.value)}
-                                    className={styles.formInput}
-                                  />
-                                </div>
-                                <div className={styles.formField}>
-                                  <label className={styles.formLabel}>Tech Stack</label>
-                                  <input
-                                    type="text"
-                                    value={proj.tech}
-                                    onChange={(e) => handleNestedChange('projects', index, 'tech', e.target.value)}
-                                    className={styles.formInput}
-                                  />
-                                </div>
-                              </div>
-                              <div className={styles.formField}>
-                                <label className={styles.formLabel}>Description (one bullet per line)</label>
-                                <textarea
-                                  value={proj.description}
-                                  onChange={(e) => handleNestedChange('projects', index, 'description', e.target.value)}
-                                  className={styles.formTextarea}
-                                  rows={3}
-                                />
-                              </div>
-                            </div>
-                          ))}
-                        </div>
+                        )}
                       </div>
 
                       {/* Right: Preview */}
