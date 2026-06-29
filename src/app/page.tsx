@@ -211,52 +211,25 @@ export default function Home() {
             </div>
           </ScrollReveal>
 
-          {/* Right Column: Hero Grid Cards */}
+          {/* Right Column: Hero Member ID Verifier Scanner */}
           <ScrollReveal direction="pop" delay={150} className={styles.heroVisualGrid}>
-            <div className={styles.heroCardsGrid}>
-              {/* Card 1: Career Clarity */}
-              <div className={styles.heroCardLight}>
-                <div className={styles.cardIconWrapper} style={{ backgroundColor: 'rgba(247, 127, 0, 0.08)', color: 'var(--primary)' }}>
-                  <Compass size={20} />
+            <div className={styles.scanWrapper} style={{ marginBottom: 0 }}>
+              <div className={styles.scanLine}></div>
+              <div className={styles.memberCard} style={{ opacity: 0.85, margin: '0 auto' }}>
+                <div className={styles.cardHeader}>
+                  <span className={styles.cardLogo}>TSS ⚡</span>
+                  <span className={styles.cardBadge}>VERIFIED</span>
                 </div>
-                <div>
-                  <h4 className={styles.cardTitle}>Career Clarity</h4>
-                  <p className={styles.cardDesc}>Know exactly what path to take</p>
+                <div className={styles.cardCenter}>
+                  <div className={styles.cardId}>TSS-ST-260618001</div>
+                  <div className={styles.cardSubtitle}>The Student Spot Ecosystem</div>
                 </div>
-              </div>
-
-              {/* Card 2: Real Skills */}
-              <div className={styles.heroCardLight}>
-                <div className={styles.cardIconWrapper} style={{ backgroundColor: 'rgba(193, 18, 31, 0.08)', color: 'var(--secondary)' }}>
-                  <Zap size={20} />
-                </div>
-                <div>
-                  <h4 className={styles.cardTitle}>Real Skills</h4>
-                  <p className={styles.cardDesc}>Industry-ready training</p>
-                </div>
-              </div>
-
-              {/* Card 3: Network */}
-              <div className={styles.heroCardLight}>
-                <div className={styles.cardIconWrapper} style={{ backgroundColor: 'rgba(22, 163, 74, 0.08)', color: '#16a34a' }}>
-                  <Users size={20} />
-                </div>
-                <div>
-                  <h4 className={styles.cardTitle}>Network</h4>
-                  <p className={styles.cardDesc}>Connect with industry</p>
-                </div>
-              </div>
-
-              {/* Card 4: Opportunities */}
-              <div className={styles.heroCardGradient}>
-                <div className={styles.cardIconWrapper} style={{ backgroundColor: 'rgba(255, 255, 255, 0.2)', color: '#ffffff' }}>
-                  <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
-                    <polygon points="5 3 19 12 5 21 5 3" />
-                  </svg>
-                </div>
-                <div>
-                  <h4 className={styles.cardTitle} style={{ color: '#ffffff' }}>Opportunities</h4>
-                  <p className={styles.cardDesc} style={{ color: 'rgba(255, 255, 255, 0.85)' }}>Jobs & internships</p>
+                <div className={styles.cardFooter}>
+                  <div className={styles.cardHolder}>
+                    <span className={styles.holderName}>Rajkamal Panthagani</span>
+                    <span className={styles.holderRole}>Student · Software</span>
+                  </div>
+                  <span className={styles.cardMark}>⚡</span>
                 </div>
               </div>
             </div>
@@ -497,45 +470,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 1F. VERIFICATION CTA SECTION */}
-      <section className={styles.ctaSection}>
-        <ScrollReveal direction="up" className="container">
-          <div className={styles.scanWrapper}>
-            <div className={styles.scanLine}></div>
-            <div className={styles.memberCard} style={{ opacity: 0.85 }}>
-              <div className={styles.cardHeader}>
-                <span className={styles.cardLogo}>TSS ⚡</span>
-                <span className={styles.cardBadge}>VERIFIED</span>
-              </div>
-              <div className={styles.cardCenter}>
-                <div className={styles.cardId}>TSS-ST-260618001</div>
-                <div className={styles.cardSubtitle}>The Student Spot Ecosystem</div>
-              </div>
-              <div className={styles.cardFooter}>
-                <div className={styles.cardHolder}>
-                  <span className={styles.holderName}>Rajkamal Panthagani</span>
-                  <span className={styles.holderRole}>Student · Software</span>
-                </div>
-                <span className={styles.cardMark}>⚡</span>
-              </div>
-            </div>
-          </div>
 
-          <h2 className={styles.ctaHeading}>Everything in TSS Starts With Your Member ID.</h2>
-          <p className={styles.ctaDesc}>
-            When you verify your student credentials, you unlock direct referrals, builder sessions, and ATS formatting tools. It takes two minutes and stays free forever.
-          </p>
-
-          <span className={styles.largeIdDisplay}>TSS-ST-260618001</span>
-
-          <div>
-            <Link href="/get-verified" className={styles.btnAccent} style={{ fontSize: '1.05rem', padding: '1rem 2.2rem' }}>
-              Get Verified Free — Takes 2 Minutes <ArrowRight size={18} />
-            </Link>
-          </div>
-          <span className={styles.helperNote}>* Requires verification via college email, ID card, or verified portfolio link.</span>
-        </ScrollReveal>
-      </section>
 
       {/* 1G. FINAL SECTION */}
       <section className={styles.finalSection}>
