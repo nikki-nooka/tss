@@ -24,16 +24,13 @@ import { useToast } from '@/components/Toast';
 const ROLE_OPTIONS = [
   { name: 'Student', desc: 'Ambitious learner launching a career' },
   { name: 'Founder', desc: 'Building the next big thing' },
-  { name: 'Recruiter', desc: 'Sourcing verified builder talent' },
   { name: 'HR', desc: 'Managing workforce and partnerships' },
   { name: 'Mentor', desc: 'Guiding students and founders' },
   { name: 'Investor', desc: 'Backing high-potential projects' },
   { name: 'Freelancer', desc: 'Offering professional services' },
   { name: 'Creator', desc: 'Building audience and content' },
   { name: 'College', desc: 'Campus representative and admin' },
-  { name: 'Company', desc: 'Partnering organization' },
-  { name: 'Volunteer', desc: 'Giving back to the community' },
-  { name: 'Campus Ambassador', desc: 'Leading TSS on campus' }
+  { name: 'Company', desc: 'Partnering organization' }
 ];
 
 export default function Register() {
