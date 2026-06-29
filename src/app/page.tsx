@@ -286,9 +286,9 @@ export default function Home() {
           </ScrollReveal>
 
           {/* Right Visual: TSS Logo */}
-          <ScrollReveal direction="pop" delay={150} className={styles.mapVisual} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <div className={styles.logoCard} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '3rem', backgroundColor: 'var(--bg-card)', borderRadius: '24px', border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-md)', width: '100%', maxWidth: '380px', margin: '0 auto', aspectRatio: '1.5 / 1' }}>
-              <img src="/logo.png" alt="The Student Spot Logo" style={{ maxHeight: '90px', width: 'auto', objectFit: 'contain' }} />
+          <ScrollReveal direction="pop" delay={150} className={styles.mapVisual}>
+            <div className={styles.mapCard}>
+              <img src="/logo.png" alt="The Student Spot Logo" style={{ maxHeight: '65px', width: 'auto', objectFit: 'contain', zIndex: 10 }} />
             </div>
           </ScrollReveal>
 
