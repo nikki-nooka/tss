@@ -39,7 +39,7 @@ export const Navbar: React.FC = () => {
       <div className={`${styles.navContainer} container`}>
         {/* Logo */}
         <Link href="/" className={styles.logo} onClick={closeMenu}>
-          <img src="/logo.png" alt="TSS Logo" style={{ height: '44px', width: 'auto', objectFit: 'contain' }} />
+          <img src="/logo-old.png" alt="TSS Logo" style={{ height: '44px', width: 'auto', objectFit: 'contain' }} />
           <span className={styles.logoText} style={{ color: '#0f172a', fontWeight: 700, fontSize: '1.45rem', letterSpacing: '-0.02em', fontFamily: 'var(--font-heading)' }}>
             The Student Spot
           </span>
