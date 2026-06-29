@@ -124,6 +124,66 @@ export default function CandidateDashboard() {
   const [coverLetterInput, setCoverLetterInput] = useState('');
   const [isSubmittingApplication, setIsSubmittingApplication] = useState(false);
 
+  // Loyalty check-in states
+  const [loginDays, setLoginDays] = useState(35);
+  const [streak, setStreak] = useState(12);
+  const [hasCheckedInToday, setHasCheckedInToday] = useState(false);
+
+  useEffect(() => {
+    if (profile) {
+      const statsKey = `tss_stats_${profile.id}`;
+      const saved = localStorage.getItem(statsKey);
+      
+      const dateKey = `tss_checkin_${profile.id}_${new Date().toDateString()}`;
+      const checkedIn = localStorage.getItem(dateKey) === 'true';
+      setHasCheckedInToday(checkedIn);
+
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          setLoginDays(parsed.loginDays);
+          setStreak(parsed.streak);
+        } catch (e) {
+          console.error(e);
+        }
+      } else {
+        const initialDays = profile.status === 'Verified' ? 35 : 1;
+        const initialStreak = profile.status === 'Verified' ? 12 : 1;
+        setLoginDays(initialDays);
+        setStreak(initialStreak);
+        localStorage.setItem(statsKey, JSON.stringify({ loginDays: initialDays, streak: initialStreak }));
+      }
+    }
+  }, [profile]);
+
+  const handleDailyCheckIn = () => {
+    if (!profile) return;
+    
+    const statsKey = `tss_stats_${profile.id}`;
+    const dateKey = `tss_checkin_${profile.id}_${new Date().toDateString()}`;
+    
+    const newDays = loginDays + 1;
+    const newStreak = streak + 1;
+    
+    setLoginDays(newDays);
+    setStreak(newStreak);
+    setHasCheckedInToday(true);
+    
+    localStorage.setItem(statsKey, JSON.stringify({ loginDays: newDays, streak: newStreak }));
+    localStorage.setItem(dateKey, 'true');
+    
+    toast.success(`Check-in claimed! +10 community points added to your score.`);
+  };
+
+  const getLoyaltyTier = (days: number) => {
+    if (days <= 30) return { name: 'Spark', icon: '🌱', color: '#10b981', next: 'Builder', nextDays: 31, req: 30 };
+    if (days <= 100) return { name: 'Builder', icon: '🔨', color: '#0071e3', next: 'Founder', nextDays: 101, req: 100 };
+    if (days <= 365) return { name: 'Founder', icon: '🚀', color: '#7c3aed', next: 'Legend', nextDays: 366, req: 365 };
+    return { name: 'Legend', icon: '⭐', color: '#f59e0b', next: '', nextDays: 365, req: 365 };
+  };
+
+  const tier = getLoyaltyTier(loginDays);
+
   // Check login on load & process query credentials (for direct validation email links)
   useEffect(() => {
     // 1. Check if URL has memberId & email parameters for auto-login
@@ -1093,6 +1153,114 @@ export default function CandidateDashboard() {
                         </a>
                       </div>
                     </div>
+                    )}
+
+                    {/* Loyalty Status & Streak Tracker Section */}
+                    {profile.status === 'Verified' && (
+                      <div className={styles.loyaltyWrapper}>
+                        <div className={styles.loyaltyHeader}>
+                          <h3>TSS Loyalty & Check-ins</h3>
+                          <p>Stay consistent, build your identity, and earn premium ecosystem tiers.</p>
+                        </div>
+
+                        <div className={styles.loyaltyGrid}>
+                          {/* Card 1: Current Tier */}
+                          <div className={styles.loyaltyStatCard} style={{ borderLeft: `4px solid ${tier.color}` }}>
+                            <div className={styles.statCardHeader}>
+                              <span className={styles.statCardLabel}>Current Tier</span>
+                              <span style={{ fontSize: '1.25rem' }}>{tier.icon}</span>
+                            </div>
+                            <span className={styles.statCardValue} style={{ color: tier.color }}>{tier.name}</span>
+                            <span className={styles.statCardDesc}>Level status verified</span>
+                          </div>
+
+                          {/* Card 2: Cumulative Logins */}
+                          <div className={styles.loyaltyStatCard} style={{ borderLeft: '4px solid var(--primary)' }}>
+                            <div className={styles.statCardHeader}>
+                              <span className={styles.statCardLabel}>Total Logins</span>
+                              <span style={{ fontSize: '1.25rem' }}>📅</span>
+                            </div>
+                            <span className={styles.statCardValue}>{loginDays} Days</span>
+                            <span className={styles.statCardDesc}>Cumulative check-ins log</span>
+                          </div>
+
+                          {/* Card 3: Daily Streak */}
+                          <div className={styles.loyaltyStatCard} style={{ borderLeft: '4px solid #f97316' }}>
+                            <div className={styles.statCardHeader}>
+                              <span className={styles.statCardLabel}>Daily Streak</span>
+                              <span style={{ fontSize: '1.25rem' }}>🔥</span>
+                            </div>
+                            <span className={styles.statCardValue}>{streak} Days</span>
+                            <div className={styles.statCardDesc}>
+                              <button 
+                                onClick={handleDailyCheckIn} 
+                                disabled={hasCheckedInToday}
+                                className="btn btn-primary"
+                                style={{ 
+                                  padding: '0.25rem 0.5rem', 
+                                  fontSize: '0.7rem', 
+                                  marginTop: '0.25rem',
+                                  backgroundColor: hasCheckedInToday ? 'var(--border-color)' : '#f97316',
+                                  borderColor: hasCheckedInToday ? 'var(--border-color)' : '#f97316',
+                                  color: '#ffffff'
+                                }}
+                              >
+                                {hasCheckedInToday ? 'Checked In Today ✓' : 'Claim Check-in'}
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Progress Bar */}
+                        {tier.next && (
+                          <div className={styles.progressContainer}>
+                            <div className={styles.progressHeader}>
+                              <span>Progress to {tier.next}</span>
+                              <span>{loginDays} / {tier.req} days</span>
+                            </div>
+                            <div className={styles.progressBarBg}>
+                              <div 
+                                className={styles.progressBarFill} 
+                                style={{ 
+                                  width: `${Math.min(100, (loginDays / tier.req) * 100)}%`,
+                                  backgroundColor: tier.color 
+                                }}
+                              ></div>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Perks Listing */}
+                        <div className={styles.perksSection}>
+                          <h4>Unlocked {tier.name} Perks</h4>
+                          <div className={styles.perksGrid}>
+                            <div className={`${styles.perkItem} ${loginDays < 1 ? styles.perkItemLocked : ''}`}>
+                              <span>{loginDays >= 1 ? '✓' : '🔒'}</span>
+                              <span>Verified Member Badge & Community Card</span>
+                            </div>
+                            <div className={`${styles.perkItem} ${loginDays < 1 ? styles.perkItemLocked : ''}`}>
+                              <span>{loginDays >= 1 ? '✓' : '🔒'}</span>
+                              <span>Access to public Jobs board & Resume Studio</span>
+                            </div>
+                            <div className={`${styles.perkItem} ${loginDays < 31 ? styles.perkItemLocked : ''}`}>
+                              <span>{loginDays >= 31 ? '✓' : '🔒'}</span>
+                              <span>Priority Shortlisting in Partner Job Applications</span>
+                            </div>
+                            <div className={`${styles.perkItem} ${loginDays < 31 ? styles.perkItemLocked : ''}`}>
+                              <span>{loginDays >= 31 ? '✓' : '🔒'}</span>
+                              <span>Access to BuildX Cohorts & Sunday reviews</span>
+                            </div>
+                            <div className={`${styles.perkItem} ${loginDays < 101 ? styles.perkItemLocked : ''}`}>
+                              <span>{loginDays >= 101 ? '✓' : '🔒'}</span>
+                              <span>Founder Badge & direct intro to VC/Recruiter lists</span>
+                            </div>
+                            <div className={`${styles.perkItem} ${loginDays < 365 ? styles.perkItemLocked : ''}`}>
+                              <span>{loginDays >= 365 ? '✓' : '🔒'}</span>
+                              <span>Legend status & Private Legend communication channel</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     )}
                   </div>
                 )}
