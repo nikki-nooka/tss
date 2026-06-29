@@ -638,6 +638,58 @@
   color: #ffffff !important;
 }
 
+.segmentedControl {
+  display: flex;
+  background-color: rgba(0, 0, 0, 0.03);
+  padding: 3px;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  margin-bottom: 1.5rem;
+  width: 100%;
+}
+
+.segmentBtn {
+  flex: 1;
+  text-align: center;
+  background: none;
+  border: none;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.5rem;
+  border-radius: 6px;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.segmentBtn:hover {
+  color: var(--primary);
+}
+
+.activeSegmentBtn {
+  background-color: #ffffff;
+  color: #0071e3 !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+/* Custom modern scrollbars */
+.editorPanel::-webkit-scrollbar,
+.previewScrollBox::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.editorPanel::-webkit-scrollbar-thumb,
+.previewScrollBox::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.08);
+  border-radius: 4px;
+}
+
+.editorPanel::-webkit-scrollbar-track,
+.previewScrollBox::-webkit-scrollbar-track {
+  background: transparent;
+}
+
 .studioGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -768,13 +820,16 @@
 
 .resumePaper {
   width: 100%;
-  min-width: 480px;
+  min-width: 580px;
   background-color: #ffffff;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-  padding: 2rem;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 4px;
+  padding: 3rem 2.5rem;
   box-sizing: border-box;
   text-align: left;
-  color: #333333;
+  color: #000000;
+  transition: all 0.3s ease;
 }
 
 /* RESUME TEMPLATES STYLING */

@@ -1523,63 +1523,47 @@ export default function CandidateDashboard() {
                     <h2>TSS Resume Studio</h2>
                     <p>Customize and download print-ready resumes tailored for different application settings.</p>
                     
-                    <div className={styles.templateSelector}>
-                      <button
-                        type="button"
-                        onClick={() => setSelectedTemplate('FAANG')}
-                        className={`${styles.templateBtn} ${selectedTemplate === 'FAANG' ? styles.activeTemplateBtn : ''}`}
-                      >
-                        FAANG (ATS Minimal)
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setSelectedTemplate('Startup')}
-                        className={`${styles.templateBtn} ${selectedTemplate === 'Startup' ? styles.activeTemplateBtn : ''}`}
-                      >
-                        Startup (Modern/Tech)
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setSelectedTemplate('General')}
-                        className={`${styles.templateBtn} ${selectedTemplate === 'General' ? styles.activeTemplateBtn : ''}`}
-                      >
-                        General (Standard Business)
-                      </button>
+                    <div className={styles.templateSelectorOuter} style={{ display: 'flex', justifyContent: 'center', marginBottom: '2rem' }}>
+                      <div className={styles.segmentedControl} style={{ maxWidth: '600px', width: '100%' }}>
+                        <button
+                          type="button"
+                          onClick={() => setSelectedTemplate('FAANG')}
+                          className={`${styles.segmentBtn} ${selectedTemplate === 'FAANG' ? styles.activeSegmentBtn : ''}`}
+                        >
+                          FAANG (ATS Minimal)
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setSelectedTemplate('Startup')}
+                          className={`${styles.segmentBtn} ${selectedTemplate === 'Startup' ? styles.activeSegmentBtn : ''}`}
+                        >
+                          Startup (Modern/Tech)
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setSelectedTemplate('General')}
+                          className={`${styles.segmentBtn} ${selectedTemplate === 'General' ? styles.activeSegmentBtn : ''}`}
+                        >
+                          General (Standard Business)
+                        </button>
+                      </div>
                     </div>
 
                     <div className={styles.studioGrid}>
                       {/* Left: Editor */}
                       <div className={styles.editorPanel}>
-                        <div style={{ display: 'flex', gap: '1rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.75rem', marginBottom: '1.25rem' }}>
+                        <div className={styles.segmentedControl}>
                           <button
                             type="button"
                             onClick={() => setResumeSubTab('edit')}
-                            style={{
-                              background: 'none',
-                              border: 'none',
-                              fontWeight: 700,
-                              fontSize: '0.9rem',
-                              color: resumeSubTab === 'edit' ? '#0071e3' : 'var(--text-muted)',
-                              borderBottom: resumeSubTab === 'edit' ? '2px solid #0071e3' : 'none',
-                              paddingBottom: '0.25rem',
-                              cursor: 'pointer'
-                            }}
+                            className={`${styles.segmentBtn} ${resumeSubTab === 'edit' ? styles.activeSegmentBtn : ''}`}
                           >
                             1. Edit Details
                           </button>
                           <button
                             type="button"
                             onClick={() => setResumeSubTab('ats')}
-                            style={{
-                              background: 'none',
-                              border: 'none',
-                              fontWeight: 700,
-                              fontSize: '0.9rem',
-                              color: resumeSubTab === 'ats' ? '#0071e3' : 'var(--text-muted)',
-                              borderBottom: resumeSubTab === 'ats' ? '2px solid #0071e3' : 'none',
-                              paddingBottom: '0.25rem',
-                              cursor: 'pointer'
-                            }}
+                            className={`${styles.segmentBtn} ${resumeSubTab === 'ats' ? styles.activeSegmentBtn : ''}`}
                           >
                             2. ATS Match Checker
                           </button>
