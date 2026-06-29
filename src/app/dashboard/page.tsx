@@ -201,7 +201,7 @@ export default function CandidateDashboard() {
 
   const getLoyaltyTier = (days: number) => {
     if (days <= 30) return { name: 'Spark', icon: '🌱', color: '#10b981', next: 'Builder', nextDays: 31, req: 30 };
-    if (days <= 100) return { name: 'Builder', icon: '🔨', color: '#0071e3', next: 'Founder', nextDays: 101, req: 100 };
+    if (days <= 100) return { name: 'Builder', icon: '🔨', color: '#f77f00', next: 'Founder', nextDays: 101, req: 100 };
     if (days <= 365) return { name: 'Founder', icon: '🚀', color: '#7c3aed', next: 'Legend', nextDays: 366, req: 365 };
     return { name: 'Legend', icon: '⭐', color: '#f59e0b', next: '', nextDays: 365, req: 365 };
   };
@@ -678,7 +678,7 @@ export default function CandidateDashboard() {
                 <button 
                   onClick={handleReapplySubmit}
                   className="btn btn-primary btn-sm"
-                  style={{ backgroundColor: '#0071e3', borderColor: '#0071e3', color: '#ffffff' }}
+                  style={{ backgroundColor: 'var(--primary)', borderColor: 'var(--primary)', color: '#ffffff' }}
                 >
                   Submit Reapplication Now
                 </button>
@@ -691,7 +691,7 @@ export default function CandidateDashboard() {
 
     return (
       <div style={{ backgroundColor: bannerColor, border: `1px solid ${borderColor}`, borderRadius: '12px', padding: '1.25rem', marginBottom: '1.5rem', display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
-        <ShieldAlert style={{ color: borderColor.includes('249') ? '#f97316' : '#0071e3', flexShrink: 0, marginTop: '0.15rem' }} size={24} />
+        <ShieldAlert style={{ color: borderColor.includes('249') ? '#f97316' : 'var(--primary)', flexShrink: 0, marginTop: '0.15rem' }} size={24} />
         <div>
           <strong style={{ display: 'block', color: 'var(--text-main)', marginBottom: '0.2rem', fontWeight: 700 }}>{title}</strong>
           <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{desc}</span>
@@ -1355,7 +1355,7 @@ export default function CandidateDashboard() {
                         <div className={styles.cardFooterGrid}>
                           <div className={styles.detailsColumn}>
                             <span className={styles.detailsLabel}>TSS LIFETIME ID</span>
-                            <span className={styles.memberIdCode} style={{ color: '#0071e3', fontSize: '1rem', fontWeight: 700 }}>{profile.status === 'Verified' ? profile.memberId : 'PENDING AUDIT'}</span>
+                            <span className={styles.memberIdCode} style={{ color: 'var(--primary)', fontSize: '1rem', fontWeight: 700 }}>{profile.status === 'Verified' ? profile.memberId : 'PENDING AUDIT'}</span>
                           </div>
                           
                           <div className={styles.detailsColumn}>
@@ -1400,7 +1400,7 @@ export default function CandidateDashboard() {
                             </div>
                             <div>
                               <span style={{ display: 'block', fontSize: '0.62rem', color: 'var(--text-muted)', fontWeight: 600 }}>COMMUNITY SCORE</span>
-                              <span style={{ fontSize: '0.8rem', color: '#0071e3', fontWeight: 700 }}>{profile.communityScore || 20} pts (Level {profile.level || 'Explorer'})</span>
+                              <span style={{ fontSize: '0.8rem', color: 'var(--primary)', fontWeight: 700 }}>{profile.communityScore || 20} pts (Level {profile.level || 'Explorer'})</span>
                             </div>
                           </div>
                           

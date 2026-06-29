@@ -2061,8 +2061,8 @@ export default function AdminDashboard() {
 
                   {/* Pending Draft Updates Box */}
                   {selectedCandidate.roleDetails?.draftUpdate && (
-                    <div style={{ padding: '0.75rem', border: '1px solid #0071e3', borderRadius: '6px', backgroundColor: 'rgba(0, 113, 227, 0.04)' }}>
-                      <h4 style={{ margin: '0 0 0.5rem 0', fontSize: '0.75rem', fontWeight: 700, color: '#0071e3', textTransform: 'uppercase' }}>Pending Profile Updates</h4>
+                    <div style={{ padding: '0.75rem', border: '1px solid var(--primary)', borderRadius: '6px', backgroundColor: 'var(--primary-light)' }}>
+                      <h4 style={{ margin: '0 0 0.5rem 0', fontSize: '0.75rem', fontWeight: 700, color: 'var(--primary)', textTransform: 'uppercase' }}>Pending Profile Updates</h4>
                       <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', margin: '0 0 0.5rem 0' }}>Approved updates automatically replace previous verified information:</p>
                       <div style={{ display: 'grid', gap: '0.4rem', fontSize: '0.7rem', maxHeight: '180px', overflowY: 'auto' }}>
                         {Object.entries(selectedCandidate.roleDetails.draftUpdate).map(([key, val]: [string, any]) => {
@@ -2173,7 +2173,7 @@ export default function AdminDashboard() {
                         <button 
                           onClick={() => handleUpdateStatus('review')} 
                           className="btn btn-outline btn-sm"
-                          style={{ color: '#0071e3', borderColor: '#0071e3' }}
+                          style={{ color: 'var(--primary)', borderColor: 'var(--primary)' }}
                         >
                           Move to Manual Review
                         </button>

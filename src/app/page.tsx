@@ -179,7 +179,7 @@ export default function Home() {
                 {/* Top header */}
                 <div className={styles.cardHeader}>
                   <span className={styles.cardLogo}>TSS</span>
-                  <span className={styles.cardBadge} style={{ backgroundColor: 'rgba(0, 113, 227, 0.15)', borderColor: 'rgba(0, 113, 227, 0.35)', color: '#0071e3' }}>VERIFIED</span>
+                  <span className={styles.cardBadge} style={{ backgroundColor: 'var(--primary-light)', borderColor: 'rgba(var(--primary-rgb), 0.35)', color: 'var(--primary)' }}>VERIFIED</span>
                 </div>
 
                 {/* Center ID */}

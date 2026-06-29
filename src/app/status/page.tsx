@@ -761,7 +761,7 @@ export default function Status() {
                         <div className={styles.cardFooterGrid}>
                           <div className={styles.detailsColumn}>
                             <span className={styles.detailsLabel}>TSS LIFETIME ID</span>
-                            <span className={styles.memberIdCode} style={{ color: '#0071e3', fontSize: '1rem', fontWeight: 700 }}>{candidate.memberId}</span>
+                            <span className={styles.memberIdCode} style={{ color: 'var(--primary)', fontSize: '1rem', fontWeight: 700 }}>{candidate.memberId}</span>
                           </div>
                           
                           <div className={styles.detailsColumn}>
@@ -806,7 +806,7 @@ export default function Status() {
                             </div>
                             <div>
                               <span style={{ display: 'block', fontSize: '0.62rem', color: 'var(--text-muted)', fontWeight: 600 }}>COMMUNITY SCORE</span>
-                              <span style={{ fontSize: '0.8rem', color: '#0071e3', fontWeight: 700 }}>{candidate.communityScore || 20} pts (Level {candidate.level || 'Explorer'})</span>
+                              <span style={{ fontSize: '0.8rem', color: 'var(--primary)', fontWeight: 700 }}>{candidate.communityScore || 20} pts (Level {candidate.level || 'Explorer'})</span>
                             </div>
                           </div>
                           
