@@ -182,6 +182,10 @@ export async function PUT(request: Request) {
         Object.assign(updates, roleDetails.draftUpdate);
         delete roleDetails.draftUpdate;
       }
+      if (roleDetails.draftProfileDetails) {
+        Object.assign(updates, roleDetails.draftProfileDetails);
+        delete roleDetails.draftProfileDetails;
+      }
 
       const currentScore = candidate.communityScore !== undefined ? candidate.communityScore : 20;
       updates.communityScore = currentScore + 100;
@@ -222,6 +226,7 @@ The Student Spot Team`
       roleDetails.rejectionReasons = Array.isArray(reasons) ? reasons : ['Fake Information'];
       roleDetails.rejectionDate = new Date().toISOString();
       delete roleDetails.draftUpdate; // clear staged updates on reject
+      delete roleDetails.draftProfileDetails;
 
       if (notes !== undefined) updates.notes = notes;
       logHistory(`Profile Rejected. Reasons: ${roleDetails.rejectionReasons.join(', ')}`);

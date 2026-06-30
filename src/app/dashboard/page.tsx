@@ -66,6 +66,17 @@ interface CandidateProfile {
   loginDays?: number;
   streak?: number;
   lastCheckinDate?: string;
+  bloodGroup?: string;
+  willingToDonate?: boolean;
+  availableForEmergency?: boolean;
+  lastDonationDate?: string;
+  emergencyContact?: string;
+  achievements?: string[];
+  certificates?: string[];
+  coverImage?: string;
+  bio?: string;
+  experience?: any[];
+  education?: any[];
 }
 
 interface ResumeEdu {
@@ -124,7 +135,19 @@ export default function CandidateDashboard() {
   
   // Dashboard navigation tab
   const [activeTab, setActiveTab] = useState<'dashboard-home' | 'profile' | 'card' | 'resume' | 'opportunity-hub' | 'applications' | 'saved-opportunities' | 'build' | 'events' | 'community' | 'emergency-support' | 'settings' | 'notifications'>('dashboard-home');
-  const [profileSubTab, setProfileSubTab] = useState<'details' | 'resume' | 'levels' | 'build'>('details');
+  const [profileSubTab, setProfileSubTab] = useState<'details' | 'experience' | 'achievements' | 'resume'>('details');
+  const [oppsSubTab, setOppsSubTab] = useState<'feed' | 'saved' | 'applications' | 'build'>('feed');
+  const [emergencySubTab, setEmergencySubTab] = useState<'feed' | 'settings'>('feed');
+
+  // Trust-based custom fields states
+  const [editBio, setEditBio] = useState('');
+  const [editCoverImage, setEditCoverImage] = useState('');
+  const [editAchievements, setEditAchievements] = useState('');
+  const [editCertificates, setEditCertificates] = useState('');
+  const [editExperience, setEditExperience] = useState<any[]>([]);
+  const [editEducation, setEditEducation] = useState<any[]>([]);
+  const [editWillingToDonate, setEditWillingToDonate] = useState(false);
+  const [editAvailableForEmergency, setEditAvailableForEmergency] = useState(false);
 
   // Emergency fields state
   const [editBloodGroup, setEditBloodGroup] = useState('Unknown');
@@ -379,11 +402,21 @@ export default function CandidateDashboard() {
     setEditPhotoPath(p.photoPath || '');
 
     // Emergency fields
-    setEditBloodGroup(p.roleDetails?.bloodGroup || 'Unknown');
-    setEditEmergencyContact(p.roleDetails?.emergencyContact || '');
-    setEditAvailableBloodDonation(p.roleDetails?.availableBloodDonation || 'No');
-    setEditAvailablePlateletDonation(p.roleDetails?.availablePlateletDonation || 'No');
-    setEditLastDonationDate(p.roleDetails?.lastDonationDate || '');
+    setEditBloodGroup(p.bloodGroup || p.roleDetails?.bloodGroup || 'Unknown');
+    setEditEmergencyContact(p.emergencyContact || p.roleDetails?.emergencyContact || '');
+    setEditAvailableBloodDonation(p.willingToDonate ? 'Yes' : 'No');
+    setEditAvailablePlateletDonation(p.availableForEmergency ? 'Yes' : 'No');
+    setEditLastDonationDate(p.lastDonationDate || p.roleDetails?.lastDonationDate || '');
+
+    // Trust fields
+    setEditBio(p.bio || '');
+    setEditCoverImage(p.coverImage || '');
+    setEditAchievements(Array.isArray(p.achievements) ? p.achievements.join(', ') : '');
+    setEditCertificates(Array.isArray(p.certificates) ? p.certificates.join(', ') : '');
+    setEditExperience(Array.isArray(p.experience) ? p.experience : []);
+    setEditEducation(Array.isArray(p.education) ? p.education : []);
+    setEditWillingToDonate(p.willingToDonate !== undefined ? !!p.willingToDonate : false);
+    setEditAvailableForEmergency(p.availableForEmergency !== undefined ? !!p.availableForEmergency : false);
   };
 
   // Sync resume builder with current profile values
@@ -686,9 +719,15 @@ export default function CandidateDashboard() {
         photoPath: editPhotoPath,
         bloodGroup: editBloodGroup,
         emergencyContact: editEmergencyContact,
-        availableBloodDonation: editAvailableBloodDonation,
-        availablePlateletDonation: editAvailablePlateletDonation,
-        lastDonationDate: editLastDonationDate
+        willingToDonate: editWillingToDonate,
+        availableForEmergency: editAvailableForEmergency,
+        lastDonationDate: editLastDonationDate,
+        bio: editBio,
+        coverImage: editCoverImage,
+        achievements: editAchievements.split(',').map(s => s.trim()).filter(Boolean),
+        certificates: editCertificates.split(',').map(s => s.trim()).filter(Boolean),
+        experience: editExperience,
+        education: editEducation
       };
 
       const res = await fetch('/api/auth/update-candidate', {
@@ -1619,11 +1658,12 @@ export default function CandidateDashboard() {
               <aside className={styles.sidebar}>
                 <div className={styles.sidebarBrand}>
                   <Award className={styles.brandIcon} size={20} />
-                  <span>CANDIDATE PANEL</span>
+                  <span>TSS MEMBER PORTAL</span>
                 </div>
                 
                 <nav className={styles.sidebarMenu} style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', overflowY: 'auto', maxHeight: 'calc(100vh - 200px)', paddingRight: '0.25rem' }}>
                   <button 
+                    type="button"
                     onClick={() => setActiveTab('dashboard-home')}
                     className={`${styles.sidebarItem} ${activeTab === 'dashboard-home' ? styles.sidebarItemActive : ''}`}
                   >
@@ -1632,87 +1672,49 @@ export default function CandidateDashboard() {
                   </button>
 
                   <button 
+                    type="button"
                     onClick={() => { setActiveTab('profile'); setProfileSubTab('details'); }}
                     className={`${styles.sidebarItem} ${activeTab === 'profile' ? styles.sidebarItemActive : ''}`}
                   >
                     <User size={18} />
-                    <span>My Profile</span>
+                    <span>Profile</span>
                   </button>
 
                   <button 
-                    onClick={() => setActiveTab('card')}
-                    className={`${styles.sidebarItem} ${activeTab === 'card' ? styles.sidebarItemActive : ''}`}
-                  >
-                    <Award size={18} />
-                    <span>Digital TSS Card</span>
-                  </button>
-
-                  <button 
-                    onClick={() => setActiveTab('resume')}
-                    className={`${styles.sidebarItem} ${activeTab === 'resume' ? styles.sidebarItemActive : ''}`}
-                  >
-                    <FileText size={18} />
-                    <span>Resume Studio</span>
-                  </button>
-
-                  <button 
-                    onClick={() => setActiveTab('opportunity-hub')}
+                    type="button"
+                    onClick={() => { setActiveTab('opportunity-hub'); setOppsSubTab('feed'); }}
                     className={`${styles.sidebarItem} ${activeTab === 'opportunity-hub' ? styles.sidebarItemActive : ''}`}
                   >
                     <Briefcase size={18} />
-                    <span>Opportunities</span>
+                    <span>Opportunity Hub</span>
                   </button>
 
                   <button 
-                    onClick={() => setActiveTab('applications')}
-                    className={`${styles.sidebarItem} ${activeTab === 'applications' ? styles.sidebarItemActive : ''}`}
-                  >
-                    <CheckCircle2 size={18} />
-                    <span>Applications</span>
-                  </button>
-
-                  <button 
-                    onClick={() => setActiveTab('saved-opportunities')}
-                    className={`${styles.sidebarItem} ${activeTab === 'saved-opportunities' ? styles.sidebarItemActive : ''}`}
-                  >
-                    <Bookmark size={18} />
-                    <span>Saved Opportunities</span>
-                  </button>
-
-                  <button 
-                    onClick={() => setActiveTab('build')}
-                    className={`${styles.sidebarItem} ${activeTab === 'build' ? styles.sidebarItemActive : ''}`}
-                  >
-                    <TrendingUp size={18} />
-                    <span>Build Challenge</span>
-                  </button>
-
-                  <button 
-                    onClick={() => setActiveTab('events')}
-                    className={`${styles.sidebarItem} ${activeTab === 'events' ? styles.sidebarItemActive : ''}`}
-                  >
-                    <Calendar size={18} />
-                    <span>Events</span>
-                  </button>
-
-                  <button 
-                    onClick={() => setActiveTab('community')}
-                    className={`${styles.sidebarItem} ${activeTab === 'community' ? styles.sidebarItemActive : ''}`}
-                  >
-                    <Globe size={18} />
-                    <span>Community</span>
-                  </button>
-
-                  <button 
-                    onClick={() => setActiveTab('emergency-support')}
+                    type="button"
+                    onClick={() => { setActiveTab('emergency-support'); setEmergencySubTab('feed'); }}
                     className={`${styles.sidebarItem} ${activeTab === 'emergency-support' ? styles.sidebarItemActive : ''}`}
                     style={{ borderLeftColor: activeTab === 'emergency-support' ? '#ef4444' : 'transparent' }}
                   >
                     <ShieldAlert size={18} style={{ color: activeTab === 'emergency-support' ? '#ef4444' : 'var(--text-muted)' }} />
-                    <span style={{ color: activeTab === 'emergency-support' ? '#ef4444' : 'inherit', fontWeight: activeTab === 'emergency-support' ? 700 : 'normal' }}>Emergency</span>
+                    <span style={{ color: activeTab === 'emergency-support' ? '#ef4444' : 'inherit', fontWeight: activeTab === 'emergency-support' ? 700 : 'normal' }}>Emergency Support</span>
                   </button>
 
                   <button 
+                    type="button"
+                    onClick={() => setActiveTab('notifications')}
+                    className={`${styles.sidebarItem} ${activeTab === 'notifications' ? styles.sidebarItemActive : ''}`}
+                  >
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', width: '100%' }}>
+                      <Calendar size={18} />
+                      <span>Notifications</span>
+                      {dashboardNotifications.some(n => n.unread) && (
+                        <span style={{ width: '6px', height: '6px', backgroundColor: '#3b82f6', borderRadius: '50%', marginLeft: 'auto' }}></span>
+                      )}
+                    </span>
+                  </button>
+
+                  <button 
+                    type="button"
                     onClick={() => setActiveTab('settings')}
                     className={`${styles.sidebarItem} ${activeTab === 'settings' ? styles.sidebarItemActive : ''}`}
                   >
@@ -1729,31 +1731,87 @@ export default function CandidateDashboard() {
               {/* Right View Panel */}
               <main className={styles.mainPanel}>
                 
+                {activeTab === 'opportunity-hub' && (
+                  <div style={{ display: 'flex', gap: '1rem', borderBottom: '1px solid var(--border-color)', marginBottom: '2rem', paddingBottom: '0.5rem', overflowX: 'auto' }}>
+                    <button 
+                      type="button"
+                      onClick={() => setOppsSubTab('feed')}
+                      style={{ padding: '0.5rem 1.25rem', background: 'none', border: 'none', borderBottom: oppsSubTab === 'feed' ? '2px solid var(--primary-pale)' : '2px solid transparent', color: oppsSubTab === 'feed' ? 'var(--text-main)' : 'var(--text-muted)', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s ease', fontSize: '0.9rem' }}
+                    >
+                      Browse Feed
+                    </button>
+                    <button 
+                      type="button"
+                      onClick={() => setOppsSubTab('saved')}
+                      style={{ padding: '0.5rem 1.25rem', background: 'none', border: 'none', borderBottom: oppsSubTab === 'saved' ? '2px solid var(--primary-pale)' : '2px solid transparent', color: oppsSubTab === 'saved' ? 'var(--text-main)' : 'var(--text-muted)', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s ease', fontSize: '0.9rem' }}
+                    >
+                      Saved Bookmarks
+                    </button>
+                    <button 
+                      type="button"
+                      onClick={() => setOppsSubTab('applications')}
+                      style={{ padding: '0.5rem 1.25rem', background: 'none', border: 'none', borderBottom: oppsSubTab === 'applications' ? '2px solid var(--primary-pale)' : '2px solid transparent', color: oppsSubTab === 'applications' ? 'var(--text-main)' : 'var(--text-muted)', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s ease', fontSize: '0.9rem' }}
+                    >
+                      Hiring Pipeline
+                    </button>
+                    <button 
+                      type="button"
+                      onClick={() => setOppsSubTab('build')}
+                      style={{ padding: '0.5rem 1.25rem', background: 'none', border: 'none', borderBottom: oppsSubTab === 'build' ? '2px solid var(--primary-pale)' : '2px solid transparent', color: oppsSubTab === 'build' ? 'var(--text-main)' : 'var(--text-muted)', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s ease', fontSize: '0.9rem' }}
+                    >
+                      Build Sandbox
+                    </button>
+                  </div>
+                )}
+
+                {activeTab === 'emergency-support' && (
+                  <div style={{ display: 'flex', gap: '1rem', borderBottom: '1px solid var(--border-color)', marginBottom: '2rem', paddingBottom: '0.5rem', overflowX: 'auto' }}>
+                    <button 
+                      type="button"
+                      onClick={() => setEmergencySubTab('feed')}
+                      style={{ padding: '0.5rem 1.25rem', background: 'none', border: 'none', borderBottom: emergencySubTab === 'feed' ? '2px solid var(--primary-pale)' : '2px solid transparent', color: emergencySubTab === 'feed' ? 'var(--text-main)' : 'var(--text-muted)', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s ease', fontSize: '0.9rem' }}
+                    >
+                      Emergency Requests Feed
+                    </button>
+                    <button 
+                      type="button"
+                      onClick={() => setEmergencySubTab('settings')}
+                      style={{ padding: '0.5rem 1.25rem', background: 'none', border: 'none', borderBottom: emergencySubTab === 'settings' ? '2px solid var(--primary-pale)' : '2px solid transparent', color: emergencySubTab === 'settings' ? 'var(--text-main)' : 'var(--text-muted)', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s ease', fontSize: '0.9rem' }}
+                    >
+                      Donation Settings
+                    </button>
+                  </div>
+                )}
+                
                 {activeTab === 'profile' && (
                   <div style={{ display: 'flex', gap: '1rem', borderBottom: '1px solid var(--border-color)', marginBottom: '2rem', paddingBottom: '0.5rem', overflowX: 'auto' }}>
                     <button 
+                      type="button"
                       onClick={() => setProfileSubTab('details')}
                       style={{ padding: '0.5rem 1.25rem', background: 'none', border: 'none', borderBottom: profileSubTab === 'details' ? '2px solid var(--primary-pale)' : '2px solid transparent', color: profileSubTab === 'details' ? 'var(--text-main)' : 'var(--text-muted)', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s ease', fontSize: '0.9rem' }}
                     >
-                      Profile Details
+                      Profile Info
                     </button>
                     <button 
+                      type="button"
+                      onClick={() => setProfileSubTab('experience')}
+                      style={{ padding: '0.5rem 1.25rem', background: 'none', border: 'none', borderBottom: profileSubTab === 'experience' ? '2px solid var(--primary-pale)' : '2px solid transparent', color: profileSubTab === 'experience' ? 'var(--text-main)' : 'var(--text-muted)', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s ease', fontSize: '0.9rem' }}
+                    >
+                      Experience & Education
+                    </button>
+                    <button 
+                      type="button"
+                      onClick={() => setProfileSubTab('achievements')}
+                      style={{ padding: '0.5rem 1.25rem', background: 'none', border: 'none', borderBottom: profileSubTab === 'achievements' ? '2px solid var(--primary-pale)' : '2px solid transparent', color: profileSubTab === 'achievements' ? 'var(--text-main)' : 'var(--text-muted)', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s ease', fontSize: '0.9rem' }}
+                    >
+                      Achievements & Credentials
+                    </button>
+                    <button 
+                      type="button"
                       onClick={() => setProfileSubTab('resume')}
                       style={{ padding: '0.5rem 1.25rem', background: 'none', border: 'none', borderBottom: profileSubTab === 'resume' ? '2px solid var(--primary-pale)' : '2px solid transparent', color: profileSubTab === 'resume' ? 'var(--text-main)' : 'var(--text-muted)', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s ease', fontSize: '0.9rem' }}
                     >
                       Resume Studio
-                    </button>
-                    <button 
-                      onClick={() => setProfileSubTab('levels')}
-                      style={{ padding: '0.5rem 1.25rem', background: 'none', border: 'none', borderBottom: profileSubTab === 'levels' ? '2px solid var(--primary-pale)' : '2px solid transparent', color: profileSubTab === 'levels' ? 'var(--text-main)' : 'var(--text-muted)', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s ease', fontSize: '0.9rem' }}
-                    >
-                      Vetting Levels
-                    </button>
-                    <button 
-                      onClick={() => setProfileSubTab('build')}
-                      style={{ padding: '0.5rem 1.25rem', background: 'none', border: 'none', borderBottom: profileSubTab === 'build' ? '2px solid var(--primary-pale)' : '2px solid transparent', color: profileSubTab === 'build' ? 'var(--text-main)' : 'var(--text-muted)', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s ease', fontSize: '0.9rem' }}
-                    >
-                      Build Challenge
                     </button>
                   </div>
                 )}
@@ -2432,7 +2490,7 @@ export default function CandidateDashboard() {
               )}
 
                 {/* C. VETTING LEVELS TAB */}
-                {activeTab === 'profile' && profileSubTab === 'levels' && (
+                {activeTab === 'profile' && profileSubTab === ('levels' as any) && (
                   profile.status !== 'Verified' ? renderLockedState('Vetting Levels Logs') : (
                     <div className={`${styles.tabView} fade-in`}>
                     <h2>TSS Verification Levels</h2>
@@ -2496,7 +2554,7 @@ export default function CandidateDashboard() {
               )}
 
                 {/* D. BUILD CHALLENGE TAB */}
-                {(activeTab === 'build' || (activeTab === 'profile' && profileSubTab === 'build')) && (
+                {(activeTab === 'opportunity-hub' && oppsSubTab === 'build') && (
                   profile.status !== 'Verified' ? renderLockedState('Build Challenge Sandbox') : (
                     <div className={`${styles.tabView} fade-in`}>
                     <h2>TSS Build Challenge Sandbox</h2>
@@ -2758,6 +2816,53 @@ export default function CandidateDashboard() {
                   </form>
                 )}
 
+                {activeTab === 'emergency-support' && emergencySubTab === 'settings' && profile && (
+                  <form onSubmit={handleSaveSettings} className={`${styles.tabView} fade-in`}>
+                    <h2>Emergency Donation Settings</h2>
+                    <p>Toggle blood and platelet emergency options matching community requests. No commercial activity is allowed.</p>
+                    <div className={styles.settingsGrid}>
+                      <div className={styles.formField}>
+                        <label className={styles.formLabel}>Blood Group</label>
+                        <select 
+                          value={editBloodGroup}
+                          onChange={(e) => setEditBloodGroup(e.target.value)}
+                          className={styles.formInput}
+                          style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-main)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '0.6rem', width: '100%' }}
+                        >
+                          <option value="Unknown">Unknown</option>
+                          <option value="A+">A+</option>
+                          <option value="A-">A-</option>
+                          <option value="B+">B+</option>
+                          <option value="B-">B-</option>
+                          <option value="AB+">AB+</option>
+                          <option value="AB-">AB-</option>
+                          <option value="O+">O+</option>
+                          <option value="O-">O-</option>
+                        </select>
+                      </div>
+                      <div className={styles.formField}>
+                        <label className={styles.formLabel}>Emergency Contact Number</label>
+                        <input type="text" value={editEmergencyContact} onChange={(e) => setEditEmergencyContact(e.target.value)} className={styles.formInput} required />
+                      </div>
+                      <div className={styles.formField}>
+                        <label className={styles.formLabel}>Last Donation Date</label>
+                        <input type="date" value={editLastDonationDate} onChange={(e) => setEditLastDonationDate(e.target.value)} className={styles.formInput} />
+                      </div>
+                      <div className={styles.formField} style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', gridColumn: 'span 2', marginTop: '1rem' }}>
+                        <input type="checkbox" checked={editWillingToDonate} onChange={(e) => setEditWillingToDonate(e.target.checked)} id="willingToDonateCheck" />
+                        <label htmlFor="willingToDonateCheck" className={styles.formLabel} style={{ margin: 0, cursor: 'pointer' }}>Willing to Donate Blood & Platelets</label>
+                      </div>
+                      <div className={styles.formField} style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', gridColumn: 'span 2' }}>
+                        <input type="checkbox" checked={editAvailableForEmergency} onChange={(e) => setEditAvailableForEmergency(e.target.checked)} id="availableForEmergencyCheck" />
+                        <label htmlFor="availableForEmergencyCheck" className={styles.formLabel} style={{ margin: 0, cursor: 'pointer' }}>Available for Immediate Medical Emergency Alerts</label>
+                      </div>
+                    </div>
+                    <button type="submit" disabled={isUpdatingSettings} className="btn btn-primary" style={{ marginTop: '2rem' }}>
+                      {isUpdatingSettings ? 'Saving...' : 'Save Settings'}
+                    </button>
+                  </form>
+                )}
+
                 {/* F. JOBS BOARD TAB */}
                 {profile && activeTab === ('jobs' as any) && (
                   <div className={`${styles.tabView} fade-in`}>
@@ -2939,7 +3044,7 @@ export default function CandidateDashboard() {
                 )}
 
                 {/* G. OPPORTUNITY HUB TAB */}
-                {activeTab === 'opportunity-hub' && (
+                {activeTab === 'opportunity-hub' && oppsSubTab === 'feed' && (
                   <div className={`${styles.tabView} fade-in`}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', marginBottom: '2rem' }}>
                       <div>
@@ -3257,7 +3362,7 @@ export default function CandidateDashboard() {
                 )}
 
                 {/* H. EMERGENCY SUPPORT TAB */}
-                {activeTab === 'emergency-support' && (
+                {activeTab === 'emergency-support' && emergencySubTab === 'feed' && (
                   <div className={`${styles.tabView} fade-in`}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.5rem' }}>
                       <div>
@@ -4153,7 +4258,7 @@ export default function CandidateDashboard() {
                 )}
 
                 {/* I. APPLICATIONS TAB */}
-                {activeTab === 'applications' && (
+                {activeTab === 'opportunity-hub' && oppsSubTab === 'applications' && (
                   <div className={`${styles.tabView} fade-in`}>
                     <h2>My Applications</h2>
                     <p>Track the hiring progress, referral recommendations, and status updates of your submitted applications.</p>
@@ -4187,7 +4292,7 @@ export default function CandidateDashboard() {
                 )}
 
                 {/* J. SAVED OPPORTUNITIES TAB */}
-                {activeTab === 'saved-opportunities' && (
+                {activeTab === 'opportunity-hub' && oppsSubTab === 'saved' && (
                   <div className={`${styles.tabView} fade-in`}>
                     <h2>Saved Bookmarks</h2>
                     <p>Keep track of opportunities you have saved for later review or reference.</p>

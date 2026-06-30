@@ -39,65 +39,83 @@ export async function POST(request: Request) {
     if (updates.resumeLink !== undefined) safeUpdates.resumeLink = updates.resumeLink.trim();
     if (updates.photoPath !== undefined) safeUpdates.photoPath = updates.photoPath;
 
-    // Emergency fields
+    // Reputation, bio and additional profile details
+    if (updates.bio !== undefined) safeUpdates.bio = updates.bio.trim();
+    if (updates.coverImage !== undefined) safeUpdates.coverImage = updates.coverImage;
+    if (updates.achievements !== undefined) safeUpdates.achievements = updates.achievements;
+    if (updates.certificates !== undefined) safeUpdates.certificates = updates.certificates;
+    if (updates.experience !== undefined) safeUpdates.experience = updates.experience;
+    if (updates.education !== undefined) safeUpdates.education = updates.education;
+
+    // Blood / Platelet Donation details (saved live so matchings are real-time)
     if (updates.bloodGroup !== undefined) safeUpdates.bloodGroup = updates.bloodGroup;
-    if (updates.emergencyContact !== undefined) safeUpdates.emergencyContact = updates.emergencyContact.trim();
-    if (updates.availableBloodDonation !== undefined) safeUpdates.availableBloodDonation = updates.availableBloodDonation;
-    if (updates.availablePlateletDonation !== undefined) safeUpdates.availablePlateletDonation = updates.availablePlateletDonation;
+    if (updates.willingToDonate !== undefined) safeUpdates.willingToDonate = updates.willingToDonate;
+    if (updates.availableForEmergency !== undefined) safeUpdates.availableForEmergency = updates.availableForEmergency;
     if (updates.lastDonationDate !== undefined) safeUpdates.lastDonationDate = updates.lastDonationDate;
-    
-    // Loyalty tracker fields
+    if (updates.emergencyContact !== undefined) safeUpdates.emergencyContact = updates.emergencyContact.trim();
+
+    // Checkin streaker attributes
     if (updates.loginDays !== undefined) safeUpdates.loginDays = Number(updates.loginDays);
     if (updates.streak !== undefined) safeUpdates.streak = Number(updates.streak);
     if (updates.lastCheckinDate !== undefined) safeUpdates.lastCheckinDate = updates.lastCheckinDate;
+    if (updates.communityScore !== undefined) safeUpdates.communityScore = Number(updates.communityScore);
 
-    // Check if verification affecting fields changed
-    const isVerificationFieldChanged = 
-      (updates.fullName !== undefined && updates.fullName.trim() !== (candidate.fullName || '')) ||
-      (updates.college !== undefined && updates.college.trim() !== (candidate.college || '')) ||
-      (updates.graduationYear !== undefined && Number(updates.graduationYear) !== (candidate.graduationYear || null)) ||
-      (updates.linkedin !== undefined && updates.linkedin.trim() !== (candidate.linkedin || '')) ||
-      (updates.resumeLink !== undefined && updates.resumeLink.trim() !== (candidate.roleDetails?.resumeLink || '')) ||
-      (updates.photoPath !== undefined && updates.photoPath !== (candidate.photoPath || ''));
-
-    // Handle Verified Staging Flow
-    if (candidate.status === 'Verified' && isVerificationFieldChanged) {
+    // Profile Edits approval vetting process
+    if (candidate.status === 'Verified') {
       const roleDetails = candidate.roleDetails || {};
       
-      // Stage changes inside roleDetails.draftUpdate
-      roleDetails.draftUpdate = {
-        ...roleDetails.draftUpdate,
-        ...safeUpdates
-      };
+      const liveUpdates: any = {};
+      const draftUpdates: any = {};
 
-      // Append verification history audit log
-      const auditLogs = roleDetails.auditLogs || [];
-      auditLogs.push({
-        date: new Date().toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' }),
-        event: 'Profile Edited - Moved to Review',
-        admin: 'system'
-      });
-      roleDetails.auditLogs = auditLogs;
+      const draftKeys = [
+        'fullName', 'mobile', 'city', 'state', 'college', 'graduationYear', 'skills', 
+        'linkedin', 'github', 'portfolio', 'resumeLink', 'photoPath', 
+        'bio', 'coverImage', 'achievements', 'certificates', 'experience', 'education'
+      ];
 
-      // Automatically change status to Under Review
-      await updateCandidate(id, {
-        status: 'Under Review',
-        roleDetails
+      Object.keys(safeUpdates).forEach(key => {
+        if (draftKeys.includes(key)) {
+          draftUpdates[key] = safeUpdates[key];
+        } else {
+          liveUpdates[key] = safeUpdates[key];
+        }
       });
+
+      if (Object.keys(draftUpdates).length > 0) {
+        roleDetails.draftProfileDetails = {
+          ...(roleDetails.draftProfileDetails || {}),
+          ...draftUpdates
+        };
+
+        const auditLogs = roleDetails.auditLogs || [];
+        auditLogs.push({
+          date: new Date().toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' }),
+          event: 'Profile Edited - Changes Awaiting Admin Approval',
+          admin: 'system'
+        });
+        roleDetails.auditLogs = auditLogs;
+        
+        liveUpdates.status = 'Under Review';
+      }
+
+      liveUpdates.roleDetails = roleDetails;
+      await updateCandidate(id, liveUpdates);
 
       const updatedCand = await getCandidateById(id);
-      return NextResponse.json({ 
-        success: true, 
-        message: 'Verification changes submitted for admin approval. Profile status set to Under Review.',
+      return NextResponse.json({
+        success: true,
+        message: Object.keys(draftUpdates).length > 0 
+          ? 'Profile edits submitted for admin review. Your previously verified settings remain active.' 
+          : 'Settings updated successfully.',
         candidate: updatedCand
       });
     } else {
-      // Direct updates (either not verified, or verified candidate editing non-verification fields)
+      // Directly apply updates for unverified members
       const roleDetails = candidate.roleDetails || {};
       const auditLogs = roleDetails.auditLogs || [];
       auditLogs.push({
         date: new Date().toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' }),
-        event: 'Profile Updated',
+        event: 'Profile Settings Updated',
         admin: 'system'
       });
       roleDetails.auditLogs = auditLogs;

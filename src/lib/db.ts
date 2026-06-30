@@ -45,11 +45,26 @@ export interface Candidate {
   // Dynamic Verification System additions
   username?: string;
   communityScore?: number;
-  level?: 'Explorer' | 'Builder' | 'Creator' | 'Leader' | 'Mentor' | string;
+  level?: 'Explorer' | 'Builder' | 'Contributor' | 'Leader' | 'Legend' | string;
   memberSince?: string;
   loginDays?: number;
   streak?: number;
   lastCheckinDate?: string;
+
+  // Trust-Based Ecosystem & Emergency Network addition
+  bloodGroup?: 'A+' | 'A-' | 'B+' | 'B-' | 'AB+' | 'AB-' | 'O+' | 'O-' | string;
+  willingToDonate?: boolean;
+  availableForEmergency?: boolean;
+  lastDonationDate?: string;
+  emergencyContact?: string;
+  achievements?: string[];
+  certificates?: string[];
+  coverImage?: string;
+  bio?: string;
+  timeline?: Array<{ date: string; event: string; type: string }>;
+  experience?: Array<{ title: string; company: string; duration: string; description?: string }>;
+  education?: Array<{ school: string; degree: string; year: string }>;
+  draftProfileDetails?: Record<string, any>;
 }
 
 export interface ForwardLog {
@@ -234,7 +249,20 @@ export async function getCandidates(): Promise<Candidate[]> {
       memberSince: roleDetails.memberSince || new Date(c.registrationDate || Date.now()).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
       loginDays: roleDetails.loginDays !== undefined ? roleDetails.loginDays : 36,
       streak: roleDetails.streak !== undefined ? roleDetails.streak : 13,
-      lastCheckinDate: roleDetails.lastCheckinDate || ''
+      lastCheckinDate: roleDetails.lastCheckinDate || '',
+      bloodGroup: roleDetails.bloodGroup || '',
+      willingToDonate: roleDetails.willingToDonate !== undefined ? roleDetails.willingToDonate : false,
+      availableForEmergency: roleDetails.availableForEmergency !== undefined ? roleDetails.availableForEmergency : false,
+      lastDonationDate: roleDetails.lastDonationDate || '',
+      emergencyContact: roleDetails.emergencyContact || '',
+      achievements: roleDetails.achievements || [],
+      certificates: roleDetails.certificates || [],
+      coverImage: roleDetails.coverImage || '',
+      bio: roleDetails.bio || '',
+      timeline: roleDetails.timeline || [],
+      experience: roleDetails.experience || [],
+      education: roleDetails.education || [],
+      draftProfileDetails: roleDetails.draftProfileDetails || null
     };
   }) as Candidate[];
 }
@@ -263,7 +291,20 @@ export async function getCandidateById(id: string): Promise<Candidate | null> {
     memberSince: roleDetails.memberSince || new Date(data.registrationDate || Date.now()).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
     loginDays: roleDetails.loginDays !== undefined ? roleDetails.loginDays : 36,
     streak: roleDetails.streak !== undefined ? roleDetails.streak : 13,
-    lastCheckinDate: roleDetails.lastCheckinDate || ''
+    lastCheckinDate: roleDetails.lastCheckinDate || '',
+    bloodGroup: roleDetails.bloodGroup || '',
+    willingToDonate: roleDetails.willingToDonate !== undefined ? roleDetails.willingToDonate : false,
+    availableForEmergency: roleDetails.availableForEmergency !== undefined ? roleDetails.availableForEmergency : false,
+    lastDonationDate: roleDetails.lastDonationDate || '',
+    emergencyContact: roleDetails.emergencyContact || '',
+    achievements: roleDetails.achievements || [],
+    certificates: roleDetails.certificates || [],
+    coverImage: roleDetails.coverImage || '',
+    bio: roleDetails.bio || '',
+    timeline: roleDetails.timeline || [],
+    experience: roleDetails.experience || [],
+    education: roleDetails.education || [],
+    draftProfileDetails: roleDetails.draftProfileDetails || null
   } as Candidate;
 }
 
@@ -276,6 +317,20 @@ export async function insertCandidate(candidate: Candidate): Promise<void> {
   roleDetails.loginDays = candidate.loginDays !== undefined ? candidate.loginDays : 36;
   roleDetails.streak = candidate.streak !== undefined ? candidate.streak : 13;
   roleDetails.lastCheckinDate = candidate.lastCheckinDate || '';
+
+  // Seed settings
+  roleDetails.bloodGroup = candidate.bloodGroup || '';
+  roleDetails.willingToDonate = candidate.willingToDonate !== undefined ? candidate.willingToDonate : false;
+  roleDetails.availableForEmergency = candidate.availableForEmergency !== undefined ? candidate.availableForEmergency : false;
+  roleDetails.lastDonationDate = candidate.lastDonationDate || '';
+  roleDetails.emergencyContact = candidate.emergencyContact || '';
+  roleDetails.achievements = candidate.achievements || [];
+  roleDetails.certificates = candidate.certificates || [];
+  roleDetails.coverImage = candidate.coverImage || '';
+  roleDetails.bio = candidate.bio || '';
+  roleDetails.timeline = candidate.timeline || [];
+  roleDetails.experience = candidate.experience || [];
+  roleDetails.education = candidate.education || [];
 
   const dbCandidate = {
     ...candidate,
@@ -312,11 +367,11 @@ export async function updateCandidate(id: string, updates: Partial<Candidate>): 
     } else if (updates.communityScore < 150) {
       roleDetails.level = 'Builder';
     } else if (updates.communityScore < 300) {
-      roleDetails.level = 'Creator';
+      roleDetails.level = 'Contributor';
     } else if (updates.communityScore < 500) {
       roleDetails.level = 'Leader';
     } else {
-      roleDetails.level = 'Mentor';
+      roleDetails.level = 'Legend';
     }
     updates.level = roleDetails.level;
   } else if (updates.level !== undefined) {
@@ -327,6 +382,21 @@ export async function updateCandidate(id: string, updates: Partial<Candidate>): 
   if (updates.loginDays !== undefined) roleDetails.loginDays = updates.loginDays;
   if (updates.streak !== undefined) roleDetails.streak = updates.streak;
   if (updates.lastCheckinDate !== undefined) roleDetails.lastCheckinDate = updates.lastCheckinDate;
+
+  // Sync trust-based ecosystem details into roleDetails JSON
+  if (updates.bloodGroup !== undefined) roleDetails.bloodGroup = updates.bloodGroup;
+  if (updates.willingToDonate !== undefined) roleDetails.willingToDonate = updates.willingToDonate;
+  if (updates.availableForEmergency !== undefined) roleDetails.availableForEmergency = updates.availableForEmergency;
+  if (updates.lastDonationDate !== undefined) roleDetails.lastDonationDate = updates.lastDonationDate;
+  if (updates.emergencyContact !== undefined) roleDetails.emergencyContact = updates.emergencyContact;
+  if (updates.achievements !== undefined) roleDetails.achievements = updates.achievements;
+  if (updates.certificates !== undefined) roleDetails.certificates = updates.certificates;
+  if (updates.coverImage !== undefined) roleDetails.coverImage = updates.coverImage;
+  if (updates.bio !== undefined) roleDetails.bio = updates.bio;
+  if (updates.timeline !== undefined) roleDetails.timeline = updates.timeline;
+  if (updates.experience !== undefined) roleDetails.experience = updates.experience;
+  if (updates.education !== undefined) roleDetails.education = updates.education;
+  if (updates.draftProfileDetails !== undefined) roleDetails.draftProfileDetails = updates.draftProfileDetails;
 
   const dbUpdates = {
     ...updates,

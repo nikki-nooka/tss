@@ -957,6 +957,32 @@ export default function AdminDashboard() {
                         <span style={{ fontSize: '0.8rem', color: 'var(--accent)' }}>Role: {selectedCandidate.role} | City: {selectedCandidate.city}</span>
                       </div>
 
+                      {/* Staged Draft Profile Changes Diff Panel */}
+                      {selectedCandidate.roleDetails?.draftProfileDetails && (
+                        <div style={{ backgroundColor: 'rgba(245, 158, 11, 0.05)', border: '1px solid rgba(245, 158, 11, 0.2)', borderRadius: '10px', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                          <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                            ⚠️ Proposed Profile Edits (Awaiting Vetting)
+                          </span>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', maxHeight: '200px', overflowY: 'auto', paddingRight: '0.25rem' }}>
+                            {Object.entries(selectedCandidate.roleDetails.draftProfileDetails).map(([key, newVal]: [string, any]) => {
+                              let oldVal = (selectedCandidate as any)[key];
+                              if (Array.isArray(oldVal)) oldVal = oldVal.join(', ');
+                              if (typeof oldVal === 'object') oldVal = JSON.stringify(oldVal);
+                              let renderedNew = Array.isArray(newVal) ? newVal.join(', ') : typeof newVal === 'object' ? JSON.stringify(newVal) : String(newVal);
+                              return (
+                                <div key={key} style={{ borderBottom: '1px solid rgba(255,255,255,0.02)', paddingBottom: '0.4rem', fontSize: '0.8rem' }}>
+                                  <strong style={{ color: 'var(--text-secondary)', textTransform: 'capitalize' }}>{key}</strong>
+                                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', marginTop: '0.2rem' }}>
+                                    <div style={{ textDecoration: 'line-through', color: 'var(--text-muted)', fontSize: '0.75rem' }}>Was: {String(oldVal || 'None')}</div>
+                                    <div style={{ color: 'var(--green-light)', fontWeight: 600, fontSize: '0.75rem' }}>Proposed: {renderedNew}</div>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+
                       {/* Vetting Checklist Form */}
                       <div>
                         <strong style={{ display: 'block', fontSize: '0.8rem', textTransform: 'uppercase', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>Vetting Checklist</strong>
