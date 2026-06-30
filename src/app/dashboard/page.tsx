@@ -254,16 +254,34 @@ export default function CandidateDashboard() {
   const [isSubmittingApplication, setIsSubmittingApplication] = useState(false);
 
   // Loyalty check-in states
-  const [loginDays, setLoginDays] = useState(36);
-  const [streak, setStreak] = useState(13);
+  const [loginDays, setLoginDays] = useState(1);
+  const [streak, setStreak] = useState(1);
   const [hasCheckedInToday, setHasCheckedInToday] = useState(false);
 
   useEffect(() => {
     if (profile) {
-      setLoginDays(profile.loginDays !== undefined ? profile.loginDays : 36);
-      setStreak(profile.streak !== undefined ? profile.streak : 13);
       const todayStr = new Date().toISOString().split('T')[0];
-      setHasCheckedInToday(profile.lastCheckinDate === todayStr);
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      const yesterdayStr = yesterday.toISOString().split('T')[0];
+
+      const dbLoginDays = profile.loginDays !== undefined ? profile.loginDays : 1;
+      const dbStreak = profile.streak !== undefined ? profile.streak : 1;
+      const dbLastCheckin = profile.lastCheckinDate || '';
+
+      setLoginDays(dbLoginDays);
+
+      if (dbLastCheckin === todayStr) {
+        setHasCheckedInToday(true);
+        setStreak(dbStreak);
+      } else if (dbLastCheckin === yesterdayStr) {
+        setHasCheckedInToday(false);
+        setStreak(dbStreak);
+      } else {
+        // Missed check-in: streak resets to 0 (and goes to 1 on next check-in today)
+        setHasCheckedInToday(false);
+        setStreak(0);
+      }
     }
   }, [profile]);
 

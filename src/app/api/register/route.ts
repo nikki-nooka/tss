@@ -361,7 +361,10 @@ export async function POST(request: Request) {
       username: username,
       communityScore: 20, // +20 points for registration!
       level: 'Explorer',
-      memberSince: new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+      memberSince: new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
+      loginDays: 1,
+      streak: 1,
+      lastCheckinDate: new Date().toISOString().split('T')[0]
     };
 
     await insertCandidate(newCandidate);

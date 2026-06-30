@@ -247,8 +247,8 @@ export async function getCandidates(): Promise<Candidate[]> {
       communityScore: roleDetails.communityScore !== undefined ? roleDetails.communityScore : 20,
       level: roleDetails.level || 'Explorer',
       memberSince: roleDetails.memberSince || new Date(c.registrationDate || Date.now()).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
-      loginDays: roleDetails.loginDays !== undefined ? roleDetails.loginDays : 36,
-      streak: roleDetails.streak !== undefined ? roleDetails.streak : 13,
+      loginDays: roleDetails.loginDays !== undefined ? roleDetails.loginDays : 1,
+      streak: roleDetails.streak !== undefined ? roleDetails.streak : 1,
       lastCheckinDate: roleDetails.lastCheckinDate || '',
       bloodGroup: roleDetails.bloodGroup || '',
       willingToDonate: roleDetails.willingToDonate !== undefined ? roleDetails.willingToDonate : false,
@@ -289,8 +289,8 @@ export async function getCandidateById(id: string): Promise<Candidate | null> {
     communityScore: roleDetails.communityScore !== undefined ? roleDetails.communityScore : 20,
     level: roleDetails.level || 'Explorer',
     memberSince: roleDetails.memberSince || new Date(data.registrationDate || Date.now()).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
-    loginDays: roleDetails.loginDays !== undefined ? roleDetails.loginDays : 36,
-    streak: roleDetails.streak !== undefined ? roleDetails.streak : 13,
+    loginDays: roleDetails.loginDays !== undefined ? roleDetails.loginDays : 1,
+    streak: roleDetails.streak !== undefined ? roleDetails.streak : 1,
     lastCheckinDate: roleDetails.lastCheckinDate || '',
     bloodGroup: roleDetails.bloodGroup || '',
     willingToDonate: roleDetails.willingToDonate !== undefined ? roleDetails.willingToDonate : false,
@@ -314,8 +314,8 @@ export async function insertCandidate(candidate: Candidate): Promise<void> {
   roleDetails.communityScore = candidate.communityScore !== undefined ? candidate.communityScore : 20;
   roleDetails.level = candidate.level || 'Explorer';
   roleDetails.memberSince = candidate.memberSince || new Date(candidate.registrationDate || Date.now()).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
-  roleDetails.loginDays = candidate.loginDays !== undefined ? candidate.loginDays : 36;
-  roleDetails.streak = candidate.streak !== undefined ? candidate.streak : 13;
+  roleDetails.loginDays = candidate.loginDays !== undefined ? candidate.loginDays : 1;
+  roleDetails.streak = candidate.streak !== undefined ? candidate.streak : 1;
   roleDetails.lastCheckinDate = candidate.lastCheckinDate || '';
 
   // Seed settings
