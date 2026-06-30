@@ -17,11 +17,11 @@ export async function POST(request: Request) {
 
     // Capture safe update fields
     const safeUpdates: any = {};
-    if (updates.fullName !== undefined) safeUpdates.fullName = updates.fullName.trim();
-    if (updates.mobile !== undefined) safeUpdates.mobile = updates.mobile.trim();
-    if (updates.city !== undefined) safeUpdates.city = updates.city.trim();
-    if (updates.state !== undefined) safeUpdates.state = updates.state.trim();
-    if (updates.college !== undefined) safeUpdates.college = updates.college.trim();
+    if (updates.fullName !== undefined) safeUpdates.fullName = updates.fullName ? String(updates.fullName).trim() : '';
+    if (updates.mobile !== undefined) safeUpdates.mobile = updates.mobile ? String(updates.mobile).trim() : '';
+    if (updates.city !== undefined) safeUpdates.city = updates.city ? String(updates.city).trim() : '';
+    if (updates.state !== undefined) safeUpdates.state = updates.state ? String(updates.state).trim() : '';
+    if (updates.college !== undefined) safeUpdates.college = updates.college ? String(updates.college).trim() : '';
     if (updates.graduationYear !== undefined) {
       const yr = Number(updates.graduationYear);
       safeUpdates.graduationYear = isNaN(yr) ? null : yr;
@@ -30,17 +30,17 @@ export async function POST(request: Request) {
       if (Array.isArray(updates.skills)) {
         safeUpdates.skills = updates.skills;
       } else {
-        safeUpdates.skills = updates.skills.split(',').map((s: string) => s.trim()).filter(Boolean);
+        safeUpdates.skills = updates.skills ? String(updates.skills).split(',').map((s: string) => s.trim()).filter(Boolean) : [];
       }
     }
-    if (updates.linkedin !== undefined) safeUpdates.linkedin = updates.linkedin.trim();
-    if (updates.github !== undefined) safeUpdates.github = updates.github.trim();
-    if (updates.portfolio !== undefined) safeUpdates.portfolio = updates.portfolio.trim();
-    if (updates.resumeLink !== undefined) safeUpdates.resumeLink = updates.resumeLink.trim();
+    if (updates.linkedin !== undefined) safeUpdates.linkedin = updates.linkedin ? String(updates.linkedin).trim() : '';
+    if (updates.github !== undefined) safeUpdates.github = updates.github ? String(updates.github).trim() : '';
+    if (updates.portfolio !== undefined) safeUpdates.portfolio = updates.portfolio ? String(updates.portfolio).trim() : '';
+    if (updates.resumeLink !== undefined) safeUpdates.resumeLink = updates.resumeLink ? String(updates.resumeLink).trim() : '';
     if (updates.photoPath !== undefined) safeUpdates.photoPath = updates.photoPath;
 
     // Reputation, bio and additional profile details
-    if (updates.bio !== undefined) safeUpdates.bio = updates.bio.trim();
+    if (updates.bio !== undefined) safeUpdates.bio = updates.bio ? String(updates.bio).trim() : '';
     if (updates.coverImage !== undefined) safeUpdates.coverImage = updates.coverImage;
     if (updates.achievements !== undefined) safeUpdates.achievements = updates.achievements;
     if (updates.certificates !== undefined) safeUpdates.certificates = updates.certificates;
@@ -52,7 +52,7 @@ export async function POST(request: Request) {
     if (updates.willingToDonate !== undefined) safeUpdates.willingToDonate = updates.willingToDonate;
     if (updates.availableForEmergency !== undefined) safeUpdates.availableForEmergency = updates.availableForEmergency;
     if (updates.lastDonationDate !== undefined) safeUpdates.lastDonationDate = updates.lastDonationDate;
-    if (updates.emergencyContact !== undefined) safeUpdates.emergencyContact = updates.emergencyContact.trim();
+    if (updates.emergencyContact !== undefined) safeUpdates.emergencyContact = updates.emergencyContact ? String(updates.emergencyContact).trim() : '';
 
     // Checkin streaker attributes
     if (updates.loginDays !== undefined) safeUpdates.loginDays = Number(updates.loginDays);
