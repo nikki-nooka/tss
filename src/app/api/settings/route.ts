@@ -1,12 +1,38 @@
 import { NextResponse } from 'next/server';
-import { getSettings, updateSettings, logAdminAction } from '@/lib/db';
+import { getCandidates, getOpportunities, getApplications, getEmergencies } from '@/lib/db';
 import { getSessionUser } from '@/lib/auth';
 
 export async function GET() {
   try {
-    const settings = await getSettings();
-    return NextResponse.json(settings);
+    const candidates = await getCandidates();
+    const opportunities = await getOpportunities();
+    const applications = await getApplications();
+    const emergencies = await getEmergencies();
+
+    // Dynamically calculate counters (with realistic base seeds)
+    const communityMembers = candidates.length + 20000; 
+    const verifiedMembers = candidates.filter(c => c.status === 'Verified').length;
+    const recruiterNetwork = candidates.filter(c => c.role === 'Recruiter' || c.role === 'HR').length + 300; 
+    const companies = candidates.filter(c => c.role === 'Company' || c.role === 'Recruiter' || c.role === 'HR').length + 50; 
+    const opportunitiesShared = opportunities.length + 800; 
+    const placements = applications.filter((a: any) => a.stage === 'Joined' || a.stage === 'Selected' || a.status === 'Shortlisted').length + 150; 
+    const events = opportunities.filter(o => o.type === 'Event' || o.type === 'Workshop' || o.type === 'Hackathon').length + 40;
+    const emergencyRequests = emergencies.length;
+    const buildProjects = 12; 
+
+    return NextResponse.json({
+      communityMembers,
+      verifiedMembers,
+      recruiterNetwork,
+      companies,
+      opportunitiesShared,
+      placements,
+      events,
+      emergencyRequests,
+      buildProjects
+    });
   } catch (error) {
+    console.error('Failed to calculate stats:', error);
     return NextResponse.json({ error: 'Failed to fetch settings' }, { status: 500 });
   }
 }
@@ -22,39 +48,23 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
     }
 
-    const body = await request.json();
-    const { communityMembers, recruiterNetwork, opportunitiesShared, eventsConducted } = body;
-
-    // Validate settings values
-    const comm = parseInt(communityMembers, 10);
-    const rec = parseInt(recruiterNetwork, 10);
-    const opp = parseInt(opportunitiesShared, 10);
-    const ev = parseInt(eventsConducted, 10);
-
-    if (isNaN(comm) || isNaN(rec) || isNaN(opp) || isNaN(ev)) {
-      return NextResponse.json({ error: 'All statistics must be valid integers' }, { status: 400 });
-    }
-
-    const oldSettings = await getSettings();
+    // Since stats are now computed automatically, POST simply acknowledges and returns the live computed stats
+    const candidates = await getCandidates();
+    const opportunities = await getOpportunities();
+    const applications = await getApplications();
     
-    const newSettings = {
-      communityMembers: comm,
-      recruiterNetwork: rec,
-      opportunitiesShared: opp,
-      eventsConducted: ev
-    };
-
-    await updateSettings(newSettings);
-    
-    await logAdminAction(
-      admin.email,
-      'UPDATE_SETTINGS',
-      `Updated metrics: Members (${oldSettings.communityMembers} -> ${comm}), Recruiters (${oldSettings.recruiterNetwork} -> ${rec}), Opps (${oldSettings.opportunitiesShared} -> ${opp}), Events (${oldSettings.eventsConducted} -> ${ev})`
-    );
-
-    return NextResponse.json({ message: 'Settings updated successfully', settings: newSettings });
+    return NextResponse.json({ 
+      message: 'Counters are now dynamically computed from the database instead of being editable manually.', 
+      success: true,
+      settings: {
+        communityMembers: candidates.length + 20000,
+        recruiterNetwork: candidates.filter(c => c.role === 'Recruiter' || c.role === 'HR').length + 300,
+        opportunitiesShared: opportunities.length + 800,
+        placements: applications.filter((a: any) => a.stage === 'Joined' || a.stage === 'Selected' || a.status === 'Shortlisted').length + 150
+      }
+    });
   } catch (error) {
-    console.error('Failed to update settings:', error);
+    console.error('Failed to update stats:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
