@@ -714,7 +714,7 @@ export async function updateApplicationStatus(id: string, status: 'Applied' | 'R
 // 7. Opportunity Hub & Emergency Support Persistence Helpers
 export interface Opportunity {
   id: string; // e.g. TSS-JB-260701-001
-  type: 'Job' | 'Internship' | 'Freelance Gig' | 'Startup Project' | 'Co-Founder Search' | 'Campus Ambassador' | 'Volunteer' | 'Hackathon' | 'Event' | 'Mentorship' | 'Funding' | 'Scholarship';
+  type: 'Job' | 'Internship' | 'Freelance Gig' | 'Part-time Job' | 'Project' | 'Startup Collaboration' | 'Hackathon' | 'Competition' | 'Event' | 'Workshop' | 'Scholarship' | 'Funding' | 'Emergency Request' | string;
   title: string;
   description: string;
   organization: string;
@@ -816,7 +816,7 @@ function readExtendedLocalDb() {
       },
       {
         id: 'TSS-SP-260701-001',
-        type: 'Startup Project',
+        type: 'Startup Collaboration',
         title: 'AI Product Co-Founder',
         description: 'Building an automated ATS formatting compiler for student resumes. Looking for a tech co-founder with background in Natural Language Processing and serverless integrations.',
         organization: 'ResumeEngine AI',

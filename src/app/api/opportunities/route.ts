@@ -66,15 +66,16 @@ export async function POST(request: Request) {
     if (type === 'Job') typeCode = 'JB';
     else if (type === 'Internship') typeCode = 'IN';
     else if (type === 'Freelance Gig') typeCode = 'FL';
-    else if (type === 'Startup Project') typeCode = 'SP';
-    else if (type === 'Co-Founder Search') typeCode = 'CF';
-    else if (type === 'Campus Ambassador') typeCode = 'CA';
-    else if (type === 'Volunteer') typeCode = 'VO';
+    else if (type === 'Part-time Job') typeCode = 'PT';
+    else if (type === 'Project') typeCode = 'PR';
+    else if (type === 'Startup Collaboration') typeCode = 'SC';
     else if (type === 'Hackathon') typeCode = 'HK';
+    else if (type === 'Competition') typeCode = 'CP';
     else if (type === 'Event') typeCode = 'EV';
-    else if (type === 'Mentorship') typeCode = 'MN';
+    else if (type === 'Workshop') typeCode = 'WK';
+    else if (type === 'Scholarship') typeCode = 'SH';
     else if (type === 'Funding') typeCode = 'FN';
-    else if (type === 'Scholarship') typeCode = 'SC';
+    else if (type === 'Emergency Request') typeCode = 'ER';
 
     const oppId = `TSS-${typeCode}-${dateStr}-${randomSuffix}`;
 

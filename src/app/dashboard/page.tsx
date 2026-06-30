@@ -29,7 +29,9 @@ import {
   Bookmark,
   Eye,
   Heart,
-  X
+  X,
+  Globe,
+  TrendingUp
 } from 'lucide-react';
 import { useToast } from '@/components/Toast';
 
@@ -121,7 +123,7 @@ export default function CandidateDashboard() {
   const [profile, setProfile] = useState<CandidateProfile | null>(null);
   
   // Dashboard navigation tab
-  const [activeTab, setActiveTab] = useState<'card' | 'resume' | 'levels' | 'build' | 'settings' | 'jobs' | 'opportunity-hub' | 'emergency-support' | 'profile' | 'notifications'>('card');
+  const [activeTab, setActiveTab] = useState<'dashboard-home' | 'profile' | 'card' | 'resume' | 'opportunity-hub' | 'applications' | 'saved-opportunities' | 'build' | 'events' | 'community' | 'emergency-support' | 'settings' | 'notifications'>('dashboard-home');
   const [profileSubTab, setProfileSubTab] = useState<'details' | 'resume' | 'levels' | 'build'>('details');
 
   // Emergency fields state
@@ -1064,7 +1066,7 @@ export default function CandidateDashboard() {
   };
 
   useEffect(() => {
-    if (activeTab === 'jobs' && profile) {
+    if (activeTab === 'opportunity-hub' && profile) {
       fetchJobsData();
     }
   }, [activeTab, profile]);
@@ -1620,21 +1622,37 @@ export default function CandidateDashboard() {
                   <span>CANDIDATE PANEL</span>
                 </div>
                 
-                <nav className={styles.sidebarMenu}>
+                <nav className={styles.sidebarMenu} style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', overflowY: 'auto', maxHeight: 'calc(100vh - 200px)', paddingRight: '0.25rem' }}>
+                  <button 
+                    onClick={() => setActiveTab('dashboard-home')}
+                    className={`${styles.sidebarItem} ${activeTab === 'dashboard-home' ? styles.sidebarItemActive : ''}`}
+                  >
+                    <Layers size={18} />
+                    <span>Dashboard</span>
+                  </button>
+
+                  <button 
+                    onClick={() => { setActiveTab('profile'); setProfileSubTab('details'); }}
+                    className={`${styles.sidebarItem} ${activeTab === 'profile' ? styles.sidebarItemActive : ''}`}
+                  >
+                    <User size={18} />
+                    <span>My Profile</span>
+                  </button>
+
                   <button 
                     onClick={() => setActiveTab('card')}
                     className={`${styles.sidebarItem} ${activeTab === 'card' ? styles.sidebarItemActive : ''}`}
                   >
                     <Award size={18} />
-                    <span>Dashboard</span>
+                    <span>Digital TSS Card</span>
                   </button>
 
                   <button 
-                    onClick={() => setActiveTab('profile')}
-                    className={`${styles.sidebarItem} ${activeTab === 'profile' ? styles.sidebarItemActive : ''}`}
+                    onClick={() => setActiveTab('resume')}
+                    className={`${styles.sidebarItem} ${activeTab === 'resume' ? styles.sidebarItemActive : ''}`}
                   >
-                    <User size={18} />
-                    <span>Profile</span>
+                    <FileText size={18} />
+                    <span>Resume Studio</span>
                   </button>
 
                   <button 
@@ -1642,7 +1660,47 @@ export default function CandidateDashboard() {
                     className={`${styles.sidebarItem} ${activeTab === 'opportunity-hub' ? styles.sidebarItemActive : ''}`}
                   >
                     <Briefcase size={18} />
-                    <span>Opportunity Hub</span>
+                    <span>Opportunities</span>
+                  </button>
+
+                  <button 
+                    onClick={() => setActiveTab('applications')}
+                    className={`${styles.sidebarItem} ${activeTab === 'applications' ? styles.sidebarItemActive : ''}`}
+                  >
+                    <CheckCircle2 size={18} />
+                    <span>Applications</span>
+                  </button>
+
+                  <button 
+                    onClick={() => setActiveTab('saved-opportunities')}
+                    className={`${styles.sidebarItem} ${activeTab === 'saved-opportunities' ? styles.sidebarItemActive : ''}`}
+                  >
+                    <Bookmark size={18} />
+                    <span>Saved Opportunities</span>
+                  </button>
+
+                  <button 
+                    onClick={() => setActiveTab('build')}
+                    className={`${styles.sidebarItem} ${activeTab === 'build' ? styles.sidebarItemActive : ''}`}
+                  >
+                    <TrendingUp size={18} />
+                    <span>Build Challenge</span>
+                  </button>
+
+                  <button 
+                    onClick={() => setActiveTab('events')}
+                    className={`${styles.sidebarItem} ${activeTab === 'events' ? styles.sidebarItemActive : ''}`}
+                  >
+                    <Calendar size={18} />
+                    <span>Events</span>
+                  </button>
+
+                  <button 
+                    onClick={() => setActiveTab('community')}
+                    className={`${styles.sidebarItem} ${activeTab === 'community' ? styles.sidebarItemActive : ''}`}
+                  >
+                    <Globe size={18} />
+                    <span>Community</span>
                   </button>
 
                   <button 
@@ -1651,20 +1709,7 @@ export default function CandidateDashboard() {
                     style={{ borderLeftColor: activeTab === 'emergency-support' ? '#ef4444' : 'transparent' }}
                   >
                     <ShieldAlert size={18} style={{ color: activeTab === 'emergency-support' ? '#ef4444' : 'var(--text-muted)' }} />
-                    <span style={{ color: activeTab === 'emergency-support' ? '#ef4444' : 'inherit', fontWeight: activeTab === 'emergency-support' ? 700 : 'normal' }}>Emergency Support</span>
-                  </button>
-
-                  <button 
-                    onClick={() => setActiveTab('notifications')}
-                    className={`${styles.sidebarItem} ${activeTab === 'notifications' ? styles.sidebarItemActive : ''}`}
-                  >
-                    <div style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}>
-                      <Layers size={18} />
-                      {dashboardNotifications.some(n => n.unread) && (
-                        <span style={{ position: 'absolute', top: -3, right: -3, width: 7, height: 7, backgroundColor: '#ef4444', borderRadius: '50%' }}></span>
-                      )}
-                    </div>
-                    <span style={{ marginLeft: '0.1rem' }}>Notifications</span>
+                    <span style={{ color: activeTab === 'emergency-support' ? '#ef4444' : 'inherit', fontWeight: activeTab === 'emergency-support' ? 700 : 'normal' }}>Emergency</span>
                   </button>
 
                   <button 
@@ -1989,7 +2034,7 @@ export default function CandidateDashboard() {
                 )}
 
                 {/* B. RESUME STUDIO TAB */}
-                {activeTab === 'profile' && profileSubTab === 'resume' && (
+                {(activeTab === 'resume' || (activeTab === 'profile' && profileSubTab === 'resume')) && (
                   profile.status !== 'Verified' ? renderLockedState('Resume Studio') : (
                     <div className={`${styles.tabView} fade-in`}>
                     <h2>TSS Resume Studio</h2>
@@ -2451,7 +2496,7 @@ export default function CandidateDashboard() {
               )}
 
                 {/* D. BUILD CHALLENGE TAB */}
-                {activeTab === 'profile' && profileSubTab === 'build' && (
+                {(activeTab === 'build' || (activeTab === 'profile' && profileSubTab === 'build')) && (
                   profile.status !== 'Verified' ? renderLockedState('Build Challenge Sandbox') : (
                     <div className={`${styles.tabView} fade-in`}>
                     <h2>TSS Build Challenge Sandbox</h2>
@@ -2714,7 +2759,7 @@ export default function CandidateDashboard() {
                 )}
 
                 {/* F. JOBS BOARD TAB */}
-                {activeTab === 'jobs' && (
+                {profile && activeTab === ('jobs' as any) && (
                   <div className={`${styles.tabView} fade-in`}>
                     <h2>Jobs & Internship Openings</h2>
                     <p>Access high-trust partner roles. Applying requires a verified TSS Member ID. Applications skip first-round public resume queues.</p>
@@ -2943,7 +2988,7 @@ export default function CandidateDashboard() {
 
                     {/* Filter categories tabs */}
                     <div style={{ display: 'flex', gap: '0.5rem', borderBottom: '1px solid var(--border-color)', marginBottom: '1.5rem', paddingBottom: '0.75rem', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
-                      {['All', 'Jobs', 'Internships', 'Freelance Gigs', 'Startup Projects', 'Co-Founder Search', 'Campus Ambassador', 'Volunteer', 'Hackathons', 'Events', 'Mentorship', 'Funding', 'Scholarships', 'My Posts', 'Saved'].map((cat) => (
+                      {['All', 'Jobs', 'Internships', 'Freelance Gigs', 'Part-time Jobs', 'Projects', 'Startup Collaborations', 'Hackathons', 'Competitions', 'Events', 'Workshops', 'Scholarships', 'Funding', 'Emergency Requests', 'My Posts', 'Saved'].map((cat) => (
                         <button 
                           key={cat}
                           onClick={() => setOppFilterType(cat)}
@@ -3023,11 +3068,19 @@ export default function CandidateDashboard() {
                         list = list.filter(o => savedOppIds.includes(o.id));
                       } else if (oppFilterType !== 'All') {
                         const typeMap: Record<string, string> = {
-                          'Jobs': 'Job', 'Internships': 'Internship', 'Freelance Gigs': 'Freelance Gig',
-                          'Startup Projects': 'Startup Project', 'Co-Founder Search': 'Co-Founder Search',
-                          'Campus Ambassador': 'Campus Ambassador', 'Volunteer': 'Volunteer',
-                          'Hackathons': 'Hackathon', 'Events': 'Event', 'Mentorship': 'Mentorship',
-                          'Funding': 'Funding', 'Scholarships': 'Scholarship'
+                          'Jobs': 'Job', 
+                          'Internships': 'Internship', 
+                          'Freelance Gigs': 'Freelance Gig',
+                          'Part-time Jobs': 'Part-time Job',
+                          'Projects': 'Project',
+                          'Startup Collaborations': 'Startup Collaboration',
+                          'Hackathons': 'Hackathon',
+                          'Competitions': 'Competition',
+                          'Events': 'Event',
+                          'Workshops': 'Workshop',
+                          'Scholarships': 'Scholarship',
+                          'Funding': 'Funding',
+                          'Emergency Requests': 'Emergency Request'
                         };
                         const mappedType = typeMap[oppFilterType] || oppFilterType;
                         list = list.filter(o => o.type === mappedType);
@@ -3559,15 +3612,16 @@ export default function CandidateDashboard() {
                             <option value="Job">Job</option>
                             <option value="Internship">Internship</option>
                             <option value="Freelance Gig">Freelance Gig</option>
-                            <option value="Startup Project">Startup Project</option>
-                            <option value="Co-Founder Search">Co-Founder Search</option>
-                            <option value="Campus Ambassador">Campus Ambassador</option>
-                            <option value="Volunteer">Volunteer</option>
+                            <option value="Part-time Job">Part-time Job</option>
+                            <option value="Project">Project</option>
+                            <option value="Startup Collaboration">Startup Collaboration</option>
                             <option value="Hackathon">Hackathon</option>
+                            <option value="Competition">Competition</option>
                             <option value="Event">Event</option>
-                            <option value="Mentorship">Mentorship</option>
-                            <option value="Funding">Funding</option>
+                            <option value="Workshop">Workshop</option>
                             <option value="Scholarship">Scholarship</option>
+                            <option value="Funding">Funding</option>
+                            <option value="Emergency Request">Emergency Request</option>
                           </select>
                         </div>
 
@@ -3979,6 +4033,261 @@ export default function CandidateDashboard() {
                         </button>
                       </div>
                     </form>
+                  </div>
+                )}
+
+                {/* H. DASHBOARD HOME TAB */}
+                {activeTab === 'dashboard-home' && (
+                  <div className={`${styles.tabView} fade-in`}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', marginBottom: '2.5rem' }}>
+                      <div>
+                        <h2 style={{ fontSize: '1.85rem', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>Welcome back, {profile.fullName}!</h2>
+                        <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginTop: '0.25rem' }}>Ecosystem Member ID: <strong style={{ color: 'var(--accent)' }}>{profile.memberId || 'Pending'}</strong></p>
+                      </div>
+                      
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                        <span style={{ fontSize: '0.75rem', fontWeight: 700, padding: '0.35rem 0.75rem', borderRadius: '20px', backgroundColor: profile.status === 'Verified' ? 'rgba(5, 150, 105, 0.12)' : 'rgba(245, 158, 11, 0.12)', color: profile.status === 'Verified' ? 'var(--green-light)' : 'var(--accent)' }}>
+                          🛡️ {profile.status === 'Verified' ? 'Verified Student' : profile.status}
+                        </span>
+                        {!hasCheckedInToday ? (
+                          <button onClick={handleDailyCheckIn} className="btn btn-primary" style={{ padding: '0.45rem 1.25rem', fontSize: '0.8rem', borderRadius: '8px' }}>
+                            ⚡ Daily Check In
+                          </button>
+                        ) : (
+                          <button disabled className="btn btn-outline" style={{ padding: '0.45rem 1.25rem', fontSize: '0.8rem', borderRadius: '8px', opacity: 0.6 }}>
+                            ✓ Checked In Today
+                          </button>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Quick Metrics Cards */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.25rem', marginBottom: '2.5rem' }}>
+                      <div style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '12px', padding: '1.25rem' }}>
+                        <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-secondary)', fontWeight: 700 }}>Ecosystem Level</span>
+                        <strong style={{ display: 'block', fontSize: '1.65rem', color: 'var(--text-primary)', marginTop: '0.25rem' }}>{profile.level || 'Explorer'}</strong>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Status verified</span>
+                      </div>
+                      <div style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '12px', padding: '1.25rem' }}>
+                        <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-secondary)', fontWeight: 700 }}>Community Points</span>
+                        <strong style={{ display: 'block', fontSize: '1.65rem', color: 'var(--text-primary)', marginTop: '0.25rem' }}>{profile.communityScore || 20}</strong>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Accumulated score</span>
+                      </div>
+                      <div style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '12px', padding: '1.25rem' }}>
+                        <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-secondary)', fontWeight: 700 }}>Daily Streak</span>
+                        <strong style={{ display: 'block', fontSize: '1.65rem', color: 'var(--text-primary)', marginTop: '0.25rem' }}>🔥 {streak} Days</strong>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Consistency tracking</span>
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1.8fr 1.2fr', gap: '2rem', flexWrap: 'wrap' }}>
+                      {/* Left: Quick Actions */}
+                      <div>
+                        <h4 style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '1.25rem' }}>Ecosystem Quick Actions</h4>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem' }}>
+                          <button onClick={() => { setActiveTab('profile'); setProfileSubTab('details'); }} className="btn btn-outline" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '1.5rem', borderRadius: '12px', gap: '0.5rem', textAlign: 'center', height: '110px' }}>
+                            <User size={24} style={{ color: 'var(--primary-pale)' }} />
+                            <strong style={{ fontSize: '0.85rem' }}>Complete Profile</strong>
+                          </button>
+                          <button onClick={() => setActiveTab('resume')} className="btn btn-outline" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '1.5rem', borderRadius: '12px', gap: '0.5rem', textAlign: 'center', height: '110px' }}>
+                            <FileText size={24} style={{ color: 'var(--primary-pale)' }} />
+                            <strong style={{ fontSize: '0.85rem' }}>Resume Studio</strong>
+                          </button>
+                          <button onClick={() => setActiveTab('opportunity-hub')} className="btn btn-outline" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '1.5rem', borderRadius: '12px', gap: '0.5rem', textAlign: 'center', height: '110px' }}>
+                            <Briefcase size={24} style={{ color: 'var(--primary-pale)' }} />
+                            <strong style={{ fontSize: '0.85rem' }}>Browse Opportunities</strong>
+                          </button>
+                          <button onClick={() => { setActiveTab('opportunity-hub'); setShowPostOppModal(true); }} className="btn btn-outline" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '1.5rem', borderRadius: '12px', gap: '0.5rem', textAlign: 'center', height: '110px' }}>
+                            <Plus size={24} style={{ color: 'var(--primary-pale)' }} />
+                            <strong style={{ fontSize: '0.85rem' }}>Post Opportunity</strong>
+                          </button>
+                          <button onClick={() => setActiveTab('build')} className="btn btn-outline" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '1.5rem', borderRadius: '12px', gap: '0.5rem', textAlign: 'center', height: '110px' }}>
+                            <TrendingUp size={24} style={{ color: 'var(--primary-pale)' }} />
+                            <strong style={{ fontSize: '0.85rem' }}>Build Challenge</strong>
+                          </button>
+                          <button onClick={() => setActiveTab('card')} className="btn btn-outline" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '1.5rem', borderRadius: '12px', gap: '0.5rem', textAlign: 'center', height: '110px' }}>
+                            <Award size={24} style={{ color: 'var(--primary-pale)' }} />
+                            <strong style={{ fontSize: '0.85rem' }}>Download TSS Card</strong>
+                          </button>
+                          <button onClick={() => setActiveTab('community')} className="btn btn-outline" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '1.5rem', borderRadius: '12px', gap: '0.5rem', textAlign: 'center', height: '110px' }}>
+                            <Globe size={24} style={{ color: 'var(--primary-pale)' }} />
+                            <strong style={{ fontSize: '0.85rem' }}>Community Lounges</strong>
+                          </button>
+                          <button onClick={() => setActiveTab('emergency-support')} className="btn btn-outline" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '1.5rem', borderRadius: '12px', gap: '0.5rem', textAlign: 'center', height: '110px' }}>
+                            <ShieldAlert size={24} style={{ color: '#ef4444' }} />
+                            <strong style={{ fontSize: '0.85rem', color: '#ef4444' }}>Emergency Support</strong>
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Right: Upcoming Events & Activity */}
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
+                        <div>
+                          <h4 style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '1rem' }}>Ecosystem Events</h4>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                            <div style={{ padding: '1rem', backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '10px' }}>
+                              <strong style={{ fontSize: '0.85rem', display: 'block', color: 'var(--text-primary)' }}>TSS Real Problem Hackathon</strong>
+                              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>📅 Starts July 10, 2026 | Google Meet</span>
+                            </div>
+                            <div style={{ padding: '1rem', backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '10px' }}>
+                              <strong style={{ fontSize: '0.85rem', display: 'block', color: 'var(--text-primary)' }}>Monthly Sandbox Build Review</strong>
+                              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>📅 Weekly Status updates starting Sunday</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div>
+                          <h4 style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '1rem' }}>Ecosystem Quick Links</h4>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                            <a href="https://chat.whatsapp.com/tss" target="_blank" rel="noreferrer" style={{ display: 'block', padding: '0.6rem 1rem', backgroundColor: 'rgba(5, 150, 105, 0.08)', border: '1px solid rgba(5, 150, 105, 0.2)', color: 'var(--green-light)', borderRadius: '8px', fontSize: '0.825rem', fontWeight: 600, textDecoration: 'none' }}>
+                              💚 WhatsApp Lounge Invitation
+                            </a>
+                            <a href="https://t.me/tss" target="_blank" rel="noreferrer" style={{ display: 'block', padding: '0.6rem 1rem', backgroundColor: 'rgba(59, 130, 246, 0.08)', border: '1px solid rgba(59, 130, 246, 0.2)', color: '#3b82f6', borderRadius: '8px', fontSize: '0.825rem', fontWeight: 600, textDecoration: 'none' }}>
+                              💙 Telegram Lounge Invitation
+                            </a>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* I. APPLICATIONS TAB */}
+                {activeTab === 'applications' && (
+                  <div className={`${styles.tabView} fade-in`}>
+                    <h2>My Applications</h2>
+                    <p>Track the hiring progress, referral recommendations, and status updates of your submitted applications.</p>
+                    
+                    {appliedJobs.length === 0 ? (
+                      <div style={{ textAlign: 'center', padding: '4rem 1.5rem', border: '1px dashed var(--border-color)', borderRadius: '12px', color: 'var(--text-secondary)', marginTop: '1.5rem' }}>
+                        You haven't submitted any job or opportunity applications yet.
+                      </div>
+                    ) : (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '1.5rem' }}>
+                        {appliedJobs.map((app, i) => (
+                          <div key={i} style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '12px', padding: '1.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+                            <div>
+                              <strong style={{ fontSize: '1rem', color: 'var(--text-primary)', display: 'block' }}>{app.jobTitle}</strong>
+                              <span style={{ fontSize: '0.8rem', color: 'var(--accent)', fontWeight: 600 }}>{app.companyName}</span>
+                              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block', marginTop: '0.25rem' }}>Applied on: {new Date(app.appliedDate).toLocaleDateString()}</span>
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                              <span style={{ fontSize: '0.75rem', fontWeight: 700, padding: '0.2rem 0.5rem', borderRadius: '4px', backgroundColor: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', textTransform: 'uppercase' }}>
+                                Stage: {app.stage || 'Applied'}
+                              </span>
+                              {app.feedback && (
+                                <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontStyle: 'italic' }}>&ldquo;{app.feedback}&rdquo;</span>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* J. SAVED OPPORTUNITIES TAB */}
+                {activeTab === 'saved-opportunities' && (
+                  <div className={`${styles.tabView} fade-in`}>
+                    <h2>Saved Bookmarks</h2>
+                    <p>Keep track of opportunities you have saved for later review or reference.</p>
+                    
+                    {(() => {
+                      const bookmarked = opportunities.filter(o => savedOppIds.includes(o.id));
+                      if (bookmarked.length === 0) {
+                        return (
+                          <div style={{ textAlign: 'center', padding: '4rem 1.5rem', border: '1px dashed var(--border-color)', borderRadius: '12px', color: 'var(--text-secondary)', marginTop: '1.5rem' }}>
+                            No saved opportunities. Go to the Opportunities tab to bookmark roles.
+                          </div>
+                        );
+                      }
+                      return (
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1.5rem', marginTop: '1.5rem' }}>
+                          {bookmarked.map(opp => (
+                            <div key={opp.id} style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '16px', padding: '1.5rem', display: 'flex', flexDirection: 'column', position: 'relative', boxShadow: 'var(--shadow-sm)' }}>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                                <span style={{ fontSize: '10px', textTransform: 'uppercase', fontWeight: 800, padding: '0.2rem 0.5rem', borderRadius: '4px', backgroundColor: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6' }}>
+                                  {opp.type}
+                                </span>
+                                <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>
+                                  {opp.remoteOption} ({opp.location})
+                                </span>
+                              </div>
+                              <h4 style={{ fontSize: '1.1rem', fontWeight: 700, margin: '0 0 0.25rem 0', color: 'var(--text-primary)' }}>{opp.title}</h4>
+                              <span style={{ fontSize: '0.85rem', color: 'var(--accent)', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '0.25rem', marginBottom: '0.75rem' }}>
+                                {opp.organization} <CheckCircle2 size={12} style={{ color: 'var(--green-light)' }} />
+                              </span>
+                              <div style={{ marginTop: 'auto', display: 'flex', gap: '0.5rem' }}>
+                                <button onClick={() => setSelectedOpp(opp)} className="btn btn-outline btn-sm" style={{ flex: 1, padding: '0.45rem', fontSize: '0.75rem', borderRadius: '6px' }}>Details</button>
+                                <button onClick={() => handleToggleSaveOpportunity(opp.id)} className="btn btn-sm" style={{ padding: '0.45rem', border: '1px solid var(--border-color)', borderRadius: '6px', background: 'none', color: 'var(--accent)' }}>
+                                  Remove
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      );
+                    })()}
+                  </div>
+                )}
+
+                {/* K. EVENTS TAB */}
+                {activeTab === 'events' && (
+                  <div className={`${styles.tabView} fade-in`}>
+                    <h2>Ecosystem Events</h2>
+                    <p>Register and attend verified events, hackathons, and cohort reviews organized by TSS partners.</p>
+                    
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '1.5rem' }}>
+                      <div style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '12px', padding: '1.5rem' }}>
+                        <span style={{ fontSize: '10px', textTransform: 'uppercase', fontWeight: 800, padding: '0.2rem 0.5rem', borderRadius: '4px', backgroundColor: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', display: 'inline-block', marginBottom: '0.75rem' }}>
+                          Real Problem Hackathon
+                        </span>
+                        <h4 style={{ margin: '0 0 0.5rem 0', fontSize: '1.25rem', fontWeight: 700, color: 'var(--text-primary)' }}>TSS Real Problem Hackathon Kickoff</h4>
+                        <p style={{ margin: '0 0 1rem 0', fontSize: '0.875rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+                          Assemble teams, select real challenges submitted by community organizations, and start building. Winners receive direct startup incubation support.
+                        </p>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>⏰ Schedule: <strong>July 10, 2026 at 6:00 PM</strong> | Venue: <strong>Google Meet Lounge</strong></div>
+                      </div>
+                      
+                      <div style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '12px', padding: '1.5rem' }}>
+                        <span style={{ fontSize: '10px', textTransform: 'uppercase', fontWeight: 800, padding: '0.2rem 0.5rem', borderRadius: '4px', backgroundColor: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', display: 'inline-block', marginBottom: '0.75rem' }}>
+                          Build Challenge Status
+                        </span>
+                        <h4 style={{ margin: '0 0 0.5rem 0', fontSize: '1.25rem', fontWeight: 700, color: 'var(--text-primary)' }}>Sandbox Weekly Review & Demo Day Prep</h4>
+                        <p style={{ margin: '0 0 1rem 0', fontSize: '0.875rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+                          Get feedback on your sandbox progress from Malla Reddy University and corporate mentors. Align builds with placement tracks.
+                        </p>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>⏰ Schedule: <strong>Every Sunday at 4:00 PM</strong> | Venue: <strong>TSS Private Discord Channel</strong></div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* L. COMMUNITY TAB */}
+                {activeTab === 'community' && (
+                  <div className={`${styles.tabView} fade-in`}>
+                    <h2>Community Lounges</h2>
+                    <p>Get verified access to exclusive student groups, mentors, founders, and recruitment circles.</p>
+                    
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1.5rem', marginTop: '1.5rem' }}>
+                      <div style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '12px', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                        <strong style={{ fontSize: '1.1rem', color: 'var(--text-primary)' }}>🟢 WhatsApp Official Lounge</strong>
+                        <p style={{ fontSize: '0.825rem', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.5 }}>Directly interact with student builders and core community mentors.</p>
+                        <a href="https://chat.whatsapp.com/tss" target="_blank" rel="noreferrer" className="btn btn-outline" style={{ marginTop: 'auto', textAlign: 'center', borderColor: 'var(--green-light)', color: 'var(--green-light)' }}>Join WhatsApp Lounge</a>
+                      </div>
+                      
+                      <div style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '12px', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                        <strong style={{ fontSize: '1.1rem', color: 'var(--text-primary)' }}>🔵 Telegram Resource Channel</strong>
+                        <p style={{ fontSize: '0.825rem', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.5 }}>Access hackathon sheets, placement sheets, templates, and sandbox docs.</p>
+                        <a href="https://t.me/tss" target="_blank" rel="noreferrer" className="btn btn-outline" style={{ marginTop: 'auto', textAlign: 'center', borderColor: '#3b82f6', color: '#3b82f6' }}>Join Telegram Channel</a>
+                      </div>
+
+                      <div style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '12px', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                        <strong style={{ fontSize: '1.1rem', color: 'var(--text-primary)' }}>💼 LinkedIn Directory</strong>
+                        <p style={{ fontSize: '0.825rem', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.5 }}>View placement directories, verified profile shares, and recruiter recommendations.</p>
+                        <a href="https://linkedin.com/company/thestudentsspot" target="_blank" rel="noreferrer" className="btn btn-outline" style={{ marginTop: 'auto', textAlign: 'center' }}>Follow Directory</a>
+                      </div>
+                    </div>
                   </div>
                 )}
 
