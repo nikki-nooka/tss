@@ -61,6 +61,9 @@ interface CandidateProfile {
   memberSince?: string;
   notes?: string | null;
   roleDetails?: any;
+  loginDays?: number;
+  streak?: number;
+  lastCheckinDate?: string;
 }
 
 interface ResumeEdu {
@@ -226,54 +229,57 @@ export default function CandidateDashboard() {
   const [isSubmittingApplication, setIsSubmittingApplication] = useState(false);
 
   // Loyalty check-in states
-  const [loginDays, setLoginDays] = useState(35);
-  const [streak, setStreak] = useState(12);
+  const [loginDays, setLoginDays] = useState(36);
+  const [streak, setStreak] = useState(13);
   const [hasCheckedInToday, setHasCheckedInToday] = useState(false);
 
   useEffect(() => {
     if (profile) {
-      const statsKey = `tss_stats_${profile.id}`;
-      const saved = localStorage.getItem(statsKey);
-      
-      const dateKey = `tss_checkin_${profile.id}_${new Date().toDateString()}`;
-      const checkedIn = localStorage.getItem(dateKey) === 'true';
-      setHasCheckedInToday(checkedIn);
-
-      if (saved) {
-        try {
-          const parsed = JSON.parse(saved);
-          setLoginDays(parsed.loginDays);
-          setStreak(parsed.streak);
-        } catch (e) {
-          console.error(e);
-        }
-      } else {
-        const initialDays = profile.status === 'Verified' ? 35 : 1;
-        const initialStreak = profile.status === 'Verified' ? 12 : 1;
-        setLoginDays(initialDays);
-        setStreak(initialStreak);
-        localStorage.setItem(statsKey, JSON.stringify({ loginDays: initialDays, streak: initialStreak }));
-      }
+      setLoginDays(profile.loginDays !== undefined ? profile.loginDays : 36);
+      setStreak(profile.streak !== undefined ? profile.streak : 13);
+      const todayStr = new Date().toISOString().split('T')[0];
+      setHasCheckedInToday(profile.lastCheckinDate === todayStr);
     }
   }, [profile]);
 
-  const handleDailyCheckIn = () => {
+  const handleDailyCheckIn = async () => {
     if (!profile) return;
     
-    const statsKey = `tss_stats_${profile.id}`;
-    const dateKey = `tss_checkin_${profile.id}_${new Date().toDateString()}`;
-    
+    const todayStr = new Date().toISOString().split('T')[0];
     const newDays = loginDays + 1;
     const newStreak = streak + 1;
+    const newScore = (profile.communityScore || 20) + 10;
     
     setLoginDays(newDays);
     setStreak(newStreak);
     setHasCheckedInToday(true);
     
-    localStorage.setItem(statsKey, JSON.stringify({ loginDays: newDays, streak: newStreak }));
-    localStorage.setItem(dateKey, 'true');
-    
-    toast.success(`Check-in claimed! +10 community points added to your score.`);
+    try {
+      const res = await fetch('/api/auth/update-candidate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: profile.id,
+          updates: {
+            loginDays: newDays,
+            streak: newStreak,
+            lastCheckinDate: todayStr,
+            communityScore: newScore
+          }
+        })
+      });
+      const data = await res.json();
+      if (data.success && data.candidate) {
+        setProfile(data.candidate);
+        localStorage.setItem('tss_candidate_session', JSON.stringify(data.candidate));
+        toast.success(`Check-in claimed! +10 community points added to your score.`);
+      } else {
+        toast.error(data.error || 'Failed to save check-in.');
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error('Network connection error.');
+    }
   };
 
   const getLoyaltyTier = (days: number) => {

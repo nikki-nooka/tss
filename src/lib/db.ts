@@ -47,6 +47,9 @@ export interface Candidate {
   communityScore?: number;
   level?: 'Explorer' | 'Builder' | 'Creator' | 'Leader' | 'Mentor' | string;
   memberSince?: string;
+  loginDays?: number;
+  streak?: number;
+  lastCheckinDate?: string;
 }
 
 export interface ForwardLog {
@@ -228,7 +231,10 @@ export async function getCandidates(): Promise<Candidate[]> {
       username: roleDetails.username || '',
       communityScore: roleDetails.communityScore !== undefined ? roleDetails.communityScore : 20,
       level: roleDetails.level || 'Explorer',
-      memberSince: roleDetails.memberSince || new Date(c.registrationDate || Date.now()).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+      memberSince: roleDetails.memberSince || new Date(c.registrationDate || Date.now()).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
+      loginDays: roleDetails.loginDays !== undefined ? roleDetails.loginDays : 36,
+      streak: roleDetails.streak !== undefined ? roleDetails.streak : 13,
+      lastCheckinDate: roleDetails.lastCheckinDate || ''
     };
   }) as Candidate[];
 }
@@ -254,7 +260,10 @@ export async function getCandidateById(id: string): Promise<Candidate | null> {
     username: roleDetails.username || '',
     communityScore: roleDetails.communityScore !== undefined ? roleDetails.communityScore : 20,
     level: roleDetails.level || 'Explorer',
-    memberSince: roleDetails.memberSince || new Date(data.registrationDate || Date.now()).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+    memberSince: roleDetails.memberSince || new Date(data.registrationDate || Date.now()).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
+    loginDays: roleDetails.loginDays !== undefined ? roleDetails.loginDays : 36,
+    streak: roleDetails.streak !== undefined ? roleDetails.streak : 13,
+    lastCheckinDate: roleDetails.lastCheckinDate || ''
   } as Candidate;
 }
 
@@ -264,6 +273,9 @@ export async function insertCandidate(candidate: Candidate): Promise<void> {
   roleDetails.communityScore = candidate.communityScore !== undefined ? candidate.communityScore : 20;
   roleDetails.level = candidate.level || 'Explorer';
   roleDetails.memberSince = candidate.memberSince || new Date(candidate.registrationDate || Date.now()).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+  roleDetails.loginDays = candidate.loginDays !== undefined ? candidate.loginDays : 36;
+  roleDetails.streak = candidate.streak !== undefined ? candidate.streak : 13;
+  roleDetails.lastCheckinDate = candidate.lastCheckinDate || '';
 
   const dbCandidate = {
     ...candidate,
@@ -275,6 +287,9 @@ export async function insertCandidate(candidate: Candidate): Promise<void> {
   delete (dbCandidate as any).communityScore;
   delete (dbCandidate as any).level;
   delete (dbCandidate as any).memberSince;
+  delete (dbCandidate as any).loginDays;
+  delete (dbCandidate as any).streak;
+  delete (dbCandidate as any).lastCheckinDate;
 
   const { error } = await supabase
     .from('candidates')
@@ -309,6 +324,9 @@ export async function updateCandidate(id: string, updates: Partial<Candidate>): 
   }
 
   if (updates.memberSince !== undefined) roleDetails.memberSince = updates.memberSince;
+  if (updates.loginDays !== undefined) roleDetails.loginDays = updates.loginDays;
+  if (updates.streak !== undefined) roleDetails.streak = updates.streak;
+  if (updates.lastCheckinDate !== undefined) roleDetails.lastCheckinDate = updates.lastCheckinDate;
 
   const dbUpdates = {
     ...updates,
@@ -319,6 +337,9 @@ export async function updateCandidate(id: string, updates: Partial<Candidate>): 
   delete (dbUpdates as any).communityScore;
   delete (dbUpdates as any).level;
   delete (dbUpdates as any).memberSince;
+  delete (dbUpdates as any).loginDays;
+  delete (dbUpdates as any).streak;
+  delete (dbUpdates as any).lastCheckinDate;
 
   const { error } = await supabase
     .from('candidates')

@@ -45,6 +45,11 @@ export async function POST(request: Request) {
     if (updates.availableBloodDonation !== undefined) safeUpdates.availableBloodDonation = updates.availableBloodDonation;
     if (updates.availablePlateletDonation !== undefined) safeUpdates.availablePlateletDonation = updates.availablePlateletDonation;
     if (updates.lastDonationDate !== undefined) safeUpdates.lastDonationDate = updates.lastDonationDate;
+    
+    // Loyalty tracker fields
+    if (updates.loginDays !== undefined) safeUpdates.loginDays = Number(updates.loginDays);
+    if (updates.streak !== undefined) safeUpdates.streak = Number(updates.streak);
+    if (updates.lastCheckinDate !== undefined) safeUpdates.lastCheckinDate = updates.lastCheckinDate;
 
     // Check if verification affecting fields changed
     const isVerificationFieldChanged = 
