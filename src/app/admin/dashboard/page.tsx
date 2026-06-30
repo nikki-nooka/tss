@@ -355,6 +355,12 @@ export default function AdminDashboard() {
         } else {
           toast.success(`Candidate status updated successfully.`);
           setSelectedCandidate(data.candidate);
+          // Automatically switch roster tab to match new candidate status
+          if (action === 'approve') setVerificationStatusTab('Verified');
+          else if (action === 'reject') setVerificationStatusTab('Rejected');
+          else if (action === 'request_changes') setVerificationStatusTab('Needs Changes');
+          else if (action === 'review') setVerificationStatusTab('Under Review');
+          else if (action === 'suspend') setVerificationStatusTab('Suspended');
         }
         setShowRejectModal(false);
         loadCandidates();
@@ -952,9 +958,26 @@ export default function AdminDashboard() {
                     </div>
                   ) : (
                     <div style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '14px', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-                      <div>
-                        <h4 style={{ margin: 0, fontSize: '1.15rem', color: 'var(--text-primary)', fontWeight: 800 }}>{selectedCandidate.fullName}</h4>
-                        <span style={{ fontSize: '0.8rem', color: 'var(--accent)' }}>Role: {selectedCandidate.role} | City: {selectedCandidate.city}</span>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.5rem' }}>
+                        <div>
+                          <h4 style={{ margin: 0, fontSize: '1.25rem', color: 'var(--text-primary)', fontWeight: 800 }}>{selectedCandidate.fullName}</h4>
+                          <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Role: <strong>{selectedCandidate.role}</strong> | City: {selectedCandidate.city || 'Not Provided'}</span>
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.25rem' }}>
+                          <span style={{ 
+                            fontSize: '0.75rem', 
+                            fontWeight: 700, 
+                            padding: '0.25rem 0.6rem', 
+                            borderRadius: '20px', 
+                            backgroundColor: selectedCandidate.status === 'Verified' ? 'rgba(5, 150, 105, 0.12)' : selectedCandidate.status === 'Under Review' ? 'rgba(245, 158, 11, 0.12)' : 'rgba(220, 38, 38, 0.12)', 
+                            color: selectedCandidate.status === 'Verified' ? 'var(--green-light)' : selectedCandidate.status === 'Under Review' ? 'var(--accent)' : '#ef4444' 
+                          }}>
+                            {selectedCandidate.status}
+                          </span>
+                          {selectedCandidate.memberId && (
+                            <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>ID: {selectedCandidate.memberId}</span>
+                          )}
+                        </div>
                       </div>
 
                       {/* Staged Draft Profile Changes Diff Panel */}
@@ -1053,14 +1076,78 @@ export default function AdminDashboard() {
                         )}
                       </div>
 
+                      {/* Vetting History Timeline */}
+                      <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '1rem' }}>
+                        <strong style={{ display: 'block', fontSize: '0.8rem', textTransform: 'uppercase', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>Vetting Audit History</strong>
+                        {(!selectedCandidate.roleDetails?.auditLogs || selectedCandidate.roleDetails.auditLogs.length === 0) ? (
+                          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>No audit logs generated yet.</span>
+                        ) : (
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', maxHeight: '100px', overflowY: 'auto' }}>
+                            {selectedCandidate.roleDetails.auditLogs.slice(-3).reverse().map((log: any, idx: number) => (
+                              <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                                <span>• {log.event}</span>
+                                <span>{log.date}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+
                       {/* Vetting Action Buttons */}
-                      <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', borderTop: '1px solid var(--border-color)', paddingTop: '1rem' }}>
-                        <button onClick={() => handleUpdateStatus('approve')} className="btn btn-primary btn-sm" style={{ backgroundColor: 'var(--green-light)', borderColor: 'var(--green-light)', color: '#ffffff' }}>Approve & Generate TSS ID</button>
-                        <button onClick={() => handleUpdateStatus('request_changes')} className="btn btn-outline btn-sm">Request Changes</button>
-                        <button onClick={() => handleUpdateStatus('review')} className="btn btn-outline btn-sm">Move to Manual Review</button>
-                        <button onClick={() => setShowRejectModal(true)} className="btn btn-outline btn-sm" style={{ color: 'var(--danger)', borderColor: 'rgba(239, 68, 68, 0.2)' }}>Reject Profile</button>
-                        <button onClick={() => handleUpdateStatus('suspend')} className="btn btn-outline btn-sm" style={{ color: 'var(--danger)', borderColor: 'rgba(239, 68, 68, 0.2)' }}>Suspend</button>
-                        <button onClick={() => handleUpdateStatus('delete')} className="btn btn-outline btn-sm" style={{ color: 'var(--danger)', borderColor: 'rgba(239, 68, 68, 0.2)', background: 'rgba(239, 68, 68, 0.05)' }}>Delete Profile</button>
+                      <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '1.25rem', marginTop: '0.5rem' }}>
+                        <strong style={{ display: 'block', fontSize: '0.8rem', textTransform: 'uppercase', color: 'var(--text-secondary)', marginBottom: '0.75rem' }}>Vetting Verdict Actions</strong>
+                        
+                        {selectedCandidate.roleDetails?.draftProfileDetails ? (
+                          /* DRAFT CHANGE VETTING ACTIONS */
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                            <div style={{ display: 'flex', gap: '0.75rem' }}>
+                              <button 
+                                onClick={() => handleUpdateStatus('approve')} 
+                                className="btn btn-primary" 
+                                style={{ flex: 1, backgroundColor: 'var(--green-light)', borderColor: 'var(--green-light)', color: '#ffffff', fontWeight: 700, padding: '0.6rem 1.2rem', borderRadius: '8px' }}
+                              >
+                                Approve & Merge Draft Updates
+                              </button>
+                              <button 
+                                onClick={() => setShowRejectModal(true)} 
+                                className="btn btn-outline" 
+                                style={{ flex: 1, color: 'var(--danger)', borderColor: 'rgba(239, 68, 68, 0.3)', padding: '0.6rem 1.2rem', borderRadius: '8px' }}
+                              >
+                                Reject & Discard Draft Updates
+                              </button>
+                            </div>
+                            <div style={{ display: 'flex', gap: '0.5rem' }}>
+                              <button onClick={() => handleUpdateStatus('request_changes')} className="btn btn-light btn-xs" style={{ flex: 1 }}>Ask Candidate to Revise</button>
+                              <button onClick={() => handleUpdateStatus('review')} className="btn btn-light btn-xs" style={{ flex: 1 }}>Hold in Manual Review</button>
+                            </div>
+                          </div>
+                        ) : (
+                          /* STANDARD REGISTRATION VETTING ACTIONS */
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                            <div style={{ display: 'flex', gap: '0.75rem' }}>
+                              <button 
+                                onClick={() => handleUpdateStatus('approve')} 
+                                className="btn btn-primary" 
+                                style={{ flex: 1, backgroundColor: 'var(--green-light)', borderColor: 'var(--green-light)', color: '#ffffff', fontWeight: 700, padding: '0.6rem 1.2rem', borderRadius: '8px' }}
+                              >
+                                Approve & Issue Member ID
+                              </button>
+                              <button 
+                                onClick={() => handleUpdateStatus('request_changes')} 
+                                className="btn btn-outline" 
+                                style={{ color: 'var(--accent)', borderColor: 'rgba(245, 158, 11, 0.3)', padding: '0.6rem 1.2rem', borderRadius: '8px' }}
+                              >
+                                Request Changes
+                              </button>
+                            </div>
+                            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                              <button onClick={() => handleUpdateStatus('review')} className="btn btn-light btn-xs" style={{ flex: 1 }}>Manual Review</button>
+                              <button onClick={() => setShowRejectModal(true)} className="btn btn-light btn-xs" style={{ flex: 1, color: 'var(--danger)' }}>Reject Profile</button>
+                              <button onClick={() => handleUpdateStatus('suspend')} className="btn btn-light btn-xs" style={{ flex: 1, color: 'var(--danger)' }}>Suspend</button>
+                              <button onClick={() => handleUpdateStatus('delete')} className="btn btn-xs" style={{ color: 'var(--danger)', border: '1px solid rgba(239, 68, 68, 0.15)', backgroundColor: 'rgba(239, 68, 68, 0.04)' }}>Delete</button>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
                   )}
