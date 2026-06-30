@@ -2599,18 +2599,18 @@ export default function CandidateDashboard() {
                 )}
 
                 {/* E. ACCOUNT SETTINGS TAB */}
-                {(activeTab === 'settings' || (activeTab === 'profile' && profileSubTab === 'details')) && (
+                {((activeTab === 'settings' || activeTab === 'profile') && profileSubTab === 'details') && (
                   <form onSubmit={handleSaveSettings} className={`${styles.tabView} fade-in`}>
-                    <h2>Account Settings</h2>
-                    <p>Update your registration parameters. These changes sync with the database and dynamically update your resume builder.</p>
+                    <h2>Profile Information</h2>
+                    <p>Update your background and basic member information. Changes require admin validation before publication.</p>
                     
-                    {profile.roleDetails?.draftUpdate && (
+                    {profile.roleDetails?.draftProfileDetails && (
                       <div className={styles.pendingBanner} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', backgroundColor: 'rgba(234, 179, 8, 0.08)', border: '1px solid rgba(234, 179, 8, 0.2)', borderRadius: 'var(--radius-md)', padding: '1rem', marginBottom: '1.5rem' }}>
                         <ShieldAlert style={{ color: '#eab308' }} size={24} />
                         <div>
                           <strong style={{ display: 'block', color: 'var(--text-main)', marginBottom: '0.2rem' }}>Profile Changes Pending Review</strong>
                           <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                            Your recent profile updates are currently queued for administrator approval. Your previously verified parameters remain active.
+                            Your recent updates are currently queued for administrator approval. Previously verified details remain active.
                           </span>
                         </div>
                       </div>
@@ -2619,204 +2619,313 @@ export default function CandidateDashboard() {
                     <div className={styles.settingsGrid}>
                       <div className={styles.formField}>
                         <label className={styles.formLabel}>Full Name</label>
-                        <input 
-                          type="text" 
-                          value={editName}
-                          onChange={(e) => setEditName(e.target.value)}
-                          className={styles.formInput}
-                          required
-                        />
+                        <input type="text" value={editName} onChange={(e) => setEditName(e.target.value)} className={styles.formInput} required />
                       </div>
-
                       <div className={styles.formField}>
                         <label className={styles.formLabel}>Mobile Number</label>
-                        <input 
-                          type="text" 
-                          value={editMobile}
-                          onChange={(e) => setEditMobile(e.target.value)}
-                          className={styles.formInput}
-                          required
-                        />
+                        <input type="text" value={editMobile} onChange={(e) => setEditMobile(e.target.value)} className={styles.formInput} required />
                       </div>
-
                       <div className={styles.formField}>
                         <label className={styles.formLabel}>College / Institution</label>
-                        <input 
-                          type="text" 
-                          value={editCollege}
-                          onChange={(e) => setEditCollege(e.target.value)}
-                          className={styles.formInput}
-                        />
+                        <input type="text" value={editCollege} onChange={(e) => setEditCollege(e.target.value)} className={styles.formInput} required />
                       </div>
-
                       <div className={styles.formField}>
                         <label className={styles.formLabel}>Graduation Year</label>
-                        <input 
-                          type="number" 
-                          placeholder="e.g. 2026" 
-                          value={editGraduationYear}
-                          onChange={(e) => setEditGraduationYear(e.target.value)}
-                          className={styles.formInput}
-                        />
+                        <input type="number" value={editGraduationYear} onChange={(e) => setEditGraduationYear(e.target.value)} className={styles.formInput} required />
                       </div>
-
-                      <div className={styles.formField} style={{ gridColumn: 'span 2' }}>
-                        <label className={styles.formLabel}>Skills (separated by commas)</label>
-                        <input 
-                          type="text" 
-                          placeholder="React, Next.js, Python, PostgreSQL" 
-                          value={editSkills}
-                          onChange={(e) => setEditSkills(e.target.value)}
-                          className={styles.formInput}
-                        />
-                      </div>
-
                       <div className={styles.formField}>
-                        <label className={styles.formLabel}>LinkedIn Profile</label>
-                        <input 
-                          type="url" 
-                          value={editLinkedin}
-                          onChange={(e) => setEditLinkedin(e.target.value)}
-                          className={styles.formInput}
-                          required
-                        />
+                        <label className={styles.formLabel}>LinkedIn Profile URL</label>
+                        <input type="url" value={editLinkedin} onChange={(e) => setEditLinkedin(e.target.value)} className={styles.formInput} required />
                       </div>
-
                       <div className={styles.formField}>
-                        <label className={styles.formLabel}>GitHub Profile</label>
-                        <input 
-                          type="url" 
-                          value={editGithub}
-                          onChange={(e) => setEditGithub(e.target.value)}
-                          className={styles.formInput}
-                        />
+                        <label className={styles.formLabel}>GitHub Profile URL</label>
+                        <input type="url" value={editGithub} onChange={(e) => setEditGithub(e.target.value)} className={styles.formInput} />
                       </div>
-
-                      <div className={styles.formField} style={{ gridColumn: 'span 2' }}>
-                        <label className={styles.formLabel}>Portfolio Website</label>
-                        <input 
-                          type="url" 
-                          value={editPortfolio}
-                          onChange={(e) => setEditPortfolio(e.target.value)}
-                          className={styles.formInput}
-                        />
-                      </div>
-
                       <div className={styles.formField}>
-                        <label className={styles.formLabel}>Profile Photo URL</label>
-                        <input 
-                          type="url" 
-                          placeholder="e.g. https://example.com/photo.jpg" 
-                          value={editPhotoPath}
-                          onChange={(e) => setEditPhotoPath(e.target.value)}
-                          className={styles.formInput}
-                        />
+                        <label className={styles.formLabel}>Personal Portfolio Link</label>
+                        <input type="url" value={editPortfolio} onChange={(e) => setEditPortfolio(e.target.value)} className={styles.formInput} />
                       </div>
-
                       <div className={styles.formField}>
-                        <label className={styles.formLabel}>Resume Link (Google Drive URL only)</label>
-                        <input 
-                          type="url" 
-                          placeholder="https://drive.google.com/..." 
-                          value={editResumeLink}
-                          onChange={(e) => setEditResumeLink(e.target.value)}
-                          className={styles.formInput}
-                        />
+                        <label className={styles.formLabel}>Resume Drive URL (No raw files allowed)</label>
+                        <input type="url" value={editResumeLink} onChange={(e) => setEditResumeLink(e.target.value)} className={styles.formInput} placeholder="Google Drive / Dropbox link" required />
                       </div>
-
-                      {/* Emergency Donor Registry Section */}
-                      <div style={{ gridColumn: 'span 2', marginTop: '1.5rem', borderTop: '1px solid var(--border-color)', paddingTop: '1.5rem' }}>
-                        <h4 style={{ color: '#ef4444', fontWeight: 700, fontSize: '0.95rem', marginBottom: '0.25rem' }}>Emergency Donor Registry (Optional)</h4>
-                        <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '1.25rem' }}>
-                          Help save lives by volunteering to donate blood or platelets in case of local community medical emergencies.
-                        </p>
-                      </div>
-
                       <div className={styles.formField}>
-                        <label className={styles.formLabel}>Blood Group</label>
-                        <select 
-                          value={editBloodGroup}
-                          onChange={(e) => setEditBloodGroup(e.target.value)}
-                          className={styles.formInput}
-                          style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-main)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '0.6rem', width: '100%' }}
-                        >
-                          <option value="Unknown">Unknown</option>
-                          <option value="A+">A+</option>
-                          <option value="A-">A-</option>
-                          <option value="B+">B+</option>
-                          <option value="B-">B-</option>
-                          <option value="AB+">AB+</option>
-                          <option value="AB-">AB-</option>
-                          <option value="O+">O+</option>
-                          <option value="O-">O-</option>
-                        </select>
+                        <label className={styles.formLabel}>Profile Photo Path (Base64 data or URL)</label>
+                        <input type="text" value={editPhotoPath} onChange={(e) => setEditPhotoPath(e.target.value)} className={styles.formInput} />
                       </div>
-
                       <div className={styles.formField}>
-                        <label className={styles.formLabel}>Emergency Contact Number</label>
-                        <input 
-                          type="text" 
-                          placeholder="Secondary or family phone number"
-                          value={editEmergencyContact}
-                          onChange={(e) => setEditEmergencyContact(e.target.value)}
-                          className={styles.formInput}
-                        />
-                      </div>
-
-                      <div className={styles.formField}>
-                        <label className={styles.formLabel}>Available for Blood Donation?</label>
-                        <select 
-                          value={editAvailableBloodDonation}
-                          onChange={(e) => setEditAvailableBloodDonation(e.target.value)}
-                          className={styles.formInput}
-                          style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-main)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '0.6rem', width: '100%' }}
-                        >
-                          <option value="Yes">Yes</option>
-                          <option value="No">No</option>
-                        </select>
-                      </div>
-
-                      <div className={styles.formField}>
-                        <label className={styles.formLabel}>Available for Platelet Donation?</label>
-                        <select 
-                          value={editAvailablePlateletDonation}
-                          onChange={(e) => setEditAvailablePlateletDonation(e.target.value)}
-                          className={styles.formInput}
-                          style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-main)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '0.6rem', width: '100%' }}
-                        >
-                          <option value="Yes">Yes</option>
-                          <option value="No">No</option>
-                        </select>
-                      </div>
-
-                      <div className={styles.formField} style={{ gridColumn: 'span 2' }}>
-                        <label className={styles.formLabel}>Last Donation Date</label>
-                        <input 
-                          type="date" 
-                          value={editLastDonationDate}
-                          onChange={(e) => setEditLastDonationDate(e.target.value)}
-                          className={styles.formInput}
-                        />
+                        <label className={styles.formLabel}>Cover Image URL</label>
+                        <input type="text" value={editCoverImage} onChange={(e) => setEditCoverImage(e.target.value)} className={styles.formInput} placeholder="e.g. https://images.unsplash.com/photo-..." />
                       </div>
                     </div>
 
-                    <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'center', marginTop: '1.5rem' }}>
-                      <button type="submit" disabled={isUpdatingSettings} className="btn btn-primary">
-                        {isUpdatingSettings ? 'Saving Settings...' : 'Save Profile Changes'}
-                      </button>
-                      <button 
-                        type="button" 
-                        onClick={handleDeleteProfile} 
-                        className="btn btn-light"
-                        style={{ color: 'var(--danger)', border: '1px solid rgba(239, 68, 68, 0.2)', backgroundColor: 'rgba(239, 68, 68, 0.05)', marginLeft: 'auto' }}
-                      >
-                        Delete Profile Permanently
-                      </button>
+                    <div style={{ marginTop: '1.5rem' }}>
+                      <label className={styles.formLabel}>Professional Bio Summary</label>
+                      <textarea value={editBio} onChange={(e) => setEditBio(e.target.value)} className={styles.formInput} style={{ minHeight: '80px', fontFamily: 'inherit' }} placeholder="Short tagline detailing your core focus and skills..." />
                     </div>
+
+                    <div style={{ marginTop: '1.5rem' }}>
+                      <label className={styles.formLabel}>Skills Tags (comma-separated)</label>
+                      <input type="text" value={editSkills} onChange={(e) => setEditSkills(e.target.value)} className={styles.formInput} placeholder="e.g. React, Node.js, Python, TypeScript" />
+                    </div>
+
+                    <button type="submit" disabled={isUpdatingSettings} className="btn btn-primary" style={{ marginTop: '2rem' }}>
+                      {isUpdatingSettings ? 'Submitting for Verification...' : 'Save & Stage Updates'}
+                    </button>
                   </form>
                 )}
 
-                {activeTab === 'emergency-support' && emergencySubTab === 'settings' && profile && (
+                {activeTab === 'profile' && profileSubTab === 'experience' && profile && (
+                  <form onSubmit={handleSaveSettings} className={`${styles.tabView} fade-in`}>
+                    <h2>Experience & Education</h2>
+                    <p>Configure your historical timelines. These details sync with the ATS Resume Studio automatically.</p>
+                    
+                    {profile.roleDetails?.draftProfileDetails && (
+                      <div className={styles.pendingBanner} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', backgroundColor: 'rgba(234, 179, 8, 0.08)', border: '1px solid rgba(234, 179, 8, 0.2)', borderRadius: 'var(--radius-md)', padding: '1rem', marginBottom: '1.5rem' }}>
+                        <ShieldAlert style={{ color: '#eab308' }} size={24} />
+                        <div>
+                          <strong style={{ display: 'block', color: 'var(--text-main)', marginBottom: '0.2rem' }}>Profile Changes Pending Review</strong>
+                          <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                            Your recent updates are currently queued for administrator approval. Previously verified details remain active.
+                          </span>
+                        </div>
+                      </div>
+                    )}
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                      {/* EXPERIENCES BLOCK */}
+                      <div style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '12px', padding: '1.5rem' }}>
+                        <h3 style={{ fontSize: '1.15rem', color: 'var(--text-primary)', marginBottom: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <span>Professional Experience</span>
+                          <button 
+                            type="button" 
+                            onClick={() => setEditExperience([...editExperience, { title: '', company: '', duration: '', description: '' }])}
+                            className="btn btn-primary btn-sm"
+                            style={{ fontSize: '0.75rem', padding: '0.25rem 0.75rem', borderRadius: '6px' }}
+                          >
+                            + Add Experience
+                          </button>
+                        </h3>
+
+                        {editExperience.length === 0 ? (
+                          <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>No experiences declared yet.</p>
+                        ) : (
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                            {editExperience.map((exp, idx) => (
+                              <div key={idx} style={{ padding: '1rem', border: '1px solid rgba(255,255,255,0.03)', borderRadius: '8px', position: 'relative' }}>
+                                <button 
+                                  type="button" 
+                                  onClick={() => setEditExperience(editExperience.filter((_, i) => i !== idx))}
+                                  style={{ position: 'absolute', top: '10px', right: '10px', background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '0.8rem' }}
+                                >
+                                  Remove
+                                </button>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '0.75rem' }}>
+                                  <div>
+                                    <label style={{ fontSize: '0.75rem', display: 'block', marginBottom: '0.25rem', color: 'var(--text-secondary)' }}>Job Title / Role</label>
+                                    <input 
+                                      type="text" 
+                                      value={exp.title}
+                                      onChange={(e) => {
+                                        const next = [...editExperience];
+                                        next[idx].title = e.target.value;
+                                        setEditExperience(next);
+                                      }}
+                                      className={styles.formInput} 
+                                      placeholder="e.g. Software Engineer Intern"
+                                      required
+                                    />
+                                  </div>
+                                  <div>
+                                    <label style={{ fontSize: '0.75rem', display: 'block', marginBottom: '0.25rem', color: 'var(--text-secondary)' }}>Company / Organization</label>
+                                    <input 
+                                      type="text" 
+                                      value={exp.company}
+                                      onChange={(e) => {
+                                        const next = [...editExperience];
+                                        next[idx].company = e.target.value;
+                                        setEditExperience(next);
+                                      }}
+                                      className={styles.formInput} 
+                                      placeholder="e.g. TSS Startup Hub"
+                                      required
+                                    />
+                                  </div>
+                                </div>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1rem', marginBottom: '0.75rem' }}>
+                                  <div>
+                                    <label style={{ fontSize: '0.75rem', display: 'block', marginBottom: '0.25rem', color: 'var(--text-secondary)' }}>Duration (e.g. May 2025 - Present)</label>
+                                    <input 
+                                      type="text" 
+                                      value={exp.duration}
+                                      onChange={(e) => {
+                                        const next = [...editExperience];
+                                        next[idx].duration = e.target.value;
+                                        setEditExperience(next);
+                                      }}
+                                      className={styles.formInput}
+                                      placeholder="e.g. June 2025 - Aug 2025"
+                                      required
+                                    />
+                                  </div>
+                                </div>
+                                <div>
+                                  <label style={{ fontSize: '0.75rem', display: 'block', marginBottom: '0.25rem', color: 'var(--text-secondary)' }}>Key Contributions & Description</label>
+                                  <textarea 
+                                    value={exp.description || ''}
+                                    onChange={(e) => {
+                                      const next = [...editExperience];
+                                      next[idx].description = e.target.value;
+                                      setEditExperience(next);
+                                    }}
+                                    className={styles.formInput}
+                                    style={{ minHeight: '80px', fontFamily: 'inherit' }}
+                                    placeholder="Explain your tasks and achievements (use bullet points if possible)"
+                                  />
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* EDUCATION BLOCK */}
+                      <div style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '12px', padding: '1.5rem' }}>
+                        <h3 style={{ fontSize: '1.15rem', color: 'var(--text-primary)', marginBottom: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <span>Education Records</span>
+                          <button 
+                            type="button" 
+                            onClick={() => setEditEducation([...editEducation, { school: '', degree: '', year: '' }])}
+                            className="btn btn-primary btn-sm"
+                            style={{ fontSize: '0.75rem', padding: '0.25rem 0.75rem', borderRadius: '6px' }}
+                          >
+                            + Add Education
+                          </button>
+                        </h3>
+
+                        {editEducation.length === 0 ? (
+                          <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>No education rows declared yet.</p>
+                        ) : (
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                            {editEducation.map((edu, idx) => (
+                              <div key={idx} style={{ padding: '1rem', border: '1px solid rgba(255,255,255,0.03)', borderRadius: '8px', position: 'relative' }}>
+                                <button 
+                                  type="button" 
+                                  onClick={() => setEditEducation(editEducation.filter((_, i) => i !== idx))}
+                                  style={{ position: 'absolute', top: '10px', right: '10px', background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '0.8rem' }}
+                                >
+                                  Remove
+                                </button>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr 0.5fr', gap: '1rem' }}>
+                                  <div>
+                                    <label style={{ fontSize: '0.75rem', display: 'block', marginBottom: '0.25rem', color: 'var(--text-secondary)' }}>School / College</label>
+                                    <input 
+                                      type="text" 
+                                      value={edu.school}
+                                      onChange={(e) => {
+                                        const next = [...editEducation];
+                                        next[idx].school = e.target.value;
+                                        setEditEducation(next);
+                                      }}
+                                      className={styles.formInput} 
+                                      placeholder="e.g. Malla Reddy University"
+                                      required
+                                    />
+                                  </div>
+                                  <div>
+                                    <label style={{ fontSize: '0.75rem', display: 'block', marginBottom: '0.25rem', color: 'var(--text-secondary)' }}>Degree / Course</label>
+                                    <input 
+                                      type="text" 
+                                      value={edu.degree}
+                                      onChange={(e) => {
+                                        const next = [...editEducation];
+                                        next[idx].degree = e.target.value;
+                                        setEditEducation(next);
+                                      }}
+                                      className={styles.formInput} 
+                                      placeholder="e.g. B.Tech Computer Science"
+                                      required
+                                    />
+                                  </div>
+                                  <div>
+                                    <label style={{ fontSize: '0.75rem', display: 'block', marginBottom: '0.25rem', color: 'var(--text-secondary)' }}>Graduation Year</label>
+                                    <input 
+                                      type="text" 
+                                      value={edu.year}
+                                      onChange={(e) => {
+                                        const next = [...editEducation];
+                                        next[idx].year = e.target.value;
+                                        setEditEducation(next);
+                                      }}
+                                      className={styles.formInput} 
+                                      placeholder="e.g. 2026"
+                                      required
+                                    />
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <button type="submit" disabled={isUpdatingSettings} className="btn btn-primary" style={{ marginTop: '2rem' }}>
+                      {isUpdatingSettings ? 'Submitting for Verification...' : 'Save & Stage Updates'}
+                    </button>
+                  </form>
+                )}
+
+                {activeTab === 'profile' && profileSubTab === 'achievements' && profile && (
+                  <form onSubmit={handleSaveSettings} className={`${styles.tabView} fade-in`}>
+                    <h2>Achievements & Credentials</h2>
+                    <p>Showcase your verified credentials, certifications, and wins within and outside the TSS network.</p>
+
+                    {profile.roleDetails?.draftProfileDetails && (
+                      <div className={styles.pendingBanner} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', backgroundColor: 'rgba(234, 179, 8, 0.08)', border: '1px solid rgba(234, 179, 8, 0.2)', borderRadius: 'var(--radius-md)', padding: '1rem', marginBottom: '1.5rem' }}>
+                        <ShieldAlert style={{ color: '#eab308' }} size={24} />
+                        <div>
+                          <strong style={{ display: 'block', color: 'var(--text-main)', marginBottom: '0.2rem' }}>Profile Changes Pending Review</strong>
+                          <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                            Your recent updates are currently queued for administrator approval. Previously verified details remain active.
+                          </span>
+                        </div>
+                      </div>
+                    )}
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                      <div>
+                        <label className={styles.formLabel}>Achievements (comma-separated list)</label>
+                        <textarea 
+                          value={editAchievements}
+                          onChange={(e) => setEditAchievements(e.target.value)}
+                          className={styles.formInput}
+                          style={{ minHeight: '120px', fontFamily: 'inherit' }}
+                          placeholder="e.g. TSS Build Challenge Winner #1, Finalist Malla Reddy Hackathon, Google Cloud Certified Associate Cloud Engineer"
+                        />
+                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Comma separated list of awards, honors, and milestones.</span>
+                      </div>
+
+                      <div>
+                        <label className={styles.formLabel}>Certificates & Badges Links (comma-separated URLs)</label>
+                        <textarea 
+                          value={editCertificates}
+                          onChange={(e) => setEditCertificates(e.target.value)}
+                          className={styles.formInput}
+                          style={{ minHeight: '120px', fontFamily: 'inherit' }}
+                          placeholder="e.g. https://cloud.google.com/verify/123, https://creds.tss/verify-hackathon"
+                        />
+                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>URLs pointing to public credential checkers or portfolio files.</span>
+                      </div>
+                    </div>
+
+                    <button type="submit" disabled={isUpdatingSettings} className="btn btn-primary" style={{ marginTop: '2rem' }}>
+                      {isUpdatingSettings ? 'Submitting for Verification...' : 'Save & Stage Updates'}
+                    </button>
+                  </form>
+                )}
+
+                                {activeTab === 'emergency-support' && emergencySubTab === 'settings' && profile && (
                   <form onSubmit={handleSaveSettings} className={`${styles.tabView} fade-in`}>
                     <h2>Emergency Donation Settings</h2>
                     <p>Toggle blood and platelet emergency options matching community requests. No commercial activity is allowed.</p>
