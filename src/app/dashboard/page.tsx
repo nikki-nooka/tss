@@ -4275,6 +4275,8 @@ export default function CandidateDashboard() {
                       </div>
                     </div>
 
+                    {renderStatusBanner()}
+
                     {/* Quick Metrics Cards */}
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.25rem', marginBottom: '2.5rem' }}>
                       <div style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '12px', padding: '1.25rem' }}>
