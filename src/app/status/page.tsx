@@ -13,7 +13,8 @@ import {
   ArrowRight, 
   Award, 
   User, 
-  Download 
+  Download,
+  ShieldAlert
 } from 'lucide-react';
 import { useToast } from '@/components/Toast';
 
@@ -21,7 +22,8 @@ interface CandidateStatus {
   success: boolean;
   fullName: string;
   role: 'Student' | 'Founder' | 'Recruiter' | 'Mentor' | 'Investor' | 'Working Professional' | string;
-  status: 'Pending' | 'Under Review' | 'Verified' | 'Rejected';
+  status: 'Pending' | 'Under Review' | 'Verified' | 'Rejected' | 'Needs Changes' | 'Suspended' | string;
+  notes?: string | null;
   memberId: string | null;
   highestQualification?: string | null;
   preferredRoles?: string[];
@@ -752,6 +754,46 @@ export default function Status() {
                       </p>
                       <p className={styles.contactSupportText}>
                         Please <Link href="/contact">contact support</Link> or re-register with valid credentials.
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {candidate.status === 'Needs Changes' && (
+                  <div className={`${styles.statusAlert} ${styles.reviewAlert}`} style={{ borderColor: '#eab308', backgroundColor: 'rgba(234, 179, 8, 0.05)' }}>
+                    <ShieldAlert size={32} style={{ color: '#eab308', marginRight: '1rem', flexShrink: 0 }} />
+                    <div>
+                      <h3 style={{ color: '#eab308', margin: '0 0 0.5rem 0', fontSize: '1.1rem', fontWeight: 700 }}>Application Vetting Status: ACTION REQUIRED</h3>
+                      <p style={{ margin: 0, color: 'var(--text-secondary)' }}>
+                        Hello <strong>{candidate.fullName}</strong>. The vetting board has requested revisions for your profile parameters.
+                      </p>
+                      {candidate.notes && (
+                        <div style={{ marginTop: '0.75rem', padding: '0.75rem', backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: '6px', borderLeft: '3px solid #eab308', fontSize: '0.8rem', color: 'var(--text-main)' }}>
+                          <strong>Feedback Notes:</strong> {candidate.notes}
+                        </div>
+                      )}
+                      <p style={{ marginTop: '0.75rem', fontSize: '0.82rem', margin: '0.75rem 0 0 0' }}>
+                        Please <Link href="/dashboard" style={{ color: '#eab308', textDecoration: 'underline', fontWeight: 700 }}>Log In to your Dashboard</Link> to adjust your settings and resubmit.
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {candidate.status === 'Suspended' && (
+                  <div className={`${styles.statusAlert} ${styles.rejectedAlert}`}>
+                    <AlertOctagon size={32} className={styles.alertIcon} />
+                    <div>
+                      <h3>Application Vetting Status: SUSPENDED</h3>
+                      <p>
+                        Hello <strong>{candidate.fullName}</strong>. Your membership verification has been temporarily suspended.
+                      </p>
+                      {candidate.notes && (
+                        <div style={{ marginTop: '0.75rem', padding: '0.75rem', backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: '6px', borderLeft: '3px solid #ef4444', fontSize: '0.8rem' }}>
+                          <strong>Admin Reason:</strong> {candidate.notes}
+                        </div>
+                      )}
+                      <p className={styles.contactSupportText}>
+                        Please <Link href="/contact">contact support</Link> to appeal this decision.
                       </p>
                     </div>
                   </div>
