@@ -30,5 +30,5 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": ["node_modules", "PORTFOLIO-NIKSHITH"]
+  "exclude": ["node_modules", "PORTFOLIO-NIKSHITH", "cryptoviz"]
 }
