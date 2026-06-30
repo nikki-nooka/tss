@@ -372,11 +372,11 @@ export default function Home() {
         <ScrollReveal direction="pop" className="container">
           <h2 className={styles.finalHeading}>Stop Waiting. Start Building.</h2>
           <p className={styles.finalDesc}>20,000+ students already inside. Your Member ID is waiting.</p>
-          <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap' }}>
-            <Link href="/get-verified" className={styles.btnAccent}>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap', marginTop: '2rem' }}>
+            <Link href="/get-verified" className={styles.btnJoinNow}>
               Get Verified
             </Link>
-            <Link href="/contact" className={styles.btnOutline}>
+            <Link href="/contact" className={styles.btnPartnerWithUs}>
               Contact Us
             </Link>
           </div>
