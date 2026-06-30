@@ -30,7 +30,9 @@ import {
   TrendingUp,
   FileSpreadsheet,
   X,
-  Share2
+  Share2,
+  Layers,
+  ShieldAlert
 } from 'lucide-react';
 import { useToast } from '@/components/Toast';
 import { Candidate, ForwardLog, ContactMessage, AdminActivityLog } from '@/lib/db';
@@ -63,7 +65,7 @@ const TwitterIcon = (props: React.SVGProps<SVGSVGElement>) => (
   </svg>
 );
 
-type TabType = 'overview' | 'candidates' | 'settings' | 'messages' | 'logs' | 'jobs';
+type TabType = 'overview' | 'candidates' | 'settings' | 'messages' | 'logs' | 'jobs' | 'opportunities' | 'emergencies';
 
 export default function AdminDashboard() {
   const toast = useToast();
@@ -78,6 +80,14 @@ export default function AdminDashboard() {
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [messages, setMessages] = useState<ContactMessage[]>([]);
   const [activityLogs, setActivityLogs] = useState<AdminActivityLog[]>([]);
+  const [opportunities, setOpportunities] = useState<any[]>([]);
+  const [emergencies, setEmergencies] = useState<any[]>([]);
+  const [selectedOpp, setSelectedOpp] = useState<any | null>(null);
+  const [selectedEm, setSelectedEm] = useState<any | null>(null);
+  const [oppRejectionTargetId, setOppRejectionTargetId] = useState<string | null>(null);
+  const [emRejectionTargetId, setEmRejectionTargetId] = useState<string | null>(null);
+  const [rejectionReasonInput, setRejectionReasonInput] = useState('');
+  
   const [metrics, setMetrics] = useState<any>({
     totalRegistrations: 0,
     pendingReviews: 0,
@@ -207,7 +217,9 @@ export default function AdminDashboard() {
           loadCandidates(),
           loadSettings(),
           loadMessages(),
-          loadLogs()
+          loadLogs(),
+          loadOpportunities(),
+          loadEmergencies()
         ]);
         
         setIsLoading(false);
@@ -258,6 +270,64 @@ export default function AdminDashboard() {
     if (res.ok) {
       const data = await res.json();
       setActivityLogs(data);
+    }
+  };
+
+  const loadOpportunities = async () => {
+    const res = await fetch('/api/admin/opportunities');
+    if (res.ok) {
+      const data = await res.json();
+      setOpportunities(data);
+    }
+  };
+
+  const loadEmergencies = async () => {
+    const res = await fetch('/api/admin/emergencies');
+    if (res.ok) {
+      const data = await res.json();
+      setEmergencies(data);
+    }
+  };
+
+  const handleModerateOpportunity = async (oppId: string, action: 'approve' | 'reject' | 'feature' | 'delete', reason = '') => {
+    try {
+      const res = await fetch('/api/admin/opportunities', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ oppId, action, rejectionReason: reason })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        toast.success(`Opportunity ${action}ed successfully.`);
+        loadOpportunities();
+        loadStats(); // reload stats metrics
+      } else {
+        toast.error(data.error || 'Failed to update opportunity.');
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error('Network connection error.');
+    }
+  };
+
+  const handleModerateEmergency = async (emId: string, action: 'approve' | 'reject' | 'feature' | 'delete', reason = '') => {
+    try {
+      const res = await fetch('/api/admin/emergencies', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ emId, action, rejectionReason: reason })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        toast.success(`Emergency request ${action}ed successfully.`);
+        loadEmergencies();
+        loadStats();
+      } else {
+        toast.error(data.error || 'Failed to moderate emergency request.');
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error('Network connection error.');
     }
   };
 
@@ -1016,6 +1086,18 @@ export default function AdminDashboard() {
               onClick={() => setActiveTab('jobs')}
             >
               <Briefcase size={18} /> Jobs Board
+            </button>
+            <button 
+              className={`${styles.tabBtn} ${activeTab === 'opportunities' ? styles.activeTab : ''}`}
+              onClick={() => setActiveTab('opportunities')}
+            >
+              <Layers size={18} /> Opportunities Queue ({opportunities.filter(o => o.status === 'Pending').length})
+            </button>
+            <button 
+              className={`${styles.tabBtn} ${activeTab === 'emergencies' ? styles.activeTab : ''}`}
+              onClick={() => setActiveTab('emergencies')}
+            >
+              <ShieldAlert size={18} /> Emergencies Queue ({emergencies.filter(e => e.status === 'Pending').length})
             </button>
           </div>
         </div>
@@ -2321,6 +2403,159 @@ export default function AdminDashboard() {
         </div>
       )}
 
+      {/* TAB 7: Opportunities Review Queue */}
+      {activeTab === 'opportunities' && (
+        <div className="fade-in" style={{ padding: '2rem 0' }}>
+          <div className={styles.panelHeader}>
+            <div>
+              <h3 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-primary)' }}>Opportunities Review Queue</h3>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Audit and moderate listings posted by Verified Members before they go public.</p>
+            </div>
+          </div>
+
+          <div className="premium-card" style={{ padding: '1.5rem', backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '12px', marginTop: '1.5rem', overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
+              <thead>
+                <tr style={{ borderBottom: '1px solid var(--border-color)', color: 'var(--text-muted)', textAlign: 'left' }}>
+                  <th style={{ padding: '0.75rem' }}>Title & Organization</th>
+                  <th style={{ padding: '0.75rem' }}>Type</th>
+                  <th style={{ padding: '0.75rem' }}>Posted By</th>
+                  <th style={{ padding: '0.75rem' }}>Trust Score</th>
+                  <th style={{ padding: '0.75rem' }}>Date</th>
+                  <th style={{ padding: '0.75rem' }}>Status</th>
+                  <th style={{ padding: '0.75rem', textAlign: 'right' }}>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {opportunities.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>No opportunities registered.</td>
+                  </tr>
+                ) : (
+                  opportunities.map(opp => (
+                    <tr key={opp.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
+                      <td style={{ padding: '0.75rem' }}>
+                        <strong style={{ color: 'var(--text-primary)', display: 'block' }}>{opp.title}</strong>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{opp.organization}</span>
+                      </td>
+                      <td style={{ padding: '0.75rem' }}>{opp.type}</td>
+                      <td style={{ padding: '0.75rem' }}>{opp.postedByName || opp.postedBy}</td>
+                      <td style={{ padding: '0.75rem' }}>🛡️ {opp.trustScore || 20}</td>
+                      <td style={{ padding: '0.75rem' }}>{new Date(opp.postedDate).toLocaleDateString()}</td>
+                      <td style={{ padding: '0.75rem' }}>
+                        <span style={{
+                          padding: '0.2rem 0.5rem',
+                          borderRadius: '4px',
+                          fontSize: '10px',
+                          fontWeight: 700,
+                          textTransform: 'uppercase',
+                          backgroundColor: opp.status === 'Approved' ? 'rgba(5, 150, 105, 0.15)' : opp.status === 'Rejected' ? 'rgba(220, 38, 38, 0.15)' : 'rgba(245, 158, 11, 0.15)',
+                          color: opp.status === 'Approved' ? 'var(--green-light)' : opp.status === 'Rejected' ? '#ef4444' : 'var(--accent)'
+                        }}>{opp.status}</span>
+                      </td>
+                      <td style={{ padding: '0.75rem', textAlign: 'right' }}>
+                        <div style={{ display: 'inline-flex', gap: '0.35rem' }}>
+                          <button onClick={() => setSelectedOpp(opp)} className="btn btn-light btn-xs" style={{ padding: '0.25rem 0.5rem', fontSize: '11px', borderRadius: '4px' }}>Details</button>
+                          {opp.status !== 'Approved' && (
+                            <button onClick={() => handleModerateOpportunity(opp.id, 'approve')} className="btn btn-primary btn-xs" style={{ padding: '0.25rem 0.5rem', fontSize: '11px', borderRadius: '4px', backgroundColor: 'var(--green-light)', borderColor: 'var(--green-light)', color: '#ffffff' }}>Approve</button>
+                          )}
+                          {opp.status !== 'Rejected' && (
+                            <button onClick={() => setOppRejectionTargetId(opp.id)} className="btn btn-outline btn-xs" style={{ padding: '0.25rem 0.5rem', fontSize: '11px', borderRadius: '4px', color: '#ef4444', borderColor: 'rgba(239, 68, 68, 0.2)' }}>Reject</button>
+                          )}
+                          <button onClick={() => handleModerateOpportunity(opp.id, 'delete')} className="btn btn-xs" style={{ padding: '0.25rem 0.5rem', fontSize: '11px', borderRadius: '4px', color: 'var(--danger)', background: 'rgba(239, 68, 68, 0.05)', border: '1px solid rgba(239, 68, 68, 0.1)' }}>Delete</button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* TAB 8: Emergencies Review Queue */}
+      {activeTab === 'emergencies' && (
+        <div className="fade-in" style={{ padding: '2rem 0' }}>
+          <div className={styles.panelHeader}>
+            <div>
+              <h3 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#ef4444' }}>Emergency Support Queue</h3>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Moderate active medical requests. Verify hospital case sheet and medical contact details before approving.</p>
+            </div>
+          </div>
+
+          <div className="premium-card" style={{ padding: '1.5rem', backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '12px', marginTop: '1.5rem', overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
+              <thead>
+                <tr style={{ borderBottom: '1px solid var(--border-color)', color: 'var(--text-muted)', textAlign: 'left' }}>
+                  <th style={{ padding: '0.75rem' }}>Patient & Hospital</th>
+                  <th style={{ padding: '0.75rem' }}>Group</th>
+                  <th style={{ padding: '0.75rem' }}>Units</th>
+                  <th style={{ padding: '0.75rem' }}>City</th>
+                  <th style={{ padding: '0.75rem' }}>Required Before</th>
+                  <th style={{ padding: '0.75rem' }}>Proof / Doc</th>
+                  <th style={{ padding: '0.75rem' }}>Status</th>
+                  <th style={{ padding: '0.75rem', textAlign: 'right' }}>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {emergencies.length === 0 ? (
+                  <tr>
+                    <td colSpan={8} style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>No emergency requests registered.</td>
+                  </tr>
+                ) : (
+                  emergencies.map(em => (
+                    <tr key={em.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
+                      <td style={{ padding: '0.75rem' }}>
+                        <strong style={{ color: 'var(--text-primary)', display: 'block' }}>{em.patientName}</strong>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{em.hospitalName}</span>
+                      </td>
+                      <td style={{ padding: '0.75rem' }}>
+                        <span style={{ fontWeight: 800, color: '#ef4444', backgroundColor: 'rgba(239, 68, 68, 0.08)', padding: '0.15rem 0.4rem', borderRadius: '4px', border: '1px solid rgba(239, 68, 68, 0.15)' }}>{em.bloodGroup}</span>
+                      </td>
+                      <td style={{ padding: '0.75rem' }}>{em.unitsRequired}</td>
+                      <td style={{ padding: '0.75rem' }}>{em.city}</td>
+                      <td style={{ padding: '0.75rem', color: '#ef4444', fontWeight: 600 }}>{em.requiredBefore}</td>
+                      <td style={{ padding: '0.75rem' }}>
+                        {em.proofUrl.startsWith('http') ? (
+                          <a href={em.proofUrl} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary-pale)', textDecoration: 'underline' }}>View Document</a>
+                        ) : (
+                          <span style={{ fontStyle: 'italic', color: 'var(--text-muted)' }}>{em.proofUrl.slice(0, 15)}...</span>
+                        )}
+                      </td>
+                      <td style={{ padding: '0.75rem' }}>
+                        <span style={{
+                          padding: '0.2rem 0.5rem',
+                          borderRadius: '4px',
+                          fontSize: '10px',
+                          fontWeight: 700,
+                          textTransform: 'uppercase',
+                          backgroundColor: em.status === 'Approved' ? 'rgba(5, 150, 105, 0.15)' : em.status === 'Rejected' ? 'rgba(220, 38, 38, 0.15)' : 'rgba(245, 158, 11, 0.15)',
+                          color: em.status === 'Approved' ? 'var(--green-light)' : em.status === 'Rejected' ? '#ef4444' : 'var(--accent)'
+                        }}>{em.status}</span>
+                      </td>
+                      <td style={{ padding: '0.75rem', textAlign: 'right' }}>
+                        <div style={{ display: 'inline-flex', gap: '0.35rem' }}>
+                          <button onClick={() => setSelectedEm(em)} className="btn btn-light btn-xs" style={{ padding: '0.25rem 0.5rem', fontSize: '11px', borderRadius: '4px' }}>Notes</button>
+                          {em.status !== 'Approved' && (
+                            <button onClick={() => handleModerateEmergency(em.id, 'approve')} className="btn btn-primary btn-xs" style={{ padding: '0.25rem 0.5rem', fontSize: '11px', borderRadius: '4px', backgroundColor: 'var(--green-light)', borderColor: 'var(--green-light)', color: '#ffffff' }}>Approve</button>
+                          )}
+                          {em.status !== 'Rejected' && (
+                            <button onClick={() => setEmRejectionTargetId(em.id)} className="btn btn-outline btn-xs" style={{ padding: '0.25rem 0.5rem', fontSize: '11px', borderRadius: '4px', color: '#ef4444', borderColor: 'rgba(239, 68, 68, 0.2)' }}>Reject</button>
+                          )}
+                          <button onClick={() => handleModerateEmergency(em.id, 'feature')} className="btn btn-xs" style={{ padding: '0.25rem 0.5rem', fontSize: '11px', borderRadius: '4px', backgroundColor: em.isFeatured ? 'var(--accent)' : 'var(--bg-input)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}>{em.isFeatured ? '★ Featured' : 'Feature'}</button>
+                          <button onClick={() => handleModerateEmergency(em.id, 'delete')} className="btn btn-xs" style={{ padding: '0.25rem 0.5rem', fontSize: '11px', borderRadius: '4px', color: 'var(--danger)', background: 'rgba(239, 68, 68, 0.05)', border: '1px solid rgba(239, 68, 68, 0.1)' }}>Delete</button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
       {/* --- PREDEFINED REJECTION REASONS MODAL --- */}
       {showRejectModal && (
         <div className={styles.modalOverlay} style={{ zIndex: 1100 }} onClick={() => setShowRejectModal(false)}>
@@ -2383,6 +2618,149 @@ export default function AdminDashboard() {
                   type="button" 
                   disabled={selectedRejectionReasons.length === 0}
                   onClick={() => handleUpdateStatus('reject')} 
+                  className="btn btn-primary btn-sm"
+                  style={{ backgroundColor: 'var(--danger)', borderColor: 'var(--danger)', color: '#ffffff' }}
+                >
+                  Confirm Rejection
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* --- OPPORTUNITY DETAILS DIALOG FOR ADMIN --- */}
+      {selectedOpp && (
+        <div className={styles.modalOverlay} style={{ zIndex: 1100 }} onClick={() => setSelectedOpp(null)}>
+          <div className={styles.modalBody} style={{ maxWidth: '600px', width: '90%' }} onClick={e => e.stopPropagation()}>
+            <div className={styles.modalHeader}>
+              <h2 style={{ fontSize: '1.25rem', fontWeight: 700 }}>Opportunity Details</h2>
+              <button onClick={() => setSelectedOpp(null)} className={styles.closeModalBtn}>
+                <X size={20} />
+              </button>
+            </div>
+            <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+              <div><strong>Title:</strong> {selectedOpp.title}</div>
+              <div><strong>Organization:</strong> {selectedOpp.organization}</div>
+              <div><strong>Type:</strong> {selectedOpp.type}</div>
+              <div><strong>Format/Location:</strong> {selectedOpp.remoteOption} ({selectedOpp.location})</div>
+              <div><strong>Stipend:</strong> {selectedOpp.salaryStipend}</div>
+              <div><strong>Deadline:</strong> {selectedOpp.deadline}</div>
+              <div><strong>Skills:</strong> {selectedOpp.skillsRequired?.join(', ')}</div>
+              <div><strong>Description:</strong></div>
+              <p style={{ whiteSpace: 'pre-wrap', backgroundColor: 'var(--bg-main)', padding: '0.75rem', borderRadius: '6px', border: '1px solid var(--border-color)', margin: 0 }}>{selectedOpp.description}</p>
+              {selectedOpp.applyLink && <div><strong>Apply Link:</strong> <a href={selectedOpp.applyLink} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary-pale)', textDecoration: 'underline' }}>{selectedOpp.applyLink}</a></div>}
+              {selectedOpp.contactEmail && <div><strong>Email:</strong> {selectedOpp.contactEmail}</div>}
+              {selectedOpp.website && <div><strong>Website:</strong> {selectedOpp.website}</div>}
+              {selectedOpp.supportingLinks && <div><strong>Supporting Link:</strong> <a href={selectedOpp.supportingLinks} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary-pale)' }}>{selectedOpp.supportingLinks}</a></div>}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* --- EMERGENCY DETAILS DIALOG FOR ADMIN --- */}
+      {selectedEm && (
+        <div className={styles.modalOverlay} style={{ zIndex: 1100 }} onClick={() => setSelectedEm(null)}>
+          <div className={styles.modalBody} style={{ maxWidth: '600px', width: '90%' }} onClick={e => e.stopPropagation()}>
+            <div className={styles.modalHeader}>
+              <h2 style={{ fontSize: '1.25rem', fontWeight: 700 }}>Emergency Request Details</h2>
+              <button onClick={() => setSelectedEm(null)} className={styles.closeModalBtn}>
+                <X size={20} />
+              </button>
+            </div>
+            <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+              <div><strong>Patient Name:</strong> {selectedEm.patientName}</div>
+              <div><strong>Blood Group:</strong> {selectedEm.bloodGroup}</div>
+              <div><strong>Units Required:</strong> {selectedEm.unitsRequired}</div>
+              <div><strong>Hospital:</strong> {selectedEm.hospitalName}</div>
+              <div><strong>Hospital Address:</strong> {selectedEm.hospitalAddress}, {selectedEm.city}</div>
+              <div><strong>Required Before:</strong> {selectedEm.requiredBefore}</div>
+              <div><strong>Contact Person:</strong> {selectedEm.contactPerson} ({selectedEm.phoneNumber})</div>
+              <div><strong>Medical Case Notes:</strong></div>
+              <p style={{ whiteSpace: 'pre-wrap', backgroundColor: 'var(--bg-main)', padding: '0.75rem', borderRadius: '6px', border: '1px solid var(--border-color)', margin: 0 }}>{selectedEm.medicalNotes}</p>
+              <div><strong>Verification Proof:</strong> <a href={selectedEm.proofUrl} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary-pale)', textDecoration: 'underline' }}>View Case Sheet / Medical ID</a></div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* --- OPPORTUNITY REJECTION REASON DIALOG --- */}
+      {oppRejectionTargetId && (
+        <div className={styles.modalOverlay} style={{ zIndex: 1100 }} onClick={() => setOppRejectionTargetId(null)}>
+          <div className={styles.modalBody} style={{ maxWidth: '440px', width: '90%' }} onClick={e => e.stopPropagation()}>
+            <div className={styles.modalHeader}>
+              <h2 style={{ fontSize: '1.15rem', fontWeight: 700 }}>Reject Opportunity</h2>
+              <button onClick={() => setOppRejectionTargetId(null)} className={styles.closeModalBtn}>
+                <X size={20} />
+              </button>
+            </div>
+            <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                <label className="form-label">Reason for Rejection *</label>
+                <textarea
+                  value={rejectionReasonInput}
+                  onChange={e => setRejectionReasonInput(e.target.value)}
+                  placeholder="Provide explicit feedback to help the poster correct their listing..."
+                  rows={4}
+                  className="form-textarea"
+                  style={{ fontSize: '0.8rem', padding: '0.5rem', borderRadius: '6px', border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-input)', color: 'var(--text-main)', width: '100%' }}
+                  required
+                />
+              </div>
+              <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
+                <button type="button" onClick={() => { setOppRejectionTargetId(null); setRejectionReasonInput(''); }} className="btn btn-outline btn-sm">Cancel</button>
+                <button 
+                  type="button" 
+                  disabled={!rejectionReasonInput.trim()}
+                  onClick={() => {
+                    handleModerateOpportunity(oppRejectionTargetId, 'reject', rejectionReasonInput);
+                    setOppRejectionTargetId(null);
+                    setRejectionReasonInput('');
+                  }} 
+                  className="btn btn-primary btn-sm"
+                  style={{ backgroundColor: 'var(--danger)', borderColor: 'var(--danger)', color: '#ffffff' }}
+                >
+                  Confirm Rejection
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* --- EMERGENCY REJECTION REASON DIALOG --- */}
+      {emRejectionTargetId && (
+        <div className={styles.modalOverlay} style={{ zIndex: 1100 }} onClick={() => setEmRejectionTargetId(null)}>
+          <div className={styles.modalBody} style={{ maxWidth: '440px', width: '90%' }} onClick={e => e.stopPropagation()}>
+            <div className={styles.modalHeader}>
+              <h2 style={{ fontSize: '1.15rem', fontWeight: 700 }}>Reject Emergency Request</h2>
+              <button onClick={() => setEmRejectionTargetId(null)} className={styles.closeModalBtn}>
+                <X size={20} />
+              </button>
+            </div>
+            <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                <label className="form-label">Reason for Rejection *</label>
+                <textarea
+                  value={rejectionReasonInput}
+                  onChange={e => setRejectionReasonInput(e.target.value)}
+                  placeholder="e.g. Inauthentic medical proof, financial request detected..."
+                  rows={4}
+                  className="form-textarea"
+                  style={{ fontSize: '0.8rem', padding: '0.5rem', borderRadius: '6px', border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-input)', color: 'var(--text-main)', width: '100%' }}
+                  required
+                />
+              </div>
+              <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
+                <button type="button" onClick={() => { setEmRejectionTargetId(null); setRejectionReasonInput(''); }} className="btn btn-outline btn-sm">Cancel</button>
+                <button 
+                  type="button" 
+                  disabled={!rejectionReasonInput.trim()}
+                  onClick={() => {
+                    handleModerateEmergency(emRejectionTargetId, 'reject', rejectionReasonInput);
+                    setEmRejectionTargetId(null);
+                    setRejectionReasonInput('');
+                  }} 
                   className="btn btn-primary btn-sm"
                   style={{ backgroundColor: 'var(--danger)', borderColor: 'var(--danger)', color: '#ffffff' }}
                 >

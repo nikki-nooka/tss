@@ -485,6 +485,8 @@ const LOCAL_DB_PATH = path.join(process.cwd(), 'db_fallback.json');
 interface FallbackStore {
   jobs: Job[];
   applications: JobApplication[];
+  opportunities?: Opportunity[];
+  emergencies?: EmergencyRequest[];
 }
 
 function readLocalDb(): FallbackStore {
@@ -687,3 +689,347 @@ export async function updateApplicationStatus(id: string, status: 'Applied' | 'R
     }
   }
 }
+
+// 7. Opportunity Hub & Emergency Support Persistence Helpers
+export interface Opportunity {
+  id: string; // e.g. TSS-JB-260701-001
+  type: 'Job' | 'Internship' | 'Freelance Gig' | 'Startup Project' | 'Co-Founder Search' | 'Campus Ambassador' | 'Volunteer' | 'Hackathon' | 'Event' | 'Mentorship' | 'Funding' | 'Scholarship';
+  title: string;
+  description: string;
+  organization: string;
+  location: string;
+  remoteOption: 'Remote' | 'Hybrid' | 'Onsite';
+  skillsRequired: string[];
+  experienceRequired?: string;
+  salaryStipend: string;
+  deadline: string;
+  applyLink: string;
+  website?: string;
+  contactEmail?: string;
+  supportingLinks?: string;
+  postedBy: string; // Candidate ID
+  postedByName?: string; // Candidate name (joined)
+  trustScore?: number; // trust level of poster
+  postedDate: string; // ISO string
+  views: number;
+  applicationsCount: number;
+  status: 'Draft' | 'Pending Approval' | 'Approved' | 'Rejected' | 'Closed' | 'Expired';
+  rejectionReason?: string;
+  isFeatured?: boolean;
+  savedByUsers?: string[]; // Candidate IDs who saved this
+}
+
+export interface EmergencyRequest {
+  id: string; // e.g. TSS-BL-260701-001
+  type: 'Blood Requirement' | 'Platelet Requirement' | 'Rare Blood Group Requirement' | 'Emergency Blood Donor' | 'Medical Volunteer Request';
+  patientName: string;
+  hospitalName: string;
+  bloodGroup: 'A+' | 'A-' | 'B+' | 'B-' | 'AB+' | 'AB-' | 'O+' | 'O-' | 'Unknown';
+  unitsRequired: number;
+  hospitalAddress: string;
+  city: string;
+  contactPerson: string;
+  phoneNumber: string;
+  requiredBefore: string;
+  medicalNotes?: string;
+  proofUrl?: string; // text proof / file upload link
+  additionalInfo?: string;
+  status: 'Pending Emergency Verification' | 'Approved' | 'Rejected' | 'Closed' | 'Needs Info';
+  postedBy: string; // Candidate ID
+  postedByName?: string; // Candidate name (joined)
+  postedDate: string; // ISO string
+  isFeatured?: boolean;
+  rejectionReason?: string;
+  internalNotes?: string;
+  donorsCount?: number; // number of users who clicked "I Can Donate"
+  potentialDonors?: string[]; // Candidate IDs of potential donors who clicked "I Can Donate"
+}
+
+// Extends FallbackStore inside writeLocalDb/readLocalDb
+function readExtendedLocalDb() {
+  const local = readLocalDb();
+  if (!local.opportunities) {
+    // Seed initial mock opportunities
+    local.opportunities = [
+      {
+        id: 'TSS-JB-260701-001',
+        type: 'Job',
+        title: 'Frontend Software Engineer',
+        description: 'We are looking for a skilled React Developer with experience in Next.js and styling systems. You will work on creating sleek, responsive user interfaces, managing client data dashboards, and optimizing web vitals.',
+        organization: 'AestheticLabs Ltd',
+        location: 'Bengaluru',
+        remoteOption: 'Hybrid',
+        skillsRequired: ['React', 'CSS Modules', 'TypeScript'],
+        experienceRequired: '1-2 Years',
+        salaryStipend: '₹8 - 12 LPA',
+        deadline: '2026-08-30',
+        applyLink: 'https://aestheticlabs.com/apply',
+        website: 'https://aestheticlabs.com',
+        contactEmail: 'careers@aestheticlabs.com',
+        postedBy: 'cand-1',
+        postedDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+        views: 124,
+        applicationsCount: 5,
+        status: 'Approved'
+      },
+      {
+        id: 'TSS-IN-260701-001',
+        type: 'Internship',
+        title: 'UI/UX Design Intern',
+        description: 'Looking for a creative UI/UX design intern to collaborate with founders on our mobile application and design layouts for student verification profile badges.',
+        organization: 'DesignStudio',
+        location: 'Remote',
+        remoteOption: 'Remote',
+        skillsRequired: ['Figma', 'Wireframing', 'Visual Design'],
+        experienceRequired: 'Fresher',
+        salaryStipend: '₹15,000/month',
+        deadline: '2026-07-15',
+        applyLink: 'https://designstudio.dev/interns',
+        website: 'https://designstudio.dev',
+        contactEmail: 'design@designstudio.dev',
+        postedBy: 'cand-1',
+        postedDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+        views: 58,
+        applicationsCount: 2,
+        status: 'Approved'
+      },
+      {
+        id: 'TSS-SP-260701-001',
+        type: 'Startup Project',
+        title: 'AI Product Co-Founder',
+        description: 'Building an automated ATS formatting compiler for student resumes. Looking for a tech co-founder with background in Natural Language Processing and serverless integrations.',
+        organization: 'ResumeEngine AI',
+        location: 'Hyderabad (Hybrid)',
+        remoteOption: 'Hybrid',
+        skillsRequired: ['Python', 'NLP', 'Next.js'],
+        experienceRequired: 'No Limit',
+        salaryStipend: 'Equity + Revenue Share',
+        deadline: '2026-09-01',
+        applyLink: 'https://resumeengine.ai',
+        website: 'https://resumeengine.ai',
+        contactEmail: 'founders@resumeengine.ai',
+        postedBy: 'cand-1',
+        postedDate: new Date().toISOString(),
+        views: 89,
+        applicationsCount: 1,
+        status: 'Approved'
+      }
+    ];
+  }
+  if (!local.emergencies) {
+    // Seed initial mock emergencies
+    local.emergencies = [
+      {
+        id: 'TSS-BL-260701-001',
+        type: 'Blood Requirement',
+        patientName: 'Anil Kumar',
+        hospitalName: 'Apollo Hospitals',
+        bloodGroup: 'O-',
+        unitsRequired: 3,
+        hospitalAddress: 'Jubilee Hills, Road No. 72',
+        city: 'Hyderabad',
+        contactPerson: 'Sunitha Sharma',
+        phoneNumber: '9848022338',
+        requiredBefore: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        medicalNotes: 'Patient undergoing urgent cardiac surgery. Rare blood group required.',
+        proofUrl: 'https://apollohospitals.com/proof/cardiac-case.pdf',
+        status: 'Approved',
+        postedBy: 'cand-1',
+        postedDate: new Date().toISOString(),
+        isFeatured: true,
+        donorsCount: 1,
+        potentialDonors: ['cand-1']
+      },
+      {
+        id: 'TSS-BL-260701-002',
+        type: 'Platelet Requirement',
+        patientName: 'Meera Rao',
+        hospitalName: 'NIMS Hospital',
+        bloodGroup: 'B+',
+        unitsRequired: 6,
+        hospitalAddress: 'Panjagutta Main Road',
+        city: 'Hyderabad',
+        contactPerson: 'Ramesh Rao',
+        phoneNumber: '9988776655',
+        requiredBefore: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        medicalNotes: 'Dengue emergency. Patient platelets count critical (under 15,000). Immediate donor required.',
+        proofUrl: 'https://nims.edu.in/patient-records/992.pdf',
+        status: 'Approved',
+        postedBy: 'cand-1',
+        postedDate: new Date().toISOString(),
+        isFeatured: false,
+        donorsCount: 0,
+        potentialDonors: []
+      }
+    ];
+  }
+  return local;
+}
+
+export async function getOpportunities(): Promise<Opportunity[]> {
+  try {
+    const { data, error } = await supabase
+      .from('opportunities')
+      .select('*')
+      .order('postedDate', { ascending: false });
+    if (error) throw error;
+    
+    const opps = (data || []) as Opportunity[];
+    const candidates = await getCandidates();
+    const candidatesMap = new Map(candidates.map(c => [c.id, c]));
+    
+    return opps.map(op => {
+      const c = candidatesMap.get(op.postedBy);
+      return {
+        ...op,
+        postedByName: c?.fullName || 'TSS Member',
+        trustScore: c?.communityScore || 20,
+        skillsRequired: Array.isArray(op.skillsRequired) ? op.skillsRequired : JSON.parse(op.skillsRequired || '[]'),
+        savedByUsers: Array.isArray(op.savedByUsers) ? op.savedByUsers : JSON.parse(op.savedByUsers || '[]')
+      };
+    });
+  } catch (err) {
+    const local = readExtendedLocalDb();
+    const candidates = await getCandidates();
+    const candidatesMap = new Map(candidates.map(c => [c.id, c]));
+    
+    return (local.opportunities || []).map(op => {
+      const c = candidatesMap.get(op.postedBy);
+      return {
+        ...op,
+        postedByName: c?.fullName || 'TSS Member',
+        trustScore: c?.communityScore || 20
+      };
+    }).sort((a,b) => new Date(b.postedDate).getTime() - new Date(a.postedDate).getTime());
+  }
+}
+
+export async function insertOpportunity(opp: Opportunity): Promise<void> {
+  try {
+    const { error } = await supabase
+      .from('opportunities')
+      .insert([opp]);
+    if (error) throw error;
+  } catch (err) {
+    const local = readExtendedLocalDb();
+    local.opportunities = local.opportunities || [];
+    local.opportunities.push(opp);
+    writeLocalDb(local);
+  }
+}
+
+export async function updateOpportunity(id: string, updates: Partial<Opportunity>): Promise<void> {
+  try {
+    const { error } = await supabase
+      .from('opportunities')
+      .update(updates)
+      .eq('id', id);
+    if (error) throw error;
+  } catch (err) {
+    const local = readExtendedLocalDb();
+    local.opportunities = local.opportunities || [];
+    const idx = local.opportunities.findIndex(o => o.id === id);
+    if (idx !== -1) {
+      local.opportunities[idx] = { ...local.opportunities[idx], ...updates };
+      writeLocalDb(local);
+    }
+  }
+}
+
+export async function deleteOpportunity(id: string): Promise<void> {
+  try {
+    const { error } = await supabase
+      .from('opportunities')
+      .delete()
+      .eq('id', id);
+    if (error) throw error;
+  } catch (err) {
+    const local = readExtendedLocalDb();
+    local.opportunities = local.opportunities || [];
+    local.opportunities = local.opportunities.filter(o => o.id !== id);
+    writeLocalDb(local);
+  }
+}
+
+export async function getEmergencies(): Promise<EmergencyRequest[]> {
+  try {
+    const { data, error } = await supabase
+      .from('emergencies')
+      .select('*')
+      .order('postedDate', { ascending: false });
+    if (error) throw error;
+    
+    const ems = (data || []) as EmergencyRequest[];
+    const candidates = await getCandidates();
+    const candidatesMap = new Map(candidates.map(c => [c.id, c]));
+    
+    return ems.map(em => {
+      const c = candidatesMap.get(em.postedBy);
+      return {
+        ...em,
+        postedByName: c?.fullName || 'TSS Member',
+        potentialDonors: Array.isArray(em.potentialDonors) ? em.potentialDonors : JSON.parse(em.potentialDonors || '[]')
+      };
+    });
+  } catch (err) {
+    const local = readExtendedLocalDb();
+    const candidates = await getCandidates();
+    const candidatesMap = new Map(candidates.map(c => [c.id, c]));
+    
+    return (local.emergencies || []).map(em => {
+      const c = candidatesMap.get(em.postedBy);
+      return {
+        ...em,
+        postedByName: c?.fullName || 'TSS Member'
+      };
+    }).sort((a,b) => new Date(b.postedDate).getTime() - new Date(a.postedDate).getTime());
+  }
+}
+
+export async function insertEmergency(em: EmergencyRequest): Promise<void> {
+  try {
+    const { error } = await supabase
+      .from('emergencies')
+      .insert([em]);
+    if (error) throw error;
+  } catch (err) {
+    const local = readExtendedLocalDb();
+    local.emergencies = local.emergencies || [];
+    local.emergencies.push(em);
+    writeLocalDb(local);
+  }
+}
+
+export async function updateEmergency(id: string, updates: Partial<EmergencyRequest>): Promise<void> {
+  try {
+    const { error } = await supabase
+      .from('emergencies')
+      .update(updates)
+      .eq('id', id);
+    if (error) throw error;
+  } catch (err) {
+    const local = readExtendedLocalDb();
+    local.emergencies = local.emergencies || [];
+    const idx = local.emergencies.findIndex(e => e.id === id);
+    if (idx !== -1) {
+      local.emergencies[idx] = { ...local.emergencies[idx], ...updates };
+      writeLocalDb(local);
+    }
+  }
+}
+
+export async function deleteEmergency(id: string): Promise<void> {
+  try {
+    const { error } = await supabase
+      .from('emergencies')
+      .delete()
+      .eq('id', id);
+    if (error) throw error;
+  } catch (err) {
+    const local = readExtendedLocalDb();
+    local.emergencies = local.emergencies || [];
+    local.emergencies = local.emergencies.filter(e => e.id !== id);
+    writeLocalDb(local);
+  }
+}
+

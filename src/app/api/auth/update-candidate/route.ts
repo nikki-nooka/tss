@@ -39,8 +39,24 @@ export async function POST(request: Request) {
     if (updates.resumeLink !== undefined) safeUpdates.resumeLink = updates.resumeLink.trim();
     if (updates.photoPath !== undefined) safeUpdates.photoPath = updates.photoPath;
 
+    // Emergency fields
+    if (updates.bloodGroup !== undefined) safeUpdates.bloodGroup = updates.bloodGroup;
+    if (updates.emergencyContact !== undefined) safeUpdates.emergencyContact = updates.emergencyContact.trim();
+    if (updates.availableBloodDonation !== undefined) safeUpdates.availableBloodDonation = updates.availableBloodDonation;
+    if (updates.availablePlateletDonation !== undefined) safeUpdates.availablePlateletDonation = updates.availablePlateletDonation;
+    if (updates.lastDonationDate !== undefined) safeUpdates.lastDonationDate = updates.lastDonationDate;
+
+    // Check if verification affecting fields changed
+    const isVerificationFieldChanged = 
+      (updates.fullName !== undefined && updates.fullName.trim() !== (candidate.fullName || '')) ||
+      (updates.college !== undefined && updates.college.trim() !== (candidate.college || '')) ||
+      (updates.graduationYear !== undefined && Number(updates.graduationYear) !== (candidate.graduationYear || null)) ||
+      (updates.linkedin !== undefined && updates.linkedin.trim() !== (candidate.linkedin || '')) ||
+      (updates.resumeLink !== undefined && updates.resumeLink.trim() !== (candidate.roleDetails?.resumeLink || '')) ||
+      (updates.photoPath !== undefined && updates.photoPath !== (candidate.photoPath || ''));
+
     // Handle Verified Staging Flow
-    if (candidate.status === 'Verified') {
+    if (candidate.status === 'Verified' && isVerificationFieldChanged) {
       const roleDetails = candidate.roleDetails || {};
       
       // Stage changes inside roleDetails.draftUpdate
@@ -67,11 +83,11 @@ export async function POST(request: Request) {
       const updatedCand = await getCandidateById(id);
       return NextResponse.json({ 
         success: true, 
-        message: 'Changes submitted for admin approval. Profile status set to Under Review.',
+        message: 'Verification changes submitted for admin approval. Profile status set to Under Review.',
         candidate: updatedCand
       });
     } else {
-      // Direct updates for non-verified profiles
+      // Direct updates (either not verified, or verified candidate editing non-verification fields)
       const roleDetails = candidate.roleDetails || {};
       const auditLogs = roleDetails.auditLogs || [];
       auditLogs.push({

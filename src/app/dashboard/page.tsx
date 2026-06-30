@@ -21,7 +21,15 @@ import {
   FileText,
   Lock,
   ShieldAlert,
-  Briefcase
+  Briefcase,
+  Search,
+  Share2,
+  Phone,
+  ExternalLink,
+  Bookmark,
+  Eye,
+  Heart,
+  X
 } from 'lucide-react';
 import { useToast } from '@/components/Toast';
 
@@ -110,7 +118,76 @@ export default function CandidateDashboard() {
   const [profile, setProfile] = useState<CandidateProfile | null>(null);
   
   // Dashboard navigation tab
-  const [activeTab, setActiveTab] = useState<'card' | 'resume' | 'levels' | 'build' | 'settings' | 'jobs'>('card');
+  const [activeTab, setActiveTab] = useState<'card' | 'resume' | 'levels' | 'build' | 'settings' | 'jobs' | 'opportunity-hub' | 'emergency-support' | 'profile' | 'notifications'>('card');
+  const [profileSubTab, setProfileSubTab] = useState<'details' | 'resume' | 'levels' | 'build'>('details');
+
+  // Emergency fields state
+  const [editBloodGroup, setEditBloodGroup] = useState('Unknown');
+  const [editEmergencyContact, setEditEmergencyContact] = useState('');
+  const [editAvailableBloodDonation, setEditAvailableBloodDonation] = useState('No');
+  const [editAvailablePlateletDonation, setEditAvailablePlateletDonation] = useState('No');
+  const [editLastDonationDate, setEditLastDonationDate] = useState('');
+
+  // Opportunity Hub States
+  const [opportunities, setOpportunities] = useState<any[]>([]);
+  const [oppSearch, setOppSearch] = useState('');
+  const [oppFilterType, setOppFilterType] = useState('All'); // tabs
+  const [oppFilterRemote, setOppFilterRemote] = useState('All');
+  const [oppFilterPaid, setOppFilterPaid] = useState('All');
+  const [oppFilterVerifiedOnly, setOppFilterVerifiedOnly] = useState(false);
+  const [oppSortBy, setOppSortBy] = useState('newest'); // newest, trust, applied
+  const [selectedOpp, setSelectedOpp] = useState<any | null>(null);
+  
+  // Post Opportunity Form States
+  const [showPostOppModal, setShowPostOppModal] = useState(false);
+  const [newOppType, setNewOppType] = useState('Job');
+  const [newOppTitle, setNewOppTitle] = useState('');
+  const [newOppDesc, setNewOppDesc] = useState('');
+  const [newOppOrg, setNewOppOrg] = useState('');
+  const [newOppLocation, setNewOppLocation] = useState('');
+  const [newOppRemote, setNewOppRemote] = useState('Onsite');
+  const [newOppSkills, setNewOppSkills] = useState('');
+  const [newOppExperience, setNewOppExperience] = useState('');
+  const [newOppSalary, setNewOppSalary] = useState('');
+  const [newOppDeadline, setNewOppDeadline] = useState('');
+  const [newOppLink, setNewOppLink] = useState('');
+  const [newOppWebsite, setNewOppWebsite] = useState('');
+  const [newOppEmail, setNewOppEmail] = useState('');
+  const [newOppLinks, setNewOppLinks] = useState('');
+  const [newOppTerms, setNewOppTerms] = useState(false);
+  const [isSubmittingOpp, setIsSubmittingOpp] = useState(false);
+
+  // Saved & My Posts lists
+  const [savedOppIds, setSavedOppIds] = useState<string[]>([]);
+
+  // Emergency Support States
+  const [emergencies, setEmergencies] = useState<any[]>([]);
+  const [emSearch, setEmSearch] = useState('');
+  const [emFilterGroup, setEmFilterGroup] = useState('All');
+  const [selectedEm, setSelectedEm] = useState<any | null>(null);
+
+  // Create Emergency Request Form States
+  const [showPostEmModal, setShowPostEmModal] = useState(false);
+  const [newEmType, setNewEmType] = useState('Blood Requirement');
+  const [newEmPatientName, setNewEmPatientName] = useState('');
+  const [newEmHospitalName, setNewEmHospitalName] = useState('');
+  const [newEmBloodGroup, setNewEmBloodGroup] = useState('A+');
+  const [newEmUnits, setNewEmUnits] = useState(1);
+  const [newEmAddress, setNewEmAddress] = useState('');
+  const [newEmCity, setNewEmCity] = useState('');
+  const [newEmContactPerson, setNewEmContactPerson] = useState('');
+  const [newEmPhone, setNewEmPhone] = useState('');
+  const [newEmBefore, setNewEmBefore] = useState('');
+  const [newEmNotes, setNewEmNotes] = useState('');
+  const [newEmProof, setNewEmProof] = useState('');
+  const [newEmInfo, setNewEmInfo] = useState('');
+  const [isSubmittingEm, setIsSubmittingEm] = useState(false);
+
+  // Notifications State
+  const [dashboardNotifications, setDashboardNotifications] = useState<any[]>([
+    { id: 'nt-1', text: 'Welcome to the new TSS Verified Ecosystem Dashboard!', date: 'Just now', unread: true },
+    { id: 'nt-2', text: 'Review the Vetting Levels under Profile to check your digital card eligibility.', date: '1 day ago', unread: false }
+  ]);
   
   // Resume studio states
   const [selectedTemplate, setSelectedTemplate] = useState<'FAANG' | 'Startup' | 'General'>('FAANG');
@@ -292,6 +369,13 @@ export default function CandidateDashboard() {
     setEditPortfolio(p.portfolio || '');
     setEditResumeLink(p.resumeLink || p.resumePath || '');
     setEditPhotoPath(p.photoPath || '');
+
+    // Emergency fields
+    setEditBloodGroup(p.roleDetails?.bloodGroup || 'Unknown');
+    setEditEmergencyContact(p.roleDetails?.emergencyContact || '');
+    setEditAvailableBloodDonation(p.roleDetails?.availableBloodDonation || 'No');
+    setEditAvailablePlateletDonation(p.roleDetails?.availablePlateletDonation || 'No');
+    setEditLastDonationDate(p.roleDetails?.lastDonationDate || '');
   };
 
   // Sync resume builder with current profile values
@@ -367,6 +451,201 @@ export default function CandidateDashboard() {
     }
   };
 
+  const fetchOppsAndEmergencies = async () => {
+    try {
+      const resOpp = await fetch('/api/opportunities');
+      const dataOpp = await resOpp.json();
+      if (dataOpp.opportunities) {
+        setOpportunities(dataOpp.opportunities);
+      }
+
+      const resEm = await fetch('/api/emergencies');
+      const dataEm = await resEm.json();
+      if (dataEm.emergencies) {
+        setEmergencies(dataEm.emergencies);
+      }
+    } catch (err) {
+      console.error('Failed to load portal data:', err);
+    }
+  };
+
+  // Sync portal content when profile is set
+  useEffect(() => {
+    if (profile) {
+      fetchOppsAndEmergencies();
+      
+      const saved = localStorage.getItem(`tss_saved_opps_${profile.id}`);
+      if (saved) {
+        try {
+          setSavedOppIds(JSON.parse(saved));
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    }
+  }, [profile]);
+
+  const handlePostOpportunitySubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!profile) return;
+    if (!newOppTitle.trim() || !newOppDesc.trim() || !newOppOrg.trim() || !newOppLocation.trim() || !newOppSalary.trim() || !newOppDeadline.trim() || !newOppLink.trim()) {
+      toast.error('Please fill in all mandatory fields.');
+      return;
+    }
+    if (!newOppTerms) {
+      toast.error('You must accept the terms & conditions.');
+      return;
+    }
+    
+    setIsSubmittingOpp(true);
+    try {
+      const res = await fetch('/api/opportunities', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: newOppType,
+          title: newOppTitle.trim(),
+          description: newOppDesc.trim(),
+          organization: newOppOrg.trim(),
+          location: newOppLocation.trim(),
+          remoteOption: newOppRemote,
+          skillsRequired: newOppSkills.split(',').map(s => s.trim()).filter(Boolean),
+          experienceRequired: newOppExperience.trim(),
+          salaryStipend: newOppSalary.trim(),
+          deadline: newOppDeadline,
+          applyLink: newOppLink.trim(),
+          website: newOppWebsite.trim(),
+          contactEmail: newOppEmail.trim(),
+          supportingLinks: newOppLinks.trim(),
+          postedBy: profile.id
+        })
+      });
+      const data = await res.json();
+      if (data.success && data.opportunity) {
+        toast.success('Opportunity submitted successfully! Pending admin approval.');
+        setOpportunities(prev => [data.opportunity, ...prev]);
+        setShowPostOppModal(false);
+        setNewOppTitle('');
+        setNewOppDesc('');
+        setNewOppOrg('');
+        setNewOppLocation('');
+        setNewOppSkills('');
+        setNewOppExperience('');
+        setNewOppSalary('');
+        setNewOppDeadline('');
+        setNewOppLink('');
+        setNewOppWebsite('');
+        setNewOppEmail('');
+        setNewOppLinks('');
+        setNewOppTerms(false);
+      } else {
+        toast.error(data.error || 'Failed to submit opportunity.');
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error('Network connection error.');
+    } finally {
+      setIsSubmittingOpp(false);
+    }
+  };
+
+  const handlePostEmergencySubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!profile) return;
+    if (!newEmPatientName.trim() || !newEmHospitalName.trim() || !newEmAddress.trim() || !newEmCity.trim() || !newEmContactPerson.trim() || !newEmPhone.trim() || !newEmBefore.trim()) {
+      toast.error('Please fill in all mandatory fields.');
+      return;
+    }
+
+    setIsSubmittingEm(true);
+    try {
+      const res = await fetch('/api/emergencies', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: newEmType,
+          patientName: newEmPatientName.trim(),
+          hospitalName: newEmHospitalName.trim(),
+          bloodGroup: newEmBloodGroup,
+          unitsRequired: newEmUnits,
+          hospitalAddress: newEmAddress.trim(),
+          city: newEmCity.trim(),
+          contactPerson: newEmContactPerson.trim(),
+          phoneNumber: newEmPhone.trim(),
+          requiredBefore: newEmBefore,
+          medicalNotes: newEmNotes.trim(),
+          proofUrl: newEmProof.trim(),
+          additionalInfo: newEmInfo.trim(),
+          postedBy: profile.id
+        })
+      });
+      const data = await res.json();
+      if (data.success && data.emergency) {
+        toast.success('Emergency request submitted successfully! Pending details audit.');
+        setEmergencies(prev => [data.emergency, ...prev]);
+        setShowPostEmModal(false);
+        setNewEmPatientName('');
+        setNewEmHospitalName('');
+        setNewEmAddress('');
+        setNewEmCity('');
+        setNewEmContactPerson('');
+        setNewEmPhone('');
+        setNewEmBefore('');
+        setNewEmNotes('');
+        setNewEmProof('');
+        setNewEmInfo('');
+      } else {
+        toast.error(data.error || 'Failed to submit emergency request.');
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error('Network connection error.');
+    } finally {
+      setIsSubmittingEm(false);
+    }
+  };
+
+  const handleRegisterDonor = (emId: string) => {
+    if (!profile) return;
+    
+    setEmergencies(prev => prev.map(em => {
+      if (em.id === emId) {
+        const list = em.potentialDonors || [];
+        const exists = list.includes(profile.id);
+        const newList = exists 
+          ? list.filter((id: string) => id !== profile.id)
+          : [...list, profile.id];
+        
+        if (!exists) {
+          toast.success('Thank you! Your availability has been registered and the contact person has been notified.');
+        } else {
+          toast.success('Your donor registration has been withdrawn.');
+        }
+        return {
+          ...em,
+          potentialDonors: newList,
+          donorsCount: newList.length
+        };
+      }
+      return em;
+    }));
+  };
+
+  const handleToggleSaveOpportunity = (oppId: string) => {
+    if (!profile) return;
+    const isSaved = savedOppIds.includes(oppId);
+    let newList;
+    if (isSaved) {
+      newList = savedOppIds.filter(id => id !== oppId);
+      toast.success('Removed opportunity from saved bookmarks.');
+    } else {
+      newList = [...savedOppIds, oppId];
+      toast.success('Opportunity saved successfully.');
+    }
+    setSavedOppIds(newList);
+    localStorage.setItem(`tss_saved_opps_${profile.id}`, JSON.stringify(newList));
+  };
+
   const handleLogout = () => {
     localStorage.removeItem('tss_candidate_session');
     setProfile(null);
@@ -396,7 +675,12 @@ export default function CandidateDashboard() {
         github: editGithub,
         portfolio: editPortfolio,
         resumeLink: editResumeLink,
-        photoPath: editPhotoPath
+        photoPath: editPhotoPath,
+        bloodGroup: editBloodGroup,
+        emergencyContact: editEmergencyContact,
+        availableBloodDonation: editAvailableBloodDonation,
+        availablePlateletDonation: editAvailablePlateletDonation,
+        lastDonationDate: editLastDonationDate
       };
 
       const res = await fetch('/api/auth/update-candidate', {
@@ -1335,48 +1619,54 @@ export default function CandidateDashboard() {
                     onClick={() => setActiveTab('card')}
                     className={`${styles.sidebarItem} ${activeTab === 'card' ? styles.sidebarItemActive : ''}`}
                   >
+                    <Award size={18} />
+                    <span>Dashboard</span>
+                  </button>
+
+                  <button 
+                    onClick={() => setActiveTab('profile')}
+                    className={`${styles.sidebarItem} ${activeTab === 'profile' ? styles.sidebarItemActive : ''}`}
+                  >
                     <User size={18} />
-                    <span>My Member Card</span>
+                    <span>Profile</span>
                   </button>
-                  
+
                   <button 
-                    onClick={() => setActiveTab('resume')}
-                    className={`${styles.sidebarItem} ${activeTab === 'resume' ? styles.sidebarItemActive : ''}`}
-                  >
-                    <FileText size={18} />
-                    <span>Resume Studio</span>
-                  </button>
-                  
-                  <button 
-                    onClick={() => setActiveTab('levels')}
-                    className={`${styles.sidebarItem} ${activeTab === 'levels' ? styles.sidebarItemActive : ''}`}
-                  >
-                    <Layers size={18} />
-                    <span>Vetting Levels</span>
-                  </button>
-                  
-                  <button 
-                    onClick={() => setActiveTab('build')}
-                    className={`${styles.sidebarItem} ${activeTab === 'build' ? styles.sidebarItemActive : ''}`}
-                  >
-                    <Calendar size={18} />
-                    <span>Build Challenge</span>
-                  </button>
-                  
-                  <button 
-                    onClick={() => setActiveTab('jobs')}
-                    className={`${styles.sidebarItem} ${activeTab === 'jobs' ? styles.sidebarItemActive : ''}`}
+                    onClick={() => setActiveTab('opportunity-hub')}
+                    className={`${styles.sidebarItem} ${activeTab === 'opportunity-hub' ? styles.sidebarItemActive : ''}`}
                   >
                     <Briefcase size={18} />
-                    <span>Jobs & Openings</span>
+                    <span>Opportunity Hub</span>
                   </button>
-                  
+
+                  <button 
+                    onClick={() => setActiveTab('emergency-support')}
+                    className={`${styles.sidebarItem} ${activeTab === 'emergency-support' ? styles.sidebarItemActive : ''}`}
+                    style={{ borderLeftColor: activeTab === 'emergency-support' ? '#ef4444' : 'transparent' }}
+                  >
+                    <ShieldAlert size={18} style={{ color: activeTab === 'emergency-support' ? '#ef4444' : 'var(--text-muted)' }} />
+                    <span style={{ color: activeTab === 'emergency-support' ? '#ef4444' : 'inherit', fontWeight: activeTab === 'emergency-support' ? 700 : 'normal' }}>Emergency Support</span>
+                  </button>
+
+                  <button 
+                    onClick={() => setActiveTab('notifications')}
+                    className={`${styles.sidebarItem} ${activeTab === 'notifications' ? styles.sidebarItemActive : ''}`}
+                  >
+                    <div style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}>
+                      <Layers size={18} />
+                      {dashboardNotifications.some(n => n.unread) && (
+                        <span style={{ position: 'absolute', top: -3, right: -3, width: 7, height: 7, backgroundColor: '#ef4444', borderRadius: '50%' }}></span>
+                      )}
+                    </div>
+                    <span style={{ marginLeft: '0.1rem' }}>Notifications</span>
+                  </button>
+
                   <button 
                     onClick={() => setActiveTab('settings')}
                     className={`${styles.sidebarItem} ${activeTab === 'settings' ? styles.sidebarItemActive : ''}`}
                   >
                     <Settings size={18} />
-                    <span>Account Settings</span>
+                    <span>Settings</span>
                   </button>
                 </nav>
 
@@ -1387,6 +1677,35 @@ export default function CandidateDashboard() {
 
               {/* Right View Panel */}
               <main className={styles.mainPanel}>
+                
+                {activeTab === 'profile' && (
+                  <div style={{ display: 'flex', gap: '1rem', borderBottom: '1px solid var(--border-color)', marginBottom: '2rem', paddingBottom: '0.5rem', overflowX: 'auto' }}>
+                    <button 
+                      onClick={() => setProfileSubTab('details')}
+                      style={{ padding: '0.5rem 1.25rem', background: 'none', border: 'none', borderBottom: profileSubTab === 'details' ? '2px solid var(--primary-pale)' : '2px solid transparent', color: profileSubTab === 'details' ? 'var(--text-main)' : 'var(--text-muted)', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s ease', fontSize: '0.9rem' }}
+                    >
+                      Profile Details
+                    </button>
+                    <button 
+                      onClick={() => setProfileSubTab('resume')}
+                      style={{ padding: '0.5rem 1.25rem', background: 'none', border: 'none', borderBottom: profileSubTab === 'resume' ? '2px solid var(--primary-pale)' : '2px solid transparent', color: profileSubTab === 'resume' ? 'var(--text-main)' : 'var(--text-muted)', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s ease', fontSize: '0.9rem' }}
+                    >
+                      Resume Studio
+                    </button>
+                    <button 
+                      onClick={() => setProfileSubTab('levels')}
+                      style={{ padding: '0.5rem 1.25rem', background: 'none', border: 'none', borderBottom: profileSubTab === 'levels' ? '2px solid var(--primary-pale)' : '2px solid transparent', color: profileSubTab === 'levels' ? 'var(--text-main)' : 'var(--text-muted)', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s ease', fontSize: '0.9rem' }}
+                    >
+                      Vetting Levels
+                    </button>
+                    <button 
+                      onClick={() => setProfileSubTab('build')}
+                      style={{ padding: '0.5rem 1.25rem', background: 'none', border: 'none', borderBottom: profileSubTab === 'build' ? '2px solid var(--primary-pale)' : '2px solid transparent', color: profileSubTab === 'build' ? 'var(--text-main)' : 'var(--text-muted)', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s ease', fontSize: '0.9rem' }}
+                    >
+                      Build Challenge
+                    </button>
+                  </div>
+                )}
                 
                 {/* A. DIGITAL MEMBER CARD TAB */}
                 {activeTab === 'card' && (
@@ -1664,7 +1983,7 @@ export default function CandidateDashboard() {
                 )}
 
                 {/* B. RESUME STUDIO TAB */}
-                {activeTab === 'resume' && (
+                {activeTab === 'profile' && profileSubTab === 'resume' && (
                   profile.status !== 'Verified' ? renderLockedState('Resume Studio') : (
                     <div className={`${styles.tabView} fade-in`}>
                     <h2>TSS Resume Studio</h2>
@@ -2062,7 +2381,7 @@ export default function CandidateDashboard() {
               )}
 
                 {/* C. VETTING LEVELS TAB */}
-                {activeTab === 'levels' && (
+                {activeTab === 'profile' && profileSubTab === 'levels' && (
                   profile.status !== 'Verified' ? renderLockedState('Vetting Levels Logs') : (
                     <div className={`${styles.tabView} fade-in`}>
                     <h2>TSS Verification Levels</h2>
@@ -2126,7 +2445,7 @@ export default function CandidateDashboard() {
               )}
 
                 {/* D. BUILD CHALLENGE TAB */}
-                {activeTab === 'build' && (
+                {activeTab === 'profile' && profileSubTab === 'build' && (
                   profile.status !== 'Verified' ? renderLockedState('Build Challenge Sandbox') : (
                     <div className={`${styles.tabView} fade-in`}>
                     <h2>TSS Build Challenge Sandbox</h2>
@@ -2171,7 +2490,7 @@ export default function CandidateDashboard() {
                 )}
 
                 {/* E. ACCOUNT SETTINGS TAB */}
-                {activeTab === 'settings' && (
+                {(activeTab === 'settings' || (activeTab === 'profile' && profileSubTab === 'details')) && (
                   <form onSubmit={handleSaveSettings} className={`${styles.tabView} fade-in`}>
                     <h2>Account Settings</h2>
                     <p>Update your registration parameters. These changes sync with the database and dynamically update your resume builder.</p>
@@ -2292,6 +2611,81 @@ export default function CandidateDashboard() {
                           placeholder="https://drive.google.com/..." 
                           value={editResumeLink}
                           onChange={(e) => setEditResumeLink(e.target.value)}
+                          className={styles.formInput}
+                        />
+                      </div>
+
+                      {/* Emergency Donor Registry Section */}
+                      <div style={{ gridColumn: 'span 2', marginTop: '1.5rem', borderTop: '1px solid var(--border-color)', paddingTop: '1.5rem' }}>
+                        <h4 style={{ color: '#ef4444', fontWeight: 700, fontSize: '0.95rem', marginBottom: '0.25rem' }}>Emergency Donor Registry (Optional)</h4>
+                        <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '1.25rem' }}>
+                          Help save lives by volunteering to donate blood or platelets in case of local community medical emergencies.
+                        </p>
+                      </div>
+
+                      <div className={styles.formField}>
+                        <label className={styles.formLabel}>Blood Group</label>
+                        <select 
+                          value={editBloodGroup}
+                          onChange={(e) => setEditBloodGroup(e.target.value)}
+                          className={styles.formInput}
+                          style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-main)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '0.6rem', width: '100%' }}
+                        >
+                          <option value="Unknown">Unknown</option>
+                          <option value="A+">A+</option>
+                          <option value="A-">A-</option>
+                          <option value="B+">B+</option>
+                          <option value="B-">B-</option>
+                          <option value="AB+">AB+</option>
+                          <option value="AB-">AB-</option>
+                          <option value="O+">O+</option>
+                          <option value="O-">O-</option>
+                        </select>
+                      </div>
+
+                      <div className={styles.formField}>
+                        <label className={styles.formLabel}>Emergency Contact Number</label>
+                        <input 
+                          type="text" 
+                          placeholder="Secondary or family phone number"
+                          value={editEmergencyContact}
+                          onChange={(e) => setEditEmergencyContact(e.target.value)}
+                          className={styles.formInput}
+                        />
+                      </div>
+
+                      <div className={styles.formField}>
+                        <label className={styles.formLabel}>Available for Blood Donation?</label>
+                        <select 
+                          value={editAvailableBloodDonation}
+                          onChange={(e) => setEditAvailableBloodDonation(e.target.value)}
+                          className={styles.formInput}
+                          style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-main)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '0.6rem', width: '100%' }}
+                        >
+                          <option value="Yes">Yes</option>
+                          <option value="No">No</option>
+                        </select>
+                      </div>
+
+                      <div className={styles.formField}>
+                        <label className={styles.formLabel}>Available for Platelet Donation?</label>
+                        <select 
+                          value={editAvailablePlateletDonation}
+                          onChange={(e) => setEditAvailablePlateletDonation(e.target.value)}
+                          className={styles.formInput}
+                          style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-main)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '0.6rem', width: '100%' }}
+                        >
+                          <option value="Yes">Yes</option>
+                          <option value="No">No</option>
+                        </select>
+                      </div>
+
+                      <div className={styles.formField} style={{ gridColumn: 'span 2' }}>
+                        <label className={styles.formLabel}>Last Donation Date</label>
+                        <input 
+                          type="date" 
+                          value={editLastDonationDate}
+                          onChange={(e) => setEditLastDonationDate(e.target.value)}
                           className={styles.formInput}
                         />
                       </div>
@@ -2490,6 +2884,1095 @@ export default function CandidateDashboard() {
                         </div>
                       </div>
                     )}
+                  </div>
+                )}
+
+                {/* G. OPPORTUNITY HUB TAB */}
+                {activeTab === 'opportunity-hub' && (
+                  <div className={`${styles.tabView} fade-in`}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', marginBottom: '2rem' }}>
+                      <div>
+                        <h2 style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          <Briefcase style={{ color: 'var(--primary-pale)' }} /> Opportunity Hub
+                        </h2>
+                        <span style={{ fontSize: '0.85rem', color: 'var(--accent)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Discover. Create. Connect.</span>
+                        <p style={{ marginTop: '0.5rem', color: 'var(--text-secondary)', fontSize: '0.875rem', maxWidth: '800px', lineHeight: 1.5 }}>
+                          Explore verified opportunities or share new ones with the community. Every listing is reviewed by the TSS Admin Team before publication to maintain quality and trust.
+                        </p>
+                      </div>
+                      
+                      {profile.status === 'Verified' ? (
+                        <button onClick={() => setShowPostOppModal(true)} className="btn btn-primary" style={{ borderRadius: '8px', padding: '0.65rem 1.25rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                          <Plus size={16} /> Post Opportunity
+                        </button>
+                      ) : (
+                        <button onClick={() => { setActiveTab('profile'); setProfileSubTab('details'); toast.error('Account verification is required to post. Complete your profile details first.'); }} className="btn btn-outline" style={{ borderRadius: '8px', padding: '0.65rem 1.25rem', borderColor: 'var(--accent)', color: 'var(--accent)', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                          <Lock size={16} /> Verification Required
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Stats overview cards */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.25rem', marginBottom: '2.5rem' }}>
+                      <div style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '12px', padding: '1.25rem', boxShadow: 'var(--shadow-sm)' }}>
+                        <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-secondary)', fontWeight: 700 }}>Applications Submitted</span>
+                        <strong style={{ display: 'block', fontSize: '1.85rem', color: 'var(--text-primary)', marginTop: '0.25rem' }}>{appliedJobs.length}</strong>
+                      </div>
+                      <div style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '12px', padding: '1.25rem', boxShadow: 'var(--shadow-sm)' }}>
+                        <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-secondary)', fontWeight: 700 }}>My Shared Listings</span>
+                        <strong style={{ display: 'block', fontSize: '1.85rem', color: 'var(--text-primary)', marginTop: '0.25rem' }}>{opportunities.filter(o => o.postedBy === profile.id).length}</strong>
+                      </div>
+                      <div style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '12px', padding: '1.25rem', boxShadow: 'var(--shadow-sm)' }}>
+                        <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-secondary)', fontWeight: 700 }}>Saved Bookmarks</span>
+                        <strong style={{ display: 'block', fontSize: '1.85rem', color: 'var(--text-primary)', marginTop: '0.25rem' }}>{savedOppIds.length}</strong>
+                      </div>
+                      <div style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '12px', padding: '1.25rem', boxShadow: 'var(--shadow-sm)' }}>
+                        <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-secondary)', fontWeight: 700 }}>Reputation / Level</span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.35rem' }}>
+                          <strong style={{ fontSize: '1.35rem', color: 'var(--text-primary)' }}>{profile.communityScore || 20}</strong>
+                          <span style={{ fontSize: '0.7rem', backgroundColor: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', padding: '0.15rem 0.5rem', borderRadius: '4px', fontWeight: 700 }}>{profile.level || 'Explorer'}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Filter categories tabs */}
+                    <div style={{ display: 'flex', gap: '0.5rem', borderBottom: '1px solid var(--border-color)', marginBottom: '1.5rem', paddingBottom: '0.75rem', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+                      {['All', 'Jobs', 'Internships', 'Freelance Gigs', 'Startup Projects', 'Co-Founder Search', 'Campus Ambassador', 'Volunteer', 'Hackathons', 'Events', 'Mentorship', 'Funding', 'Scholarships', 'My Posts', 'Saved'].map((cat) => (
+                        <button 
+                          key={cat}
+                          onClick={() => setOppFilterType(cat)}
+                          style={{
+                            padding: '0.45rem 1rem',
+                            borderRadius: '20px',
+                            background: oppFilterType === cat ? 'var(--primary-pale)' : 'none',
+                            color: oppFilterType === cat ? '#ffffff' : 'var(--text-secondary)',
+                            border: '1px solid ' + (oppFilterType === cat ? 'var(--primary-pale)' : 'var(--border-color)'),
+                            fontSize: '0.8rem',
+                            fontWeight: oppFilterType === cat ? 600 : 'normal',
+                            whiteSpace: 'nowrap',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s ease'
+                          }}
+                        >
+                          {cat}
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* Search & Filter dropdown inputs */}
+                    <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginBottom: '2rem' }}>
+                      <div style={{ position: 'relative', flex: 1, minWidth: '280px' }}>
+                        <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                        <input 
+                          type="text" 
+                          placeholder="Search title, organization, skills..." 
+                          value={oppSearch}
+                          onChange={(e) => setOppSearch(e.target.value)}
+                          className={styles.formInput}
+                          style={{ paddingLeft: '2.25rem', width: '100%' }}
+                        />
+                      </div>
+                      
+                      <select 
+                        value={oppFilterRemote} 
+                        onChange={(e) => setOppFilterRemote(e.target.value)}
+                        className={styles.formInput} 
+                        style={{ maxWidth: '140px', width: '100%', backgroundColor: 'var(--bg-card)', color: 'var(--text-main)', border: '1px solid var(--border-color)', borderRadius: '8px' }}
+                      >
+                        <option value="All">All Formats</option>
+                        <option value="Remote">Remote</option>
+                        <option value="Hybrid">Hybrid</option>
+                        <option value="Onsite">Onsite</option>
+                      </select>
+
+                      <select 
+                        value={oppSortBy} 
+                        onChange={(e) => setOppSortBy(e.target.value)}
+                        className={styles.formInput} 
+                        style={{ maxWidth: '150px', width: '100%', backgroundColor: 'var(--bg-card)', color: 'var(--text-main)', border: '1px solid var(--border-color)', borderRadius: '8px' }}
+                      >
+                        <option value="newest">Newest First</option>
+                        <option value="trust">Highest Trust</option>
+                        <option value="applied">Most Applications</option>
+                      </select>
+
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem', color: 'var(--text-secondary)', cursor: 'pointer', userSelect: 'none' }}>
+                        <input 
+                          type="checkbox" 
+                          checked={oppFilterVerifiedOnly} 
+                          onChange={(e) => setOppFilterVerifiedOnly(e.target.checked)} 
+                        />
+                        Verified Users Only
+                      </label>
+                    </div>
+
+                    {/* Opportunity list */}
+                    {(() => {
+                      let list = [...opportunities];
+
+                      // 1. Tab filters
+                      if (oppFilterType === 'My Posts') {
+                        list = list.filter(o => o.postedBy === profile.id);
+                      } else if (oppFilterType === 'Saved') {
+                        list = list.filter(o => savedOppIds.includes(o.id));
+                      } else if (oppFilterType !== 'All') {
+                        const typeMap: Record<string, string> = {
+                          'Jobs': 'Job', 'Internships': 'Internship', 'Freelance Gigs': 'Freelance Gig',
+                          'Startup Projects': 'Startup Project', 'Co-Founder Search': 'Co-Founder Search',
+                          'Campus Ambassador': 'Campus Ambassador', 'Volunteer': 'Volunteer',
+                          'Hackathons': 'Hackathon', 'Events': 'Event', 'Mentorship': 'Mentorship',
+                          'Funding': 'Funding', 'Scholarships': 'Scholarship'
+                        };
+                        const mappedType = typeMap[oppFilterType] || oppFilterType;
+                        list = list.filter(o => o.type === mappedType);
+                      }
+
+                      // Only show approved listings to general users unless viewing own draft/pending posts
+                      if (oppFilterType !== 'My Posts') {
+                        list = list.filter(o => o.status === 'Approved');
+                      }
+
+                      // 2. Keyword Filter
+                      if (oppSearch.trim()) {
+                        const kw = oppSearch.toLowerCase();
+                        list = list.filter(o => 
+                          o.title.toLowerCase().includes(kw) || 
+                          o.description.toLowerCase().includes(kw) || 
+                          o.organization.toLowerCase().includes(kw) || 
+                          o.skillsRequired?.some((sk: string) => sk.toLowerCase().includes(kw))
+                        );
+                      }
+
+                      // 3. format Filter
+                      if (oppFilterRemote !== 'All') {
+                        list = list.filter(o => o.remoteOption === oppFilterRemote);
+                      }
+
+                      // 4. Verified Only Filter
+                      if (oppFilterVerifiedOnly) {
+                        list = list.filter(o => o.trustScore && o.trustScore >= 50);
+                      }
+
+                      // 5. Sorting
+                      if (oppSortBy === 'newest') {
+                        list.sort((a, b) => new Date(b.postedDate).getTime() - new Date(a.postedDate).getTime());
+                      } else if (oppSortBy === 'trust') {
+                        list.sort((a, b) => (b.trustScore || 0) - (a.trustScore || 0));
+                      } else if (oppSortBy === 'applied') {
+                        list.sort((a, b) => (b.applicationsCount || 0) - (a.applicationsCount || 0));
+                      }
+
+                      if (list.length === 0) {
+                        return (
+                          <div style={{ textAlign: 'center', padding: '4rem 1.5rem', border: '1px dashed var(--border-color)', borderRadius: '12px', color: 'var(--text-secondary)' }}>
+                            No opportunities found. Change filters or post a new one.
+                          </div>
+                        );
+                      }
+
+                      // Render Cards
+                      return (
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1.5rem' }}>
+                          {list.map((opp) => (
+                            <div key={opp.id} style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '16px', padding: '1.5rem', display: 'flex', flexDirection: 'column', position: 'relative', boxShadow: 'var(--shadow-sm)', transition: 'all 0.2s ease' }}>
+                              
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                                <span style={{ fontSize: '10px', textTransform: 'uppercase', fontWeight: 800, padding: '0.2rem 0.5rem', borderRadius: '4px', backgroundColor: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6' }}>
+                                  {opp.type}
+                                </span>
+                                <span style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 500 }}>
+                                  {opp.remoteOption} ({opp.location})
+                                </span>
+                              </div>
+
+                              <h4 style={{ fontSize: '1.15rem', fontWeight: 700, margin: '0 0 0.25rem 0', color: 'var(--text-primary)' }}>{opp.title}</h4>
+                              <span style={{ fontSize: '0.85rem', color: 'var(--accent)', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '0.25rem', marginBottom: '0.75rem' }}>
+                                {opp.organization} 
+                                <CheckCircle2 size={12} style={{ color: 'var(--green-light)' }} />
+                              </span>
+
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.85rem', borderBottom: '1px solid rgba(255,255,255,0.03)', paddingBottom: '0.5rem' }}>
+                                <span>By: {opp.postedByName || 'TSS Member'}</span>
+                                <span style={{ width: '4px', height: '4px', backgroundColor: 'var(--border-color)', borderRadius: '50%' }}></span>
+                                <span>🛡️ Trust Score: {opp.trustScore || 20}</span>
+                              </div>
+
+                              <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.5, margin: '0 0 1rem 0', height: '2.9rem', overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
+                                {opp.description}
+                              </p>
+
+                              {opp.skillsRequired && opp.skillsRequired.length > 0 && (
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.3rem', marginBottom: '1.25rem' }}>
+                                  {opp.skillsRequired.slice(0, 3).map((sk: string, index: number) => (
+                                    <span key={index} style={{ fontSize: '9px', fontWeight: 700, padding: '0.15rem 0.4rem', borderRadius: '4px', backgroundColor: 'var(--bg-input)', color: 'var(--text-secondary)' }}>
+                                      {sk}
+                                    </span>
+                                  ))}
+                                  {opp.skillsRequired.length > 3 && (
+                                    <span style={{ fontSize: '9px', fontWeight: 700, padding: '0.15rem 0.4rem', color: 'var(--text-muted)' }}>
+                                      +{opp.skillsRequired.length - 3} more
+                                    </span>
+                                  )}
+                                </div>
+                              )}
+
+                              {oppFilterType === 'My Posts' && (
+                                <div style={{ marginBottom: '1rem', fontSize: '0.8rem' }}>
+                                  <span style={{
+                                    display: 'inline-block',
+                                    padding: '0.15rem 0.4rem',
+                                    borderRadius: '4px',
+                                    fontSize: '9px',
+                                    fontWeight: 700,
+                                    textTransform: 'uppercase',
+                                    backgroundColor: 
+                                      opp.status === 'Approved' ? 'rgba(5, 150, 105, 0.15)' :
+                                      opp.status === 'Rejected' ? 'rgba(220, 38, 38, 0.15)' : 'rgba(245, 158, 11, 0.15)',
+                                    color:
+                                      opp.status === 'Approved' ? 'var(--green-light)' :
+                                      opp.status === 'Rejected' ? '#ef4444' : 'var(--accent)'
+                                  }}>
+                                    {opp.status}
+                                  </span>
+                                  {opp.status === 'Rejected' && opp.rejectionReason && (
+                                    <p style={{ margin: '0.4rem 0 0 0', color: '#ef4444', fontStyle: 'italic', fontSize: '0.75rem' }}>
+                                      Feedback: {opp.rejectionReason}
+                                    </p>
+                                  )}
+                                </div>
+                              )}
+
+                              <div style={{ marginTop: 'auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.75rem', color: 'var(--text-muted)', borderTop: '1px solid rgba(255,255,255,0.03)', paddingTop: '0.75rem', marginBottom: '1rem' }}>
+                                <span>💰 {opp.salaryStipend}</span>
+                                <span>📅 Apply by: {opp.deadline}</span>
+                              </div>
+
+                              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                <button 
+                                  onClick={() => setSelectedOpp(opp)}
+                                  className="btn btn-outline btn-sm" 
+                                  style={{ flex: 1, padding: '0.45rem', fontSize: '0.75rem', borderRadius: '6px' }}
+                                >
+                                  Details
+                                </button>
+                                
+                                {opp.status === 'Approved' && (
+                                  <a 
+                                    href={opp.applyLink} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    onClick={() => {
+                                      setOpportunities(prev => prev.map(o => o.id === opp.id ? { ...o, applicationsCount: o.applicationsCount + 1 } : o));
+                                    }}
+                                    className="btn btn-primary btn-sm" 
+                                    style={{ flex: 1, padding: '0.45rem', fontSize: '0.75rem', borderRadius: '6px', textAlign: 'center', display: 'inline-block', color: '#ffffff' }}
+                                  >
+                                    Apply
+                                  </a>
+                                )}
+
+                                <button 
+                                  onClick={() => handleToggleSaveOpportunity(opp.id)}
+                                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0.45rem', border: '1px solid var(--border-color)', borderRadius: '6px', background: 'none', color: savedOppIds.includes(opp.id) ? 'var(--accent)' : 'var(--text-muted)', cursor: 'pointer' }}
+                                >
+                                  <Bookmark size={14} fill={savedOppIds.includes(opp.id) ? 'currentColor' : 'none'} />
+                                </button>
+
+                                <button 
+                                  onClick={() => {
+                                    navigator.clipboard.writeText(`${window.location.origin}/opportunities/${opp.id}`);
+                                    toast.success('Share link copied to clipboard!');
+                                  }}
+                                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0.45rem', border: '1px solid var(--border-color)', borderRadius: '6px', background: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}
+                                >
+                                  <Share2 size={14} />
+                                </button>
+                              </div>
+
+                            </div>
+                          ))}
+                        </div>
+                      );
+                    })()}
+                  </div>
+                )}
+
+                {/* H. EMERGENCY SUPPORT TAB */}
+                {activeTab === 'emergency-support' && (
+                  <div className={`${styles.tabView} fade-in`}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.5rem' }}>
+                      <div>
+                        <h2 style={{ fontSize: '1.8rem', fontWeight: 800, color: '#ef4444', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          <ShieldAlert /> Emergency Support
+                        </h2>
+                        <span style={{ fontSize: '0.85rem', color: '#ef4444', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Verified Emergency Requests for the Community</span>
+                        <p style={{ marginTop: '0.5rem', color: 'var(--text-secondary)', fontSize: '0.875rem', maxWidth: '800px', lineHeight: 1.5 }}>
+                          Help save lives by responding to verified emergency requests. Every request is manually verified by TSS administrators before publication.
+                        </p>
+                      </div>
+                      
+                      <button onClick={() => setShowPostEmModal(true)} className="btn btn-primary" style={{ borderRadius: '8px', padding: '0.65rem 1.25rem', backgroundColor: '#ef4444', borderColor: '#ef4444', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                        <Plus size={16} /> Create Emergency Request
+                      </button>
+                    </div>
+
+                    {/* Critical Warning Banner */}
+                    <div style={{ backgroundColor: 'rgba(220, 38, 38, 0.08)', border: '1px solid rgba(220, 38, 38, 0.25)', borderRadius: '12px', padding: '1.25rem', marginBottom: '2rem', display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
+                      <AlertOctagon size={24} style={{ color: '#ef4444', flexShrink: 0 }} />
+                      <div>
+                        <strong style={{ display: 'block', color: 'var(--text-primary)', fontSize: '0.9rem', marginBottom: '0.2rem' }}>Strict Medical Emergencies Only</strong>
+                        <span style={{ fontSize: '0.825rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>
+                          Fundraising, payments, donations, money requests, or financial requests of any type are strictly prohibited. Violators are permanently banned from the TSS ecosystem.
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Search & filters */}
+                    <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginBottom: '2rem' }}>
+                      <div style={{ position: 'relative', flex: 1, minWidth: '240px' }}>
+                        <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                        <input 
+                          type="text" 
+                          placeholder="Search patient, hospital, city or notes..." 
+                          value={emSearch}
+                          onChange={(e) => setEmSearch(e.target.value)}
+                          className={styles.formInput}
+                          style={{ paddingLeft: '2.25rem', width: '100%' }}
+                        />
+                      </div>
+
+                      <select 
+                        value={emFilterGroup} 
+                        onChange={(e) => setEmFilterGroup(e.target.value)}
+                        className={styles.formInput} 
+                        style={{ maxWidth: '160px', width: '100%', backgroundColor: 'var(--bg-card)', color: 'var(--text-main)', border: '1px solid var(--border-color)', borderRadius: '8px' }}
+                      >
+                        <option value="All">All Blood Groups</option>
+                        <option value="A+">A+</option>
+                        <option value="A-">A-</option>
+                        <option value="B+">B+</option>
+                        <option value="B-">B-</option>
+                        <option value="AB+">AB+</option>
+                        <option value="AB-">AB-</option>
+                        <option value="O+">O+</option>
+                        <option value="O-">O-</option>
+                        <option value="Unknown">Unknown</option>
+                      </select>
+                    </div>
+
+                    {/* Request Cards Grid */}
+                    {(() => {
+                      let list = emergencies.filter(e => e.status === 'Approved');
+
+                      if (emSearch.trim()) {
+                        const kw = emSearch.toLowerCase();
+                        list = list.filter(e => 
+                          e.patientName.toLowerCase().includes(kw) || 
+                          e.hospitalName.toLowerCase().includes(kw) || 
+                          e.city.toLowerCase().includes(kw) || 
+                          e.medicalNotes?.toLowerCase().includes(kw)
+                        );
+                      }
+
+                      if (emFilterGroup !== 'All') {
+                        list = list.filter(e => e.bloodGroup === emFilterGroup);
+                      }
+
+                      // Sort featured/urgent requests to the top
+                      list.sort((a, b) => (b.isFeatured ? 1 : 0) - (a.isFeatured ? 1 : 0));
+
+                      if (list.length === 0) {
+                        return (
+                          <div style={{ textAlign: 'center', padding: '4rem 1.5rem', border: '1px dashed var(--border-color)', borderRadius: '12px', color: 'var(--text-secondary)' }}>
+                            No active emergency support requests found. Click "Create Emergency Request" to post one.
+                          </div>
+                        );
+                      }
+
+                      return (
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '1.5rem' }}>
+                          {list.map((em) => (
+                            <div key={em.id} style={{ backgroundColor: 'var(--bg-card)', border: '1px solid ' + (em.isFeatured ? '#ef4444' : 'var(--border-color)'), borderRadius: '16px', padding: '1.5rem', display: 'flex', flexDirection: 'column', position: 'relative', boxShadow: em.isFeatured ? '0 4px 20px rgba(239, 68, 68, 0.08)' : 'var(--shadow-sm)', transition: 'all 0.2s ease' }}>
+                              
+                              {/* Pulsing URGENT pill */}
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                                <span className={em.isFeatured ? 'pulsing-urgent-badge' : ''} style={{ fontSize: '9px', fontWeight: 800, textTransform: 'uppercase', padding: '0.2rem 0.6rem', borderRadius: '4px', backgroundColor: 'rgba(239, 68, 68, 0.12)', color: '#ef4444', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+                                  <span style={{ width: '6px', height: '6px', backgroundColor: '#ef4444', borderRadius: '50%', display: 'inline-block' }}></span> URGENT REQUIREMENT
+                                </span>
+                                <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--green-light)', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+                                  🛡️ TSS VERIFIED
+                                </span>
+                              </div>
+
+                              <div style={{ display: 'flex', gap: '1.25rem', marginBottom: '1.25rem' }}>
+                                {/* Big Circle Blood Group Display */}
+                                <div style={{ width: '56px', height: '56px', borderRadius: '50%', backgroundColor: 'rgba(239, 68, 68, 0.1)', border: '2px solid #ef4444', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                  <strong style={{ fontSize: '1.25rem', color: '#ef4444', lineHeight: 1 }}>{em.bloodGroup}</strong>
+                                  <span style={{ fontSize: '8px', color: '#ef4444', fontWeight: 800 }}>GROUP</span>
+                                </div>
+                                
+                                <div>
+                                  <h4 style={{ fontSize: '1.15rem', fontWeight: 700, margin: '0 0 0.25rem 0', color: 'var(--text-primary)' }}>{em.type}</h4>
+                                  <span style={{ fontSize: '0.825rem', color: 'var(--text-secondary)', display: 'block' }}>Patient: <strong>{em.patientName}</strong></span>
+                                  <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Required: {em.unitsRequired} Units</span>
+                                </div>
+                              </div>
+
+                              <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'flex', flexDirection: 'column', gap: '0.35rem', marginBottom: '1rem', borderBottom: '1px solid rgba(255,255,255,0.03)', paddingBottom: '0.75rem' }}>
+                                <span>🏥 Hospital: {em.hospitalName}</span>
+                                <span>📍 Address: {em.hospitalAddress}, {em.city}</span>
+                                <span>⏰ Required before: <strong style={{ color: '#ef4444' }}>{em.requiredBefore}</strong></span>
+                              </div>
+
+                              <p style={{ fontSize: '0.825rem', color: 'var(--text-secondary)', lineHeight: 1.5, margin: '0 0 1.25rem 0', height: '3.0rem', overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', fontStyle: 'italic' }}>
+                                &ldquo;{em.medicalNotes || 'No medical notes provided.'}&rdquo;
+                              </p>
+
+                              {/* Action Row */}
+                              <div style={{ marginTop: 'auto', display: 'flex', gap: '0.5rem' }}>
+                                <a 
+                                  href={`tel:${em.phoneNumber}`} 
+                                  className="btn btn-outline btn-sm"
+                                  style={{ flex: 1, padding: '0.45rem', fontSize: '0.75rem', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.35rem' }}
+                                >
+                                  <Phone size={12} /> Call Contact
+                                </a>
+
+                                <button 
+                                  onClick={() => handleRegisterDonor(em.id)}
+                                  className="btn btn-primary btn-sm"
+                                  style={{ flex: 1.2, padding: '0.45rem', fontSize: '0.75rem', borderRadius: '6px', backgroundColor: em.potentialDonors?.includes(profile.id) ? 'var(--green-light)' : '#ef4444', borderColor: em.potentialDonors?.includes(profile.id) ? 'var(--green-light)' : '#ef4444', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.35rem' }}
+                                >
+                                  <Heart size={12} fill={em.potentialDonors?.includes(profile.id) ? '#ffffff' : 'none'} />
+                                  {em.potentialDonors?.includes(profile.id) ? 'Registered (Cancel)' : 'I Can Donate'}
+                                </button>
+                                
+                                <button 
+                                  onClick={() => {
+                                    navigator.clipboard.writeText(`URGENT BLOOD REQUIRED: ${em.bloodGroup} at ${em.hospitalName}, ${em.city}. Contact: ${em.contactPerson} (${em.phoneNumber}). Verified by TSS: ${window.location.origin}/status`);
+                                    toast.success('Emergency template copied to clipboard!');
+                                  }}
+                                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0.45rem', border: '1px solid var(--border-color)', borderRadius: '6px', background: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}
+                                  title="Share Emergency Details"
+                                >
+                                  <Share2 size={14} />
+                                </button>
+                              </div>
+
+                              {em.donorsCount && em.donorsCount > 0 ? (
+                                <div style={{ fontSize: '10px', color: 'var(--green-light)', fontWeight: 700, marginTop: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                                  <span>💚</span> {em.donorsCount} TSS Member(s) volunteered to donate.
+                                </div>
+                              ) : null}
+
+                            </div>
+                          ))}
+                        </div>
+                      );
+                    })()}
+                  </div>
+                )}
+
+                {/* I. NOTIFICATIONS TAB */}
+                {activeTab === 'notifications' && (
+                  <div className={`${styles.tabView} fade-in`}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+                      <div>
+                        <h2 style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--text-primary)' }}>System Notifications</h2>
+                        <p style={{ marginTop: '0.25rem', color: 'var(--text-secondary)', fontSize: '0.875rem' }}>Manage your incoming updates, alerts, and platform notifications.</p>
+                      </div>
+                      
+                      {dashboardNotifications.some(n => n.unread) && (
+                        <button 
+                          onClick={() => {
+                            setDashboardNotifications(prev => prev.map(n => ({ ...n, unread: false })));
+                            toast.success('All notifications marked as read.');
+                          }} 
+                          className="btn btn-outline btn-sm"
+                          style={{ borderRadius: '8px' }}
+                        >
+                          Mark all as read
+                        </button>
+                      )}
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                      {dashboardNotifications.map((nt) => (
+                        <div 
+                          key={nt.id} 
+                          onClick={() => {
+                            setDashboardNotifications(prev => prev.map(n => n.id === nt.id ? { ...n, unread: false } : n));
+                          }}
+                          style={{ 
+                            backgroundColor: nt.unread ? 'rgba(59, 130, 246, 0.04)' : 'var(--bg-card)', 
+                            border: '1px solid ' + (nt.unread ? 'rgba(59, 130, 246, 0.15)' : 'var(--border-color)'), 
+                            borderRadius: '12px', 
+                            padding: '1.25rem', 
+                            position: 'relative', 
+                            cursor: 'pointer',
+                            transition: 'all 0.2s ease'
+                          }}
+                        >
+                          {nt.unread && (
+                            <span style={{ position: 'absolute', left: '12px', top: '24px', width: '8px', height: '8px', backgroundColor: '#3b82f6', borderRadius: '50%' }}></span>
+                          )}
+                          <div style={{ paddingLeft: nt.unread ? '1rem' : 0 }}>
+                            <p style={{ margin: 0, fontSize: '0.9rem', fontWeight: nt.unread ? 600 : 'normal', color: 'var(--text-primary)' }}>{nt.text}</p>
+                            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block', marginTop: '0.35rem' }}>{nt.date}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* MODAL 1: OPPORTUNITY DETAILS OVERLAY */}
+                {selectedOpp && (
+                  <div style={{ position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', backgroundColor: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(5px)' }}>
+                    <div style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '18px', padding: '2rem', maxWidth: '620px', width: '100%', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,0.6)', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                        <div>
+                          <span style={{ fontSize: '10px', textTransform: 'uppercase', fontWeight: 800, padding: '0.15rem 0.5rem', borderRadius: '4px', backgroundColor: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', display: 'inline-block', marginBottom: '0.5rem' }}>
+                            {selectedOpp.type}
+                          </span>
+                          <h3 style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>{selectedOpp.title}</h3>
+                          <span style={{ fontSize: '0.9rem', color: 'var(--accent)', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '0.25rem', marginTop: '0.25rem' }}>
+                            {selectedOpp.organization} <CheckCircle2 size={12} style={{ color: 'var(--green-light)' }} />
+                          </span>
+                        </div>
+                        <button 
+                          onClick={() => setSelectedOpp(null)}
+                          style={{ border: 'none', background: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '0.25rem' }}
+                        >
+                          <X size={20} />
+                        </button>
+                      </div>
+
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem', padding: '1rem', backgroundColor: 'var(--bg-input)', borderRadius: '10px', fontSize: '0.85rem' }}>
+                        <div>📍 Format: <strong>{selectedOpp.remoteOption} ({selectedOpp.location})</strong></div>
+                        <div>💰 Compensation: <strong>{selectedOpp.salaryStipend}</strong></div>
+                        <div>⏰ Deadline: <strong>{selectedOpp.deadline}</strong></div>
+                        {selectedOpp.experienceRequired && <div>💼 Exp: <strong>{selectedOpp.experienceRequired}</strong></div>}
+                      </div>
+
+                      <div>
+                        <span style={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-muted)', display: 'block', marginBottom: '0.5rem' }}>Opportunity Description</span>
+                        <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', lineHeight: 1.6, margin: 0, whiteSpace: 'pre-wrap' }}>
+                          {selectedOpp.description}
+                        </p>
+                      </div>
+
+                      {selectedOpp.skillsRequired && selectedOpp.skillsRequired.length > 0 && (
+                        <div>
+                          <span style={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-muted)', display: 'block', marginBottom: '0.5rem' }}>Required Technical Skills</span>
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem' }}>
+                            {selectedOpp.skillsRequired.map((sk: string, i: number) => (
+                              <span key={i} style={{ fontSize: '10px', fontWeight: 700, padding: '0.2rem 0.5rem', borderRadius: '4px', backgroundColor: 'var(--bg-input)', color: 'var(--text-secondary)' }}>
+                                {sk}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Contact & Links */}
+                      <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '1rem', fontSize: '0.85rem', display: 'flex', flexDirection: 'column', gap: '0.4rem', color: 'var(--text-secondary)' }}>
+                        {selectedOpp.website && (
+                          <div>🌐 Website: <a href={selectedOpp.website} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary-pale)', textDecoration: 'underline' }}>{selectedOpp.website}</a></div>
+                        )}
+                        {selectedOpp.contactEmail && (
+                          <div>📧 Contact: <a href={`mailto:${selectedOpp.contactEmail}`} style={{ color: 'var(--primary-pale)' }}>{selectedOpp.contactEmail}</a></div>
+                        )}
+                        {selectedOpp.supportingLinks && (
+                          <div>🔗 Documents/Links: <a href={selectedOpp.supportingLinks} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary-pale)', textDecoration: 'underline' }}>{selectedOpp.supportingLinks}</a></div>
+                        )}
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.5rem' }}>
+                          Listing ID: <code>{selectedOpp.id}</code> | Posted on: {new Date(selectedOpp.postedDate).toLocaleDateString()}
+                        </div>
+                      </div>
+
+                      <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end', borderTop: '1px solid var(--border-color)', paddingTop: '1.25rem' }}>
+                        <button 
+                          onClick={() => handleToggleSaveOpportunity(selectedOpp.id)}
+                          className="btn btn-outline" 
+                          style={{ padding: '0.6rem 1.25rem', borderRadius: '8px', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}
+                        >
+                          <Bookmark size={14} fill={savedOppIds.includes(selectedOpp.id) ? 'currentColor' : 'none'} />
+                          {savedOppIds.includes(selectedOpp.id) ? 'Saved' : 'Bookmark'}
+                        </button>
+                        
+                        <a 
+                          href={selectedOpp.applyLink} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          onClick={() => {
+                            setOpportunities(prev => prev.map(o => o.id === selectedOpp.id ? { ...o, applicationsCount: o.applicationsCount + 1 } : o));
+                            setSelectedOpp(null);
+                          }}
+                          className="btn btn-primary" 
+                          style={{ padding: '0.6rem 1.75rem', borderRadius: '8px', fontSize: '0.85rem', display: 'inline-flex', alignItems: 'center', gap: '0.35rem', color: '#ffffff' }}
+                        >
+                          Apply Now <ExternalLink size={14} />
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* MODAL 2: POST OPPORTUNITY FORM OVERLAY */}
+                {showPostOppModal && (
+                  <div style={{ position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', backgroundColor: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(5px)' }}>
+                    <form 
+                      onSubmit={handlePostOpportunitySubmit}
+                      style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '18px', padding: '2rem', maxWidth: '660px', width: '100%', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,0.6)', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}
+                    >
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div>
+                          <h3 style={{ fontSize: '1.35rem', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>Post Verified Opportunity</h3>
+                          <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Share roles, projects, or initiatives with the spot community</span>
+                        </div>
+                        <button 
+                          type="button" 
+                          onClick={() => setShowPostOppModal(false)}
+                          style={{ border: 'none', background: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '0.25rem' }}
+                        >
+                          <X size={20} />
+                        </button>
+                      </div>
+
+                      <div className={styles.settingsGrid} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                        <div className={styles.formField}>
+                          <label className={styles.formLabel}>Opportunity Type *</label>
+                          <select 
+                            value={newOppType} 
+                            onChange={(e: any) => setNewOppType(e.target.value)}
+                            className={styles.formInput} 
+                            style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-main)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '0.6rem', width: '100%' }}
+                            required
+                          >
+                            <option value="Job">Job</option>
+                            <option value="Internship">Internship</option>
+                            <option value="Freelance Gig">Freelance Gig</option>
+                            <option value="Startup Project">Startup Project</option>
+                            <option value="Co-Founder Search">Co-Founder Search</option>
+                            <option value="Campus Ambassador">Campus Ambassador</option>
+                            <option value="Volunteer">Volunteer</option>
+                            <option value="Hackathon">Hackathon</option>
+                            <option value="Event">Event</option>
+                            <option value="Mentorship">Mentorship</option>
+                            <option value="Funding">Funding</option>
+                            <option value="Scholarship">Scholarship</option>
+                          </select>
+                        </div>
+
+                        <div className={styles.formField}>
+                          <label className={styles.formLabel}>Opportunity Title *</label>
+                          <input 
+                            type="text" 
+                            placeholder="e.g. Next.js Developer"
+                            value={newOppTitle}
+                            onChange={(e) => setNewOppTitle(e.target.value)}
+                            className={styles.formInput}
+                            required
+                          />
+                        </div>
+
+                        <div className={styles.formField} style={{ gridColumn: 'span 2' }}>
+                          <label className={styles.formLabel}>Full Description *</label>
+                          <textarea 
+                            placeholder="Detail out roles, responsibilities, context, qualifications, and project scopes..."
+                            value={newOppDesc}
+                            onChange={(e) => setNewOppDesc(e.target.value)}
+                            className={styles.formInput}
+                            rows={4}
+                            style={{ resize: 'vertical' }}
+                            required
+                          />
+                        </div>
+
+                        <div className={styles.formField}>
+                          <label className={styles.formLabel}>Organization Name *</label>
+                          <input 
+                            type="text" 
+                            placeholder="Company, Lab, or Project name"
+                            value={newOppOrg}
+                            onChange={(e) => setNewOppOrg(e.target.value)}
+                            className={styles.formInput}
+                            required
+                          />
+                        </div>
+
+                        <div className={styles.formField}>
+                          <label className={styles.formLabel}>Location City *</label>
+                          <input 
+                            type="text" 
+                            placeholder="e.g. Hyderabad, Remote"
+                            value={newOppLocation}
+                            onChange={(e) => setNewOppLocation(e.target.value)}
+                            className={styles.formInput}
+                            required
+                          />
+                        </div>
+
+                        <div className={styles.formField}>
+                          <label className={styles.formLabel}>Work format *</label>
+                          <select 
+                            value={newOppRemote} 
+                            onChange={(e: any) => setNewOppRemote(e.target.value)}
+                            className={styles.formInput} 
+                            style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-main)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '0.6rem', width: '100%' }}
+                            required
+                          >
+                            <option value="Onsite">Onsite</option>
+                            <option value="Remote">Remote</option>
+                            <option value="Hybrid">Hybrid</option>
+                          </select>
+                        </div>
+
+                        <div className={styles.formField}>
+                          <label className={styles.formLabel}>Salary / Stipend *</label>
+                          <input 
+                            type="text" 
+                            placeholder="e.g. ₹20,000/month or Equity"
+                            value={newOppSalary}
+                            onChange={(e) => setNewOppSalary(e.target.value)}
+                            className={styles.formInput}
+                            required
+                          />
+                        </div>
+
+                        <div className={styles.formField}>
+                          <label className={styles.formLabel}>Required Skills (Comma separated) *</label>
+                          <input 
+                            type="text" 
+                            placeholder="e.g. React, Node.js, Python"
+                            value={newOppSkills}
+                            onChange={(e) => setNewOppSkills(e.target.value)}
+                            className={styles.formInput}
+                            required
+                          />
+                        </div>
+
+                        <div className={styles.formField}>
+                          <label className={styles.formLabel}>Application Deadline *</label>
+                          <input 
+                            type="date" 
+                            value={newOppDeadline}
+                            onChange={(e) => setNewOppDeadline(e.target.value)}
+                            className={styles.formInput}
+                            required
+                          />
+                        </div>
+
+                        <div className={styles.formField} style={{ gridColumn: 'span 2' }}>
+                          <label className={styles.formLabel}>Application / Apply Link (External URL) *</label>
+                          <input 
+                            type="url" 
+                            placeholder="https://company.com/careers or Form link"
+                            value={newOppLink}
+                            onChange={(e) => setNewOppLink(e.target.value)}
+                            className={styles.formInput}
+                            required
+                          />
+                        </div>
+
+                        <div className={styles.formField}>
+                          <label className={styles.formLabel}>Website URL (Optional)</label>
+                          <input 
+                            type="url" 
+                            placeholder="https://company.com"
+                            value={newOppWebsite}
+                            onChange={(e) => setNewOppWebsite(e.target.value)}
+                            className={styles.formInput}
+                          />
+                        </div>
+
+                        <div className={styles.formField}>
+                          <label className={styles.formLabel}>Contact Person Email (Optional)</label>
+                          <input 
+                            type="email" 
+                            placeholder="hiring@company.com"
+                            value={newOppEmail}
+                            onChange={(e) => setNewOppEmail(e.target.value)}
+                            className={styles.formInput}
+                          />
+                        </div>
+
+                        <div className={styles.formField} style={{ gridColumn: 'span 2' }}>
+                          <label className={styles.formLabel}>Experience Required (Optional)</label>
+                          <input 
+                            type="text" 
+                            placeholder="e.g. Fresher, 1-2 years, No limit"
+                            value={newOppExperience}
+                            onChange={(e) => setNewOppExperience(e.target.value)}
+                            className={styles.formInput}
+                          />
+                        </div>
+
+                        <div className={styles.formField} style={{ gridColumn: 'span 2' }}>
+                          <label className={styles.formLabel}>Supporting links / PDF Docs (Optional)</label>
+                          <input 
+                            type="url" 
+                            placeholder="Google Drive link to JD sheet"
+                            value={newOppLinks}
+                            onChange={(e) => setNewOppLinks(e.target.value)}
+                            className={styles.formInput}
+                          />
+                        </div>
+
+                        <div style={{ gridColumn: 'span 2', display: 'flex', alignItems: 'flex-start', gap: '0.5rem', marginTop: '0.5rem' }}>
+                          <input 
+                            type="checkbox" 
+                            id="terms-check" 
+                            checked={newOppTerms} 
+                            onChange={(e) => setNewOppTerms(e.target.checked)} 
+                            style={{ marginTop: '0.2rem' }}
+                            required
+                          />
+                          <label htmlFor="terms-check" style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: 1.4, cursor: 'pointer' }}>
+                            I agree that this opportunity is authentic, verified, does not require candidate payment, and complies with TSS ecosystem quality standards.
+                          </label>
+                        </div>
+                      </div>
+
+                      <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end', borderTop: '1px solid var(--border-color)', paddingTop: '1.25rem' }}>
+                        <button 
+                          type="button" 
+                          onClick={() => setShowPostOppModal(false)}
+                          className="btn btn-outline" 
+                          style={{ padding: '0.55rem 1.25rem', borderRadius: '8px' }}
+                        >
+                          Cancel
+                        </button>
+                        <button 
+                          type="submit" 
+                          disabled={isSubmittingOpp}
+                          className="btn btn-primary" 
+                          style={{ padding: '0.55rem 1.75rem', borderRadius: '8px' }}
+                        >
+                          {isSubmittingOpp ? 'Submitting...' : 'Submit for Review'}
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                )}
+
+                {/* MODAL 3: POST EMERGENCY REQUEST OVERLAY */}
+                {showPostEmModal && (
+                  <div style={{ position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', backgroundColor: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(5px)' }}>
+                    <form 
+                      onSubmit={handlePostEmergencySubmit}
+                      style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '18px', padding: '2rem', maxWidth: '640px', width: '100%', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,0.6)', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}
+                    >
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div>
+                          <h3 style={{ fontSize: '1.35rem', fontWeight: 800, color: '#ef4444', margin: 0 }}>Create Medical Emergency Request</h3>
+                          <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Volunteers and matching blood donors will receive instant alerts.</span>
+                        </div>
+                        <button 
+                          type="button" 
+                          onClick={() => setShowPostEmModal(false)}
+                          style={{ border: 'none', background: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '0.25rem' }}
+                        >
+                          <X size={20} />
+                        </button>
+                      </div>
+
+                      {/* Warning */}
+                      <div style={{ backgroundColor: 'rgba(220, 38, 38, 0.08)', border: '1px solid rgba(220, 38, 38, 0.25)', borderRadius: '10px', padding: '1rem', fontSize: '0.75rem', color: '#ef4444', lineHeight: 1.4 }}>
+                        🚨 <strong>CRITICAL POLICY REMINDER</strong>: Absolutely no fundraising links, UPI IDs, money details, or payment requests are allowed. Requests containing financial claims will be rejected instantly and flagged.
+                      </div>
+
+                      <div className={styles.settingsGrid} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                        <div className={styles.formField}>
+                          <label className={styles.formLabel}>Emergency Type *</label>
+                          <select 
+                            value={newEmType} 
+                            onChange={(e: any) => setNewEmType(e.target.value)}
+                            className={styles.formInput} 
+                            style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-main)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '0.6rem', width: '100%' }}
+                            required
+                          >
+                            <option value="Blood Requirement">Blood Requirement</option>
+                            <option value="Platelet Requirement">Platelet Requirement</option>
+                            <option value="Rare Blood Group Requirement">Rare Blood Group Requirement</option>
+                            <option value="Emergency Blood Donor">Emergency Blood Donor</option>
+                            <option value="Medical Volunteer Request">Medical Volunteer Request</option>
+                          </select>
+                        </div>
+
+                        <div className={styles.formField}>
+                          <label className={styles.formLabel}>Patient Name *</label>
+                          <input 
+                            type="text" 
+                            placeholder="Full name of the patient"
+                            value={newEmPatientName}
+                            onChange={(e) => setNewEmPatientName(e.target.value)}
+                            className={styles.formInput}
+                            required
+                          />
+                        </div>
+
+                        <div className={styles.formField}>
+                          <label className={styles.formLabel}>Hospital Name *</label>
+                          <input 
+                            type="text" 
+                            placeholder="e.g. Apollo Hospital"
+                            value={newEmHospitalName}
+                            onChange={(e) => setNewEmHospitalName(e.target.value)}
+                            className={styles.formInput}
+                            required
+                          />
+                        </div>
+
+                        <div className={styles.formField}>
+                          <label className={styles.formLabel}>Hospital Address *</label>
+                          <input 
+                            type="text" 
+                            placeholder="e.g. Road No 2, Banjara Hills"
+                            value={newEmAddress}
+                            onChange={(e) => setNewEmAddress(e.target.value)}
+                            className={styles.formInput}
+                            required
+                          />
+                        </div>
+
+                        <div className={styles.formField}>
+                          <label className={styles.formLabel}>City *</label>
+                          <input 
+                            type="text" 
+                            placeholder="e.g. Hyderabad"
+                            value={newEmCity}
+                            onChange={(e) => setNewEmCity(e.target.value)}
+                            className={styles.formInput}
+                            required
+                          />
+                        </div>
+
+                        <div className={styles.formField}>
+                          <label className={styles.formLabel}>Blood Group Required *</label>
+                          <select 
+                            value={newEmBloodGroup} 
+                            onChange={(e: any) => setNewEmBloodGroup(e.target.value)}
+                            className={styles.formInput} 
+                            style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-main)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '0.6rem', width: '100%' }}
+                            required
+                          >
+                            <option value="A+">A+</option>
+                            <option value="A-">A-</option>
+                            <option value="B+">B+</option>
+                            <option value="B-">B-</option>
+                            <option value="AB+">AB+</option>
+                            <option value="AB-">AB-</option>
+                            <option value="O+">O+</option>
+                            <option value="O-">O-</option>
+                            <option value="Unknown">Unknown</option>
+                          </select>
+                        </div>
+
+                        <div className={styles.formField}>
+                          <label className={styles.formLabel}>Units Required *</label>
+                          <input 
+                            type="number" 
+                            min={1}
+                            value={newEmUnits}
+                            onChange={(e) => setNewEmUnits(Number(e.target.value))}
+                            className={styles.formInput}
+                            required
+                          />
+                        </div>
+
+                        <div className={styles.formField}>
+                          <label className={styles.formLabel}>Required Before Date *</label>
+                          <input 
+                            type="date" 
+                            value={newEmBefore}
+                            onChange={(e) => setNewEmBefore(e.target.value)}
+                            className={styles.formInput}
+                            required
+                          />
+                        </div>
+
+                        <div className={styles.formField}>
+                          <label className={styles.formLabel}>Contact Person *</label>
+                          <input 
+                            type="text" 
+                            placeholder="Name of family contact member"
+                            value={newEmContactPerson}
+                            onChange={(e) => setNewEmContactPerson(e.target.value)}
+                            className={styles.formInput}
+                            required
+                          />
+                        </div>
+
+                        <div className={styles.formField}>
+                          <label className={styles.formLabel}>Contact Phone Number *</label>
+                          <input 
+                            type="tel" 
+                            placeholder="e.g. 9876543210"
+                            value={newEmPhone}
+                            onChange={(e) => setNewEmPhone(e.target.value)}
+                            className={styles.formInput}
+                            required
+                          />
+                        </div>
+
+                        <div className={styles.formField} style={{ gridColumn: 'span 2' }}>
+                          <label className={styles.formLabel}>Hospital Medical Proof / ID / case sheet (Link / text description) *</label>
+                          <input 
+                            type="text" 
+                            placeholder="Drive link to case sheet, or Patient ID card details to verify authenticity"
+                            value={newEmProof}
+                            onChange={(e) => setNewEmProof(e.target.value)}
+                            className={styles.formInput}
+                            required
+                          />
+                        </div>
+
+                        <div className={styles.formField} style={{ gridColumn: 'span 2' }}>
+                          <label className={styles.formLabel}>Emergency Medical Notes *</label>
+                          <textarea 
+                            placeholder="Undergoing surgery, accident case, critical platelet count drops, etc..."
+                            value={newEmNotes}
+                            onChange={(e) => setNewEmNotes(e.target.value)}
+                            className={styles.formInput}
+                            rows={3}
+                            style={{ resize: 'vertical' }}
+                            required
+                          />
+                        </div>
+
+                        <div className={styles.formField} style={{ gridColumn: 'span 2' }}>
+                          <label className={styles.formLabel}>Additional Information / Instructions (Optional)</label>
+                          <input 
+                            type="text" 
+                            placeholder="e.g. Attenders should report at block 3, 2nd floor ICU"
+                            value={newEmInfo}
+                            onChange={(e) => setNewEmInfo(e.target.value)}
+                            className={styles.formInput}
+                          />
+                        </div>
+                      </div>
+
+                      <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end', borderTop: '1px solid var(--border-color)', paddingTop: '1.25rem' }}>
+                        <button 
+                          type="button" 
+                          onClick={() => setShowPostEmModal(false)}
+                          className="btn btn-outline" 
+                          style={{ padding: '0.55rem 1.25rem', borderRadius: '8px' }}
+                        >
+                          Cancel
+                        </button>
+                        <button 
+                          type="submit" 
+                          disabled={isSubmittingEm}
+                          className="btn btn-primary" 
+                          style={{ padding: '0.55rem 1.75rem', borderRadius: '8px', backgroundColor: '#ef4444', borderColor: '#ef4444' }}
+                        >
+                          {isSubmittingEm ? 'Submitting...' : 'Submit Verification'}
+                        </button>
+                      </div>
+                    </form>
                   </div>
                 )}
 
