@@ -132,7 +132,7 @@ export async function POST(request: Request) {
     }
 
   } catch (error) {
-    console.error('Candidate profile update error:', error);
+    console.error('Candidate profile update error:', error instanceof Error ? error.stack : error);
     return NextResponse.json({ success: false, error: 'Internal server error.' }, { status: 500 });
   }
 }

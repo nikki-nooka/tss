@@ -402,14 +402,26 @@ export async function updateCandidate(id: string, updates: Partial<Candidate>): 
     ...updates,
     roleDetails
   };
-  
-  delete (dbUpdates as any).username;
-  delete (dbUpdates as any).communityScore;
-  delete (dbUpdates as any).level;
-  delete (dbUpdates as any).memberSince;
-  delete (dbUpdates as any).loginDays;
-  delete (dbUpdates as any).streak;
-  delete (dbUpdates as any).lastCheckinDate;
+
+  // Map resumeLink to resumePath column
+  if ((updates as any).resumeLink !== undefined) {
+    (dbUpdates as any).resumePath = (updates as any).resumeLink;
+  }
+
+  // Whitelist candidates table columns to prevent Supabase query failure on non-column updates
+  const allowedColumns = [
+    'id', 'role', 'fullName', 'gender', 'dob', 'mobile', 'email', 'city', 'state', 'country',
+    'highestQualification', 'currentStatus', 'college', 'graduationYear', 'currentRole',
+    'preferredRoles', 'skills', 'experienceLevel', 'resumePath', 'resumeName',
+    'photoPath', 'photoName', 'roleDetails', 'linkedin', 'github', 'portfolio',
+    'instagram', 'xTwitter', 'status', 'memberId', 'registrationDate', 'notes'
+  ];
+
+  Object.keys(dbUpdates).forEach(key => {
+    if (!allowedColumns.includes(key)) {
+      delete (dbUpdates as any)[key];
+    }
+  });
 
   const { error } = await supabase
     .from('candidates')
