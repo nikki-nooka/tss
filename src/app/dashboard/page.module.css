@@ -1086,6 +1086,7 @@
 @media (max-width: 1024px) {
   .dashboardLayout {
     grid-template-columns: 1fr;
+    gap: 1.25rem;
   }
   
   .studioGrid {
@@ -1094,6 +1095,49 @@
   
   .previewPanel {
     position: static;
+  }
+
+  .sidebar {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem;
+    gap: 0.5rem;
+  }
+
+  .sidebarBrand {
+    margin-bottom: 0;
+    font-size: 0.9rem;
+  }
+
+  .logoutBtn {
+    margin-top: 0 !important;
+    padding: 0.4rem 0.85rem;
+    font-size: 0.8rem;
+    flex-shrink: 0;
+  }
+
+  .sidebarMenu {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    width: 100%;
+    gap: 0.4rem;
+    padding-bottom: 0.4rem;
+    scrollbar-width: thin;
+    -webkit-overflow-scrolling: touch;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    padding-top: 0.75rem;
+    margin-top: 0.25rem;
+  }
+
+  .sidebarItem {
+    flex-shrink: 0;
+    white-space: nowrap;
+    padding: 0.45rem 0.8rem;
+    font-size: 0.8rem;
   }
 }
 
@@ -1331,3 +1375,18 @@
   opacity: 0.5;
 }
 
+
+
+/* Split Grid for Dashboard Home */
+.dashboardSplit {
+  display: grid;
+  grid-template-columns: 1.8fr 1.2fr;
+  gap: 2rem;
+}
+
+@media (max-width: 1024px) {
+  .dashboardSplit {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+}

@@ -3704,7 +3704,7 @@ export default function CandidateDashboard() {
                         </button>
                       </div>
 
-                      <div className={styles.settingsGrid} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                      <div className={styles.settingsGrid}>
                         <div className={styles.formField}>
                           <label className={styles.formLabel}>Opportunity Type *</label>
                           <select 
@@ -3948,7 +3948,7 @@ export default function CandidateDashboard() {
                         🚨 <strong>CRITICAL POLICY REMINDER</strong>: Absolutely no fundraising links, UPI IDs, money details, or payment requests are allowed. Requests containing financial claims will be rejected instantly and flagged.
                       </div>
 
-                      <div className={styles.settingsGrid} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                      <div className={styles.settingsGrid}>
                         <div className={styles.formField}>
                           <label className={styles.formLabel}>Emergency Type *</label>
                           <select 
@@ -4185,7 +4185,7 @@ export default function CandidateDashboard() {
                       </div>
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1.8fr 1.2fr', gap: '2rem', flexWrap: 'wrap' }}>
+                    <div className={styles.dashboardSplit}>
                       {/* Left: Quick Actions */}
                       <div>
                         <h4 style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '1.25rem' }}>Ecosystem Quick Actions</h4>
