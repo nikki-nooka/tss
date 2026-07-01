@@ -323,9 +323,11 @@ export default function AdminDashboard() {
 
   const handleUpdateStatus = async (
     action: 'approve' | 'reject' | 'review' | 'request_changes' | 'suspend' | 'delete' | 'allow_early_reapply',
-    customReasons?: string[]
+    customReasons?: string[],
+    overrideCandidateId?: string
   ) => {
-    if (!selectedCandidate) return;
+    const targetId = overrideCandidateId || selectedCandidate?.id;
+    if (!targetId) return;
 
     if (action === 'delete') {
       const confirmDelete = window.confirm(
@@ -339,7 +341,7 @@ export default function AdminDashboard() {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          candidateId: selectedCandidate.id,
+          candidateId: targetId,
           action,
           notes: adminNotes,
           reasons: customReasons || selectedRejectionReasons,
@@ -351,10 +353,10 @@ export default function AdminDashboard() {
       if (res.ok && data.success) {
         if (action === 'delete') {
           toast.success('Candidate profile deleted permanently.');
-          setSelectedCandidate(null);
+          if (selectedCandidate?.id === targetId) setSelectedCandidate(null);
         } else {
           toast.success(`Candidate status updated successfully.`);
-          setSelectedCandidate(data.candidate);
+          if (selectedCandidate?.id === targetId) setSelectedCandidate(data.candidate);
           // Automatically switch roster tab to match new candidate status
           if (action === 'approve') setVerificationStatusTab('Verified');
           else if (action === 'reject') setVerificationStatusTab('Rejected');
@@ -941,7 +943,18 @@ export default function AdminDashboard() {
                             <strong style={{ color: 'var(--text-primary)', fontSize: '0.85rem' }}>{c.fullName}</strong>
                             <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>{c.role}</span>
                           </div>
-                          <span style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>{c.email} | registered: {new Date(c.registrationDate || Date.now()).toLocaleDateString()}</span>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.25rem' }}>
+                            <span style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)' }}>{c.email} | registered: {new Date(c.registrationDate || Date.now()).toLocaleDateString()}</span>
+                            {c.status !== 'Verified' && (
+                              <button 
+                                onClick={(e) => { e.stopPropagation(); handleUpdateStatus('approve', undefined, c.id); }}
+                                className="btn btn-primary btn-xs"
+                                style={{ backgroundColor: 'var(--green-light)', borderColor: 'var(--green-light)', color: '#ffffff', padding: '0.2rem 0.5rem', fontSize: '0.7rem', borderRadius: '4px' }}
+                              >
+                                Approve
+                              </button>
+                            )}
+                          </div>
                         </div>
                       ))}
                     {candidates.filter(c => c.status === verificationStatusTab).length === 0 && (
