@@ -667,7 +667,7 @@ export default function AdminDashboard() {
                 </div>
                 <div style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '12px', padding: '1.25rem' }}>
                   <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-secondary)', fontWeight: 700 }}>Verified Members</span>
-                  <strong style={{ display: 'block', fontSize: '1.65rem', color: 'var(--green-light)', marginTop: '0.25rem' }}>{candidates.filter(c => c.status === 'Verified').length}</strong>
+                  <strong style={{ display: 'block', fontSize: '1.65rem', color: '#10b981', marginTop: '0.25rem' }}>{candidates.filter(c => c.status === 'Verified').length}</strong>
                 </div>
                 <div style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '12px', padding: '1.25rem' }}>
                   <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-secondary)', fontWeight: 700 }}>Pending Verification</span>
@@ -728,7 +728,7 @@ export default function AdminDashboard() {
                             <td style={{ padding: '0.5rem' }}>{c.role}</td>
                             <td style={{ padding: '0.5rem' }}>{new Date(c.registrationDate || Date.now()).toLocaleDateString()}</td>
                             <td style={{ padding: '0.5rem' }}>
-                              <span style={{ fontSize: '9px', fontWeight: 700, padding: '0.15rem 0.35rem', borderRadius: '4px', backgroundColor: c.status === 'Verified' ? 'rgba(5, 150, 105, 0.1)' : 'rgba(245, 158, 11, 0.1)', color: c.status === 'Verified' ? 'var(--green-light)' : 'var(--accent)' }}>{c.status}</span>
+                              <span style={{ fontSize: '9px', fontWeight: 700, padding: '0.15rem 0.35rem', borderRadius: '4px', backgroundColor: c.status === 'Verified' ? 'rgba(5, 150, 105, 0.1)' : 'rgba(245, 158, 11, 0.1)', color: c.status === 'Verified' ? '#10b981' : 'var(--accent)' }}>{c.status}</span>
                             </td>
                           </tr>
                         ))}
@@ -763,19 +763,19 @@ export default function AdminDashboard() {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', fontSize: '0.8rem' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                         <span>Database Server</span>
-                        <strong style={{ color: 'var(--green-light)' }}>ACTIVE</strong>
+                        <strong style={{ color: '#10b981' }}>ACTIVE</strong>
                       </div>
                       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                         <span>OTP Verification Services</span>
-                        <strong style={{ color: 'var(--green-light)' }}>OPERATIONAL</strong>
+                        <strong style={{ color: '#10b981' }}>OPERATIONAL</strong>
                       </div>
                       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                         <span>Member ID Generator</span>
-                        <strong style={{ color: 'var(--green-light)' }}>ONLINE</strong>
+                        <strong style={{ color: '#10b981' }}>ONLINE</strong>
                       </div>
                       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                         <span>Auto-audit Logger</span>
-                        <strong style={{ color: 'var(--green-light)' }}>ACTIVE</strong>
+                        <strong style={{ color: '#10b981' }}>ACTIVE</strong>
                       </div>
                     </div>
                   </div>
@@ -870,7 +870,7 @@ export default function AdminDashboard() {
                           <td style={{ padding: '0.75rem', fontFamily: 'monospace' }}>{c.memberId || 'Pending'}</td>
                           <td style={{ padding: '0.75rem' }}>{c.role}</td>
                           <td style={{ padding: '0.75rem' }}>
-                            <span style={{ fontSize: '9px', fontWeight: 700, padding: '0.15rem 0.4rem', borderRadius: '4px', backgroundColor: c.status === 'Verified' ? 'rgba(5, 150, 105, 0.1)' : 'rgba(245, 158, 11, 0.1)', color: c.status === 'Verified' ? 'var(--green-light)' : 'var(--accent)' }}>{c.status}</span>
+                            <span style={{ fontSize: '9px', fontWeight: 700, padding: '0.15rem 0.4rem', borderRadius: '4px', backgroundColor: c.status === 'Verified' ? 'rgba(5, 150, 105, 0.1)' : 'rgba(245, 158, 11, 0.1)', color: c.status === 'Verified' ? '#10b981' : 'var(--accent)' }}>{c.status}</span>
                           </td>
                           <td style={{ padding: '0.75rem' }}>
                             <div>{c.email}</div>
@@ -949,7 +949,7 @@ export default function AdminDashboard() {
                               <button 
                                 onClick={(e) => { e.stopPropagation(); handleUpdateStatus('approve', undefined, c.id); }}
                                 className="btn btn-primary btn-xs"
-                                style={{ backgroundColor: 'var(--green-light)', borderColor: 'var(--green-light)', color: '#ffffff', padding: '0.2rem 0.5rem', fontSize: '0.7rem', borderRadius: '4px' }}
+                                style={{ backgroundColor: '#10b981', borderColor: '#10b981', color: '#ffffff', padding: '0.2rem 0.5rem', fontSize: '0.7rem', borderRadius: '4px' }}
                               >
                                 Approve
                               </button>
@@ -983,7 +983,7 @@ export default function AdminDashboard() {
                             padding: '0.25rem 0.6rem', 
                             borderRadius: '20px', 
                             backgroundColor: selectedCandidate.status === 'Verified' ? 'rgba(5, 150, 105, 0.12)' : selectedCandidate.status === 'Under Review' ? 'rgba(245, 158, 11, 0.12)' : 'rgba(220, 38, 38, 0.12)', 
-                            color: selectedCandidate.status === 'Verified' ? 'var(--green-light)' : selectedCandidate.status === 'Under Review' ? 'var(--accent)' : '#ef4444' 
+                            color: selectedCandidate.status === 'Verified' ? '#10b981' : selectedCandidate.status === 'Under Review' ? 'var(--accent)' : '#ef4444' 
                           }}>
                             {selectedCandidate.status}
                           </span>
@@ -1010,7 +1010,7 @@ export default function AdminDashboard() {
                                   <strong style={{ color: 'var(--text-secondary)', textTransform: 'capitalize' }}>{key}</strong>
                                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', marginTop: '0.2rem' }}>
                                     <div style={{ textDecoration: 'line-through', color: 'var(--text-muted)', fontSize: '0.75rem' }}>Was: {String(oldVal || 'None')}</div>
-                                    <div style={{ color: 'var(--green-light)', fontWeight: 600, fontSize: '0.75rem' }}>Proposed: {renderedNew}</div>
+                                    <div style={{ color: '#10b981', fontWeight: 600, fontSize: '0.75rem' }}>Proposed: {renderedNew}</div>
                                   </div>
                                 </div>
                               );
@@ -1117,7 +1117,7 @@ export default function AdminDashboard() {
                               <button 
                                 onClick={() => handleUpdateStatus('approve')} 
                                 className="btn btn-primary" 
-                                style={{ flex: 1, backgroundColor: 'var(--green-light)', borderColor: 'var(--green-light)', color: '#ffffff', fontWeight: 700, padding: '0.6rem 1.2rem', borderRadius: '8px' }}
+                                style={{ flex: 1, backgroundColor: '#10b981', borderColor: '#10b981', color: '#ffffff', fontWeight: 700, padding: '0.6rem 1.2rem', borderRadius: '8px' }}
                               >
                                 Approve & Merge Draft Updates
                               </button>
@@ -1141,7 +1141,7 @@ export default function AdminDashboard() {
                               <button 
                                 onClick={() => handleUpdateStatus('approve')} 
                                 className="btn btn-primary" 
-                                style={{ flex: 1, backgroundColor: 'var(--green-light)', borderColor: 'var(--green-light)', color: '#ffffff', fontWeight: 700, padding: '0.6rem 1.2rem', borderRadius: '8px' }}
+                                style={{ flex: 1, backgroundColor: '#10b981', borderColor: '#10b981', color: '#ffffff', fontWeight: 700, padding: '0.6rem 1.2rem', borderRadius: '8px' }}
                               >
                                 Approve & Issue Member ID
                               </button>
@@ -1211,13 +1211,13 @@ export default function AdminDashboard() {
                           <td style={{ padding: '0.75rem' }}>{opp.location} ({opp.remoteOption})</td>
                           <td style={{ padding: '0.75rem' }}>{opp.salaryStipend || 'N/A'}</td>
                           <td style={{ padding: '0.75rem' }}>
-                            <span style={{ fontSize: '9px', fontWeight: 700, padding: '0.15rem 0.4rem', borderRadius: '4px', backgroundColor: opp.status === 'Approved' ? 'rgba(5, 150, 105, 0.15)' : opp.status === 'Rejected' ? 'rgba(220, 38, 38, 0.15)' : 'rgba(245, 158, 11, 0.15)', color: opp.status === 'Approved' ? 'var(--green-light)' : opp.status === 'Rejected' ? '#ef4444' : 'var(--accent)' }}>{opp.status}</span>
+                            <span style={{ fontSize: '9px', fontWeight: 700, padding: '0.15rem 0.4rem', borderRadius: '4px', backgroundColor: opp.status === 'Approved' ? 'rgba(5, 150, 105, 0.15)' : opp.status === 'Rejected' ? 'rgba(220, 38, 38, 0.15)' : 'rgba(245, 158, 11, 0.15)', color: opp.status === 'Approved' ? '#10b981' : opp.status === 'Rejected' ? '#ef4444' : 'var(--accent)' }}>{opp.status}</span>
                           </td>
                           <td style={{ padding: '0.75rem', textAlign: 'right' }}>
                             <div style={{ display: 'inline-flex', gap: '0.35rem' }}>
                               <button onClick={() => setSelectedOpp(opp)} className="btn btn-light btn-xs">Notes</button>
                               {opp.status !== 'Approved' && (
-                                <button onClick={() => handleModerateOpportunity(opp.id, 'approve')} className="btn btn-primary btn-xs" style={{ backgroundColor: 'var(--green-light)', borderColor: 'var(--green-light)', color: '#ffffff' }}>Approve</button>
+                                <button onClick={() => handleModerateOpportunity(opp.id, 'approve')} className="btn btn-primary btn-xs" style={{ backgroundColor: '#10b981', borderColor: '#10b981', color: '#ffffff' }}>Approve</button>
                               )}
                               {opp.status !== 'Rejected' && (
                                 <button onClick={() => setOppRejectionTargetId(opp.id)} className="btn btn-outline btn-xs" style={{ color: '#ef4444', borderColor: 'rgba(239, 68, 68, 0.2)' }}>Reject</button>
@@ -1367,13 +1367,13 @@ export default function AdminDashboard() {
                             <a href={em.proofUrl} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary-pale)', textDecoration: 'underline' }}>View Case Sheet</a>
                           </td>
                           <td style={{ padding: '0.75rem' }}>
-                            <span style={{ fontSize: '9px', fontWeight: 700, padding: '0.15rem 0.4rem', borderRadius: '4px', backgroundColor: em.status === 'Approved' ? 'rgba(5, 150, 105, 0.15)' : em.status === 'Rejected' ? 'rgba(220, 38, 38, 0.15)' : 'rgba(245, 158, 11, 0.15)', color: em.status === 'Approved' ? 'var(--green-light)' : em.status === 'Rejected' ? '#ef4444' : 'var(--accent)' }}>{em.status}</span>
+                            <span style={{ fontSize: '9px', fontWeight: 700, padding: '0.15rem 0.4rem', borderRadius: '4px', backgroundColor: em.status === 'Approved' ? 'rgba(5, 150, 105, 0.15)' : em.status === 'Rejected' ? 'rgba(220, 38, 38, 0.15)' : 'rgba(245, 158, 11, 0.15)', color: em.status === 'Approved' ? '#10b981' : em.status === 'Rejected' ? '#ef4444' : 'var(--accent)' }}>{em.status}</span>
                           </td>
                           <td style={{ padding: '0.75rem', textAlign: 'right' }}>
                             <div style={{ display: 'inline-flex', gap: '0.35rem' }}>
                               <button onClick={() => setSelectedEm(em)} className="btn btn-light btn-xs">Notes</button>
                               {em.status !== 'Approved' && (
-                                <button onClick={() => handleModerateEmergency(em.id, 'approve')} className="btn btn-primary btn-xs" style={{ backgroundColor: 'var(--green-light)', borderColor: 'var(--green-light)', color: '#ffffff' }}>Approve</button>
+                                <button onClick={() => handleModerateEmergency(em.id, 'approve')} className="btn btn-primary btn-xs" style={{ backgroundColor: '#10b981', borderColor: '#10b981', color: '#ffffff' }}>Approve</button>
                               )}
                               {em.status !== 'Rejected' && (
                                 <button onClick={() => setEmRejectionTargetId(em.id)} className="btn btn-outline btn-xs" style={{ color: '#ef4444', borderColor: 'rgba(239, 68, 68, 0.2)' }}>Reject</button>
@@ -1406,7 +1406,7 @@ export default function AdminDashboard() {
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', fontSize: '0.8rem' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                       <span>Current Cycle Status</span>
-                      <strong style={{ color: 'var(--green-light)' }}>WEEK 3 REVIEW</strong>
+                      <strong style={{ color: '#10b981' }}>WEEK 3 REVIEW</strong>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                       <span>Kickoff Meet Url</span>
