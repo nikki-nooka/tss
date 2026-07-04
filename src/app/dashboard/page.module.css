@@ -251,6 +251,7 @@
   padding: 2rem;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.02);
   text-align: left;
+  min-width: 0;
 }
 
 .tabView h2 {
