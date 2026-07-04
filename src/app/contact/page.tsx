@@ -132,7 +132,7 @@ export default function Contact() {
                   <Mail className={styles.infoIcon} size={20} />
                   <div>
                     <h4>Email Address</h4>
-                    <p>support@thestudentspot.com</p>
+                    <p>contact.thestudentspot@gmail.com</p>
                   </div>
                 </div>
 
@@ -148,7 +148,7 @@ export default function Contact() {
                   <MapPin className={styles.infoIcon} size={20} />
                   <div>
                     <h4>Office</h4>
-                    <p>Vetted Hub, T-Hub Phase 2, Madhapur, Hyderabad, India</p>
+                    <p>Hyderabad, Telangana</p>
                   </div>
                 </div>
               </div>

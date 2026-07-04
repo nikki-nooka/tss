@@ -130,9 +130,6 @@ export const Footer: React.FC = () => {
           <span className={styles.copyright}>
             © {currentYear} The Student Spot. All rights reserved.
           </span>
-          <span className={styles.disclaimer}>
-            Never pay to get a job. Genuine jobs are always free.
-          </span>
         </div>
       </div>
     </footer>
