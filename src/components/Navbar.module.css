@@ -196,6 +196,11 @@
   .mobileToggle:active {
     transform: scale(0.9);
   }
+
+  .getVerifiedBtn {
+    width: 100%;
+    justify-content: center;
+  }
 }
 
 .getVerifiedBtn {

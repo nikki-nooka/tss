@@ -646,6 +646,10 @@
 }
 
 @media (max-width: 768px) {
+  .container {
+    padding: 0 2.75rem;
+  }
+
   .pageHeader {
     padding: 3rem 0 2rem;
   }

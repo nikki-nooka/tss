@@ -688,6 +688,10 @@
 }
 
 @media (max-width: 768px) {
+  .container {
+    padding: 0 2.75rem;
+  }
+
   .statsGrid {
     grid-template-columns: repeat(2, 1fr);
   }
