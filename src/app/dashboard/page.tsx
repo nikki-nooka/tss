@@ -4373,10 +4373,10 @@ export default function CandidateDashboard() {
                         <div>
                           <h4 style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '1rem' }}>Ecosystem Quick Links</h4>
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                            <a href="https://chat.whatsapp.com/tss" target="_blank" rel="noreferrer" style={{ display: 'block', padding: '0.6rem 1rem', backgroundColor: 'rgba(5, 150, 105, 0.08)', border: '1px solid rgba(5, 150, 105, 0.2)', color: 'var(--green-light)', borderRadius: '8px', fontSize: '0.825rem', fontWeight: 600, textDecoration: 'none' }}>
+                            <a href="https://chat.whatsapp.com/LxA5xaAdlKp3nvZmIGxLcp" target="_blank" rel="noreferrer" style={{ display: 'block', padding: '0.6rem 1rem', backgroundColor: 'rgba(5, 150, 105, 0.08)', border: '1px solid rgba(5, 150, 105, 0.2)', color: 'var(--green-light)', borderRadius: '8px', fontSize: '0.825rem', fontWeight: 600, textDecoration: 'none' }}>
                               💚 WhatsApp Lounge Invitation
                             </a>
-                            <a href="https://t.me/tss" target="_blank" rel="noreferrer" style={{ display: 'block', padding: '0.6rem 1rem', backgroundColor: 'rgba(59, 130, 246, 0.08)', border: '1px solid rgba(59, 130, 246, 0.2)', color: '#3b82f6', borderRadius: '8px', fontSize: '0.825rem', fontWeight: 600, textDecoration: 'none' }}>
+                            <a href="https://t.me/thestudentspot" target="_blank" rel="noreferrer" style={{ display: 'block', padding: '0.6rem 1rem', backgroundColor: 'rgba(59, 130, 246, 0.08)', border: '1px solid rgba(59, 130, 246, 0.2)', color: '#3b82f6', borderRadius: '8px', fontSize: '0.825rem', fontWeight: 600, textDecoration: 'none' }}>
                               💙 Telegram Lounge Invitation
                             </a>
                           </div>
