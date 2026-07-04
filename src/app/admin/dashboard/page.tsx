@@ -1033,6 +1033,116 @@ export default function AdminDashboard() {
                         </div>
                       </div>
 
+                      {/* Detailed Candidate Information Sheet */}
+                      <div style={{ backgroundColor: 'var(--bg-input)', border: '1px solid var(--border-color)', borderRadius: '12px', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
+                          {selectedCandidate.photoPath ? (
+                            <img 
+                              src={`data:image/jpeg;base64,${selectedCandidate.photoPath}`} 
+                              alt="Member Profile" 
+                              style={{ width: '60px', height: '60px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--primary)' }}
+                            />
+                          ) : (
+                            <div style={{ width: '60px', height: '60px', borderRadius: '50%', backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>
+                              <User size={30} />
+                            </div>
+                          )}
+                          <div>
+                            <strong style={{ fontSize: '1rem', color: 'var(--text-primary)', display: 'block' }}>{selectedCandidate.fullName}</strong>
+                            <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>@{selectedCandidate.username || 'no-username'} | Registered: {new Date(selectedCandidate.registrationDate || Date.now()).toLocaleDateString()}</span>
+                          </div>
+                        </div>
+
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.85rem', fontSize: '0.8rem', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '0.85rem' }}>
+                          <div>
+                            <span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '0.7rem', textTransform: 'uppercase' }}>Email Address</span>
+                            <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{selectedCandidate.email}</span>
+                          </div>
+                          <div>
+                            <span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '0.7rem', textTransform: 'uppercase' }}>Mobile Number</span>
+                            <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{selectedCandidate.mobile || 'Not Provided'}</span>
+                          </div>
+                          <div>
+                            <span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '0.7rem', textTransform: 'uppercase' }}>College / Institution</span>
+                            <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{selectedCandidate.college || 'Not Provided'}</span>
+                          </div>
+                          <div>
+                            <span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '0.7rem', textTransform: 'uppercase' }}>Graduation Year</span>
+                            <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{selectedCandidate.graduationYear || 'Not Provided'}</span>
+                          </div>
+                          <div>
+                            <span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '0.7rem', textTransform: 'uppercase' }}>Highest Qualification</span>
+                            <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{selectedCandidate.highestQualification || 'Not Provided'}</span>
+                          </div>
+                          <div>
+                            <span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '0.7rem', textTransform: 'uppercase' }}>Location</span>
+                            <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{selectedCandidate.city ? `${selectedCandidate.city}, ${selectedCandidate.state || ''} (${selectedCandidate.country || 'IN'})` : 'Not Provided'}</span>
+                          </div>
+                          <div>
+                            <span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '0.7rem', textTransform: 'uppercase' }}>Gender</span>
+                            <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{selectedCandidate.gender || 'Not Provided'}</span>
+                          </div>
+                          <div>
+                            <span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '0.7rem', textTransform: 'uppercase' }}>Date of Birth</span>
+                            <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{selectedCandidate.dob || 'Not Provided'}</span>
+                          </div>
+                          <div>
+                            <span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '0.7rem', textTransform: 'uppercase' }}>Reputation Score</span>
+                            <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{selectedCandidate.communityScore !== undefined ? selectedCandidate.communityScore : 20} ({selectedCandidate.level || 'Explorer'})</span>
+                          </div>
+                        </div>
+
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '0.85rem', fontSize: '0.8rem' }}>
+                          <div>
+                            <span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '0.7rem', textTransform: 'uppercase', marginBottom: '0.25rem' }}>Skills & Competencies</span>
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.25rem' }}>
+                              {selectedCandidate.skills && selectedCandidate.skills.length > 0 ? (
+                                selectedCandidate.skills.map((sk: string, i: number) => (
+                                  <span key={i} style={{ fontSize: '9px', fontWeight: 600, padding: '0.15rem 0.4rem', borderRadius: '4px', backgroundColor: 'var(--bg-card)', color: 'var(--text-secondary)' }}>
+                                    {sk}
+                                  </span>
+                                ))
+                              ) : (
+                                <span style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>None listed</span>
+                              )}
+                            </div>
+                          </div>
+
+                          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '0.5rem', marginTop: '0.5rem' }}>
+                            {selectedCandidate.linkedin && (
+                              <a href={selectedCandidate.linkedin} target="_blank" rel="noreferrer" className="btn btn-outline btn-xs" style={{ textAlign: 'center', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.25rem' }}>
+                                🔗 LinkedIn
+                              </a>
+                            )}
+                            {selectedCandidate.github && (
+                              <a href={selectedCandidate.github} target="_blank" rel="noreferrer" className="btn btn-outline btn-xs" style={{ textAlign: 'center', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.25rem' }}>
+                                🐙 GitHub
+                              </a>
+                            )}
+                            {selectedCandidate.portfolio && (
+                              <a href={selectedCandidate.portfolio} target="_blank" rel="noreferrer" className="btn btn-outline btn-xs" style={{ textAlign: 'center', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.25rem' }}>
+                                🌐 Portfolio
+                              </a>
+                            )}
+                            {selectedCandidate.instagram && (
+                              <a href={selectedCandidate.instagram} target="_blank" rel="noreferrer" className="btn btn-outline btn-xs" style={{ textAlign: 'center', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.25rem' }}>
+                                📸 Instagram
+                              </a>
+                            )}
+                            {selectedCandidate.xTwitter && (
+                              <a href={selectedCandidate.xTwitter} target="_blank" rel="noreferrer" className="btn btn-outline btn-xs" style={{ textAlign: 'center', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.25rem' }}>
+                                🐦 Twitter/X
+                              </a>
+                            )}
+                            {selectedCandidate.resumePath && (
+                              <a href={selectedCandidate.resumePath} target="_blank" rel="noreferrer" className="btn btn-primary btn-xs" style={{ textAlign: 'center', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', backgroundColor: 'var(--primary)', borderColor: 'var(--primary)', color: '#ffffff' }}>
+                                📄 Open Resume
+                              </a>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
                       {/* Staged Draft Profile Changes Diff Panel */}
                       {selectedCandidate.roleDetails?.draftProfileDetails && (
                         <div style={{ backgroundColor: 'rgba(245, 158, 11, 0.05)', border: '1px solid rgba(245, 158, 11, 0.2)', borderRadius: '10px', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
