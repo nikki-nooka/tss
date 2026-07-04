@@ -943,17 +943,52 @@ export default function AdminDashboard() {
                             <strong style={{ color: 'var(--text-primary)', fontSize: '0.85rem' }}>{c.fullName}</strong>
                             <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>{c.role}</span>
                           </div>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.25rem' }}>
-                            <span style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)' }}>{c.email} | registered: {new Date(c.registrationDate || Date.now()).toLocaleDateString()}</span>
-                            {c.status !== 'Verified' && (
-                              <button 
-                                onClick={(e) => { e.stopPropagation(); handleUpdateStatus('approve', undefined, c.id); }}
-                                className="btn btn-primary btn-xs"
-                                style={{ backgroundColor: '#10b981', borderColor: '#10b981', color: '#ffffff', padding: '0.2rem 0.5rem', fontSize: '0.7rem', borderRadius: '4px' }}
-                              >
-                                Approve
-                              </button>
-                            )}
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.25rem', gap: '0.5rem', flexWrap: 'wrap' }}>
+                            <span style={{ display: 'block', fontSize: '0.725rem', color: 'var(--text-muted)', flex: 1, minWidth: '150px' }}>{c.email} | registered: {new Date(c.registrationDate || Date.now()).toLocaleDateString()}</span>
+                            
+                            {/* Row-wise Quick Action Buttons Cluster for Bulk Operations */}
+                            <div style={{ display: 'flex', gap: '0.25rem', alignItems: 'center' }} onClick={(e) => e.stopPropagation()}>
+                              {c.status !== 'Verified' && (
+                                <button 
+                                  title="Approve / Verify (Tick)"
+                                  onClick={() => handleUpdateStatus('approve', undefined, c.id)}
+                                  className="btn btn-xs"
+                                  style={{ backgroundColor: '#10b981', borderColor: '#10b981', color: '#ffffff', padding: '0.2rem 0.45rem', fontSize: '0.75rem', borderRadius: '4px', display: 'flex', alignItems: 'center', gap: '2px', fontWeight: 700 }}
+                                >
+                                  ✔
+                                </button>
+                              )}
+                              {c.status !== 'Under Review' && (
+                                <button 
+                                  title="Move to Under Review (Wait)"
+                                  onClick={() => handleUpdateStatus('review', undefined, c.id)}
+                                  className="btn btn-xs"
+                                  style={{ backgroundColor: 'var(--primary-pale)', borderColor: 'var(--primary-pale)', color: '#ffffff', padding: '0.2rem 0.45rem', fontSize: '0.75rem', borderRadius: '4px', display: 'flex', alignItems: 'center', gap: '2px', fontWeight: 700 }}
+                                >
+                                  ⏳
+                                </button>
+                              )}
+                              {c.status !== 'Needs Changes' && (
+                                <button 
+                                  title="Request Changes"
+                                  onClick={() => handleUpdateStatus('request_changes', undefined, c.id)}
+                                  className="btn btn-xs"
+                                  style={{ backgroundColor: '#f59e0b', borderColor: '#f59e0b', color: '#ffffff', padding: '0.2rem 0.45rem', fontSize: '0.75rem', borderRadius: '4px', display: 'flex', alignItems: 'center', gap: '2px', fontWeight: 700 }}
+                                >
+                                  ✏
+                                </button>
+                              )}
+                              {c.status !== 'Rejected' && (
+                                <button 
+                                  title="Reject Profile (Cross)"
+                                  onClick={() => { setSelectedCandidate(c); setShowRejectModal(true); }}
+                                  className="btn btn-xs"
+                                  style={{ backgroundColor: '#ef4444', borderColor: '#ef4444', color: '#ffffff', padding: '0.2rem 0.45rem', fontSize: '0.75rem', borderRadius: '4px', display: 'flex', alignItems: 'center', gap: '2px', fontWeight: 700 }}
+                                >
+                                  ❌
+                                </button>
+                              )}
+                            </div>
                           </div>
                         </div>
                       ))}
