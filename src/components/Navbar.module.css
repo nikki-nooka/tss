@@ -48,6 +48,12 @@
   letter-spacing: 0.05em;
 }
 
+.desktopNavWrapper {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
 .desktopNav {
   display: flex;
   align-items: center;
@@ -178,7 +184,7 @@
 }
 
 @media (max-width: 768px) {
-  .desktopNav {
+  .desktopNavWrapper {
     display: none;
   }
   

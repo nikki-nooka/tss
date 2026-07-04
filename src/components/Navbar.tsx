@@ -46,7 +46,7 @@ export const Navbar: React.FC = () => {
         </Link>
 
         {/* Desktop Navigation */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+        <div className={styles.desktopNavWrapper}>
           <nav className={styles.desktopNav}>
             {navLinks.map((link) => (
               <Link

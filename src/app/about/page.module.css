@@ -695,10 +695,22 @@
   .teamGrid {
     grid-template-columns: 1fr;
   }
+
+  .aboutHeader {
+    padding: 3rem 0 2rem;
+  }
+
+  .heading {
+    font-size: clamp(2rem, 8vw, 2.5rem);
+  }
 }
 
 @media (max-width: 480px) {
   .statsGrid {
     grid-template-columns: 1fr;
+  }
+
+  .founderFeaturedCard {
+    padding: 1.25rem;
   }
 }

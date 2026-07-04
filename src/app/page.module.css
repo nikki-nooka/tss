@@ -988,9 +988,32 @@
   }
 }
 
+@media (max-width: 768px) {
+  .hero {
+    padding: 3rem 0;
+  }
+  
+  .headline {
+    font-size: clamp(2rem, 8vw, 2.5rem);
+  }
+
+  .section {
+    padding: 3rem 0;
+  }
+
+  .sectionHeader h2 {
+    font-size: 1.75rem;
+  }
+}
+
 @media (max-width: 600px) {
   .heroActions {
     flex-direction: column;
+    width: 100%;
+  }
+
+  .heroActions > * {
+    width: 100%;
   }
 
   .statsGrid {
