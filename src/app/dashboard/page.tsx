@@ -4540,6 +4540,47 @@ export default function CandidateDashboard() {
                         <a href="https://www.linkedin.com/company/thestudentspot" target="_blank" rel="noreferrer" className="btn btn-outline" style={{ marginTop: 'auto', textAlign: 'center' }}>Follow Directory</a>
                       </div>
                     </div>
+
+                    <h3 style={{ marginTop: '2.5rem', marginBottom: '1rem', fontSize: '1.25rem', fontWeight: 700, color: 'var(--text-primary)' }}>📢 Official Media & Founder Links</h3>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.5rem' }}>
+                      <div style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '12px', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                        <strong style={{ fontSize: '1rem', color: 'var(--text-primary)' }}>📺 YouTube Channel</strong>
+                        <a href="https://youtube.com/@the.studentspot" target="_blank" rel="noreferrer" className="btn btn-outline btn-sm" style={{ textAlign: 'center', borderColor: '#ff0000', color: '#ff0000' }}>Subscribe</a>
+                      </div>
+                      
+                      <div style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '12px', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                        <strong style={{ fontSize: '1rem', color: 'var(--text-primary)' }}>🐦 X / Twitter</strong>
+                        <a href="https://x.com/the_studentspot" target="_blank" rel="noreferrer" className="btn btn-outline btn-sm" style={{ textAlign: 'center' }}>Follow X</a>
+                      </div>
+
+                      <div style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '12px', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                        <strong style={{ fontSize: '1rem', color: 'var(--text-primary)' }}>📢 WhatsApp Channel</strong>
+                        <a href="https://whatsapp.com/channel/0029Vb6ft6072WTxJ5eMKA2I" target="_blank" rel="noreferrer" className="btn btn-outline btn-sm" style={{ textAlign: 'center', borderColor: 'var(--green-light)', color: 'var(--green-light)' }}>Join Channel</a>
+                      </div>
+
+                      <div style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '12px', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                        <strong style={{ fontSize: '1rem', color: 'var(--text-primary)' }}>💼 Collab / DM</strong>
+                        <a href="https://wa.me/919581929676" target="_blank" rel="noreferrer" className="btn btn-outline btn-sm" style={{ textAlign: 'center', borderColor: 'var(--green-light)', color: 'var(--green-light)' }}>Direct DM</a>
+                      </div>
+                    </div>
+
+                    <h3 style={{ marginTop: '2.5rem', marginBottom: '1rem', fontSize: '1.25rem', fontWeight: 700, color: 'var(--text-primary)' }}>👤 Founder – Rajkamal Panthagani</h3>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.5rem' }}>
+                      <div style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '12px', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                        <strong style={{ fontSize: '1rem', color: 'var(--text-primary)' }}>🌐 Founder Portfolio</strong>
+                        <a href="https://rajkamalpanthagani.netlify.app" target="_blank" rel="noreferrer" className="btn btn-outline btn-sm" style={{ textAlign: 'center' }}>Visit Portfolio</a>
+                      </div>
+
+                      <div style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '12px', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                        <strong style={{ fontSize: '1rem', color: 'var(--text-primary)' }}>💼 Founder LinkedIn</strong>
+                        <a href="https://www.linkedin.com/in/rajkamalprls" target="_blank" rel="noreferrer" className="btn btn-outline btn-sm" style={{ textAlign: 'center' }}>Connect</a>
+                      </div>
+
+                      <div style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '12px', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                        <strong style={{ fontSize: '1rem', color: 'var(--text-primary)' }}>📸 Founder Instagram</strong>
+                        <a href="https://instagram.com/rajkamalpanthagani" target="_blank" rel="noreferrer" className="btn btn-outline btn-sm" style={{ textAlign: 'center' }}>Follow</a>
+                      </div>
+                    </div>
                   </div>
                 )}
 
