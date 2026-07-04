@@ -354,7 +354,7 @@ export default function About() {
             </ScrollReveal>
           </div>
 
-          <div className={styles.statsGrid} style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2rem' }}>
+          <div className={styles.statsGrid} style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))', gap: '2rem' }}>
             {coreValues.map((value, idx) => {
               const IconComponent = value.icon;
               return (

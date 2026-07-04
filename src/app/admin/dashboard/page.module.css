@@ -323,7 +323,7 @@
 
 .filtersGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
   gap: 1.25rem;
 }
 
@@ -1066,7 +1066,7 @@
 /* Custom stats list and grid for role breakdown */
 .roleBreakdownGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 180px), 1fr));
   gap: 1rem;
   margin-top: 1rem;
 }

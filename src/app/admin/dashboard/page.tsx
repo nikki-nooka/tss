@@ -660,7 +660,7 @@ export default function AdminDashboard() {
               </div>
 
               {/* Grid of 10 dynamic metrics cards */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.25rem', marginBottom: '2.5rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: '1.25rem', marginBottom: '2.5rem' }}>
                 <div style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '12px', padding: '1.25rem' }}>
                   <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-secondary)', fontWeight: 700 }}>Total Registrations</span>
                   <strong style={{ display: 'block', fontSize: '1.65rem', color: 'var(--text-primary)', marginTop: '0.25rem' }}>{candidates.length}</strong>
@@ -816,7 +816,7 @@ export default function AdminDashboard() {
 
               {/* Filters Pane */}
               <div className={styles.filtersPane} style={{ marginBottom: '2rem' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: '1rem' }}>
                   <input 
                     type="text" 
                     placeholder="Search by name, ID, or email..." 
@@ -1246,7 +1246,7 @@ export default function AdminDashboard() {
 
               {/* Filters Pane */}
               <div className={styles.filtersPane} style={{ marginBottom: '2rem' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 180px), 1fr))', gap: '1rem' }}>
                   <input 
                     type="text" 
                     placeholder="Search by TSS ID..." 
@@ -1400,7 +1400,7 @@ export default function AdminDashboard() {
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))', gap: '1.5rem' }}>
                 <div style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '12px', padding: '1.5rem' }}>
                   <h4 style={{ margin: '0 0 1rem 0', fontWeight: 750, color: 'var(--text-primary)' }}>Sandbox Vetting Cycle</h4>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', fontSize: '0.8rem' }}>

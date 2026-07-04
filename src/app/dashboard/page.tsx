@@ -3196,7 +3196,7 @@ export default function CandidateDashboard() {
                     </div>
 
                     {/* Stats overview cards */}
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.25rem', marginBottom: '2.5rem' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))', gap: '1.25rem', marginBottom: '2.5rem' }}>
                       <div style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '12px', padding: '1.25rem', boxShadow: 'var(--shadow-sm)' }}>
                         <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-secondary)', fontWeight: 700 }}>Applications Submitted</span>
                         <strong style={{ display: 'block', fontSize: '1.85rem', color: 'var(--text-primary)', marginTop: '0.25rem' }}>{appliedJobs.length}</strong>
@@ -3363,7 +3363,7 @@ export default function CandidateDashboard() {
 
                       // Render Cards
                       return (
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1.5rem' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 320px), 1fr))', gap: '1.5rem' }}>
                           {list.map((opp) => (
                             <div key={opp.id} style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '16px', padding: '1.5rem', display: 'flex', flexDirection: 'column', position: 'relative', boxShadow: 'var(--shadow-sm)', transition: 'all 0.2s ease' }}>
                               
@@ -3581,7 +3581,7 @@ export default function CandidateDashboard() {
                       }
 
                       return (
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '1.5rem' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 340px), 1fr))', gap: '1.5rem' }}>
                           {list.map((em) => (
                             <div key={em.id} style={{ backgroundColor: 'var(--bg-card)', border: '1px solid ' + (em.isFeatured ? '#ef4444' : 'var(--border-color)'), borderRadius: '16px', padding: '1.5rem', display: 'flex', flexDirection: 'column', position: 'relative', boxShadow: em.isFeatured ? '0 4px 20px rgba(239, 68, 68, 0.08)' : 'var(--shadow-sm)', transition: 'all 0.2s ease' }}>
                               
@@ -3739,7 +3739,7 @@ export default function CandidateDashboard() {
                         </button>
                       </div>
 
-                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem', padding: '1rem', backgroundColor: 'var(--bg-input)', borderRadius: '10px', fontSize: '0.85rem' }}>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 180px), 1fr))', gap: '1rem', padding: '1rem', backgroundColor: 'var(--bg-input)', borderRadius: '10px', fontSize: '0.85rem' }}>
                         <div>📍 Format: <strong>{selectedOpp.remoteOption} ({selectedOpp.location})</strong></div>
                         <div>💰 Compensation: <strong>{selectedOpp.salaryStipend}</strong></div>
                         <div>⏰ Deadline: <strong>{selectedOpp.deadline}</strong></div>
@@ -4296,7 +4296,7 @@ export default function CandidateDashboard() {
                     {renderStatusBanner()}
 
                     {/* Quick Metrics Cards */}
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.25rem', marginBottom: '2.5rem' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))', gap: '1.25rem', marginBottom: '2.5rem' }}>
                       <div style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '12px', padding: '1.25rem' }}>
                         <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-secondary)', fontWeight: 700 }}>Ecosystem Level</span>
                         <strong style={{ display: 'block', fontSize: '1.65rem', color: 'var(--text-primary)', marginTop: '0.25rem' }}>{profile.level || 'Explorer'}</strong>
@@ -4318,7 +4318,7 @@ export default function CandidateDashboard() {
                       {/* Left: Quick Actions */}
                       <div>
                         <h4 style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '1.25rem' }}>Ecosystem Quick Actions</h4>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 180px), 1fr))', gap: '1rem' }}>
                           <button onClick={() => { setActiveTab('profile'); setProfileSubTab('details'); }} className="btn btn-outline" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '1.5rem', borderRadius: '12px', gap: '0.5rem', textAlign: 'center', height: '110px' }}>
                             <User size={24} style={{ color: 'var(--primary-pale)' }} />
                             <strong style={{ fontSize: '0.85rem' }}>Complete Profile</strong>
@@ -4436,7 +4436,7 @@ export default function CandidateDashboard() {
                         );
                       }
                       return (
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1.5rem', marginTop: '1.5rem' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 320px), 1fr))', gap: '1.5rem', marginTop: '1.5rem' }}>
                           {bookmarked.map(opp => (
                             <div key={opp.id} style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '16px', padding: '1.5rem', display: 'flex', flexDirection: 'column', position: 'relative', boxShadow: 'var(--shadow-sm)' }}>
                               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
@@ -4503,7 +4503,7 @@ export default function CandidateDashboard() {
                     <h2>Community Lounges</h2>
                     <p>Get verified access to exclusive student groups, mentors, founders, and recruitment circles.</p>
                     
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1.5rem', marginTop: '1.5rem' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 260px), 1fr))', gap: '1.5rem', marginTop: '1.5rem' }}>
                       <div style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '12px', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                         <strong style={{ fontSize: '1.1rem', color: 'var(--text-primary)' }}>🟢 WhatsApp Official Lounge</strong>
                         <p style={{ fontSize: '0.825rem', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.5 }}>Directly interact with student builders and core community mentors.</p>
@@ -4542,7 +4542,7 @@ export default function CandidateDashboard() {
                     </div>
 
                     <h3 style={{ marginTop: '2.5rem', marginBottom: '1rem', fontSize: '1.25rem', fontWeight: 700, color: 'var(--text-primary)' }}>📢 Official Media & Founder Links</h3>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.5rem' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 240px), 1fr))', gap: '1.5rem' }}>
                       <div style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '12px', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                         <strong style={{ fontSize: '1rem', color: 'var(--text-primary)' }}>📺 YouTube Channel</strong>
                         <a href="https://youtube.com/@the.studentspot" target="_blank" rel="noreferrer" className="btn btn-outline btn-sm" style={{ textAlign: 'center', borderColor: '#ff0000', color: '#ff0000' }}>Subscribe</a>
@@ -4565,7 +4565,7 @@ export default function CandidateDashboard() {
                     </div>
 
                     <h3 style={{ marginTop: '2.5rem', marginBottom: '1rem', fontSize: '1.25rem', fontWeight: 700, color: 'var(--text-primary)' }}>👤 Founder – Rajkamal Panthagani</h3>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.5rem' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 240px), 1fr))', gap: '1.5rem' }}>
                       <div style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '12px', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                         <strong style={{ fontSize: '1rem', color: 'var(--text-primary)' }}>🌐 Founder Portfolio</strong>
                         <a href="https://rajkamalpanthagani.netlify.app" target="_blank" rel="noreferrer" className="btn btn-outline btn-sm" style={{ textAlign: 'center' }}>Visit Portfolio</a>
