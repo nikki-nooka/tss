@@ -58,7 +58,7 @@ export const Footer: React.FC = () => {
             />
             <div className={styles.logoTextContainer}>
               <span className={styles.logoText}>TSS ⚡</span>
-              <span className={styles.logoSubtitle}>From Student to Founder</span>
+              <span className={styles.logoSubtitle}>From Students to Founders Ecosystem</span>
             </div>
           </div>
           <p className={styles.brandDesc}>
