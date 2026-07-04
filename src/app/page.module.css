@@ -1011,6 +1011,16 @@
   .sectionHeader h2, .sectionHeading {
     font-size: 1.75rem;
   }
+
+  .floatingShareBar a {
+    width: 34px;
+    height: 34px;
+  }
+
+  .floatingShareBar a:hover {
+    width: 38px;
+    padding-right: 4px;
+  }
 }
 
 @media (max-width: 600px) {
