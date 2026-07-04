@@ -199,7 +199,8 @@ export async function PUT(request: Request) {
         `Approved candidate ${candidate.fullName} (${candidate.email}). Generated Member ID: ${candidate.memberId}`
       );
 
-      await sendEmail({
+      // Send approval email in background without blocking response
+      sendEmail({
         to: candidate.email,
         subject: `Welcome to the Spot! Your TSS Member ID is Verified`,
         text: `Dear ${candidate.fullName},
@@ -219,6 +220,8 @@ Welcome to the community!
 
 Best regards,
 The Student Spot Team`
+      }).catch((err) => {
+        console.error('Failed to send verification approval email in background:', err);
       });
     } 
     else if (action === 'reject') {
