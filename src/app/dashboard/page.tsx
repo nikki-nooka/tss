@@ -1709,6 +1709,15 @@ export default function CandidateDashboard() {
 
                   <button 
                     type="button"
+                    onClick={() => { setActiveTab('resume'); setResumeSubTab('edit'); }}
+                    className={`${styles.sidebarItem} ${activeTab === 'resume' ? styles.sidebarItemActive : ''}`}
+                  >
+                    <FileText size={18} />
+                    <span>Resume Studio</span>
+                  </button>
+
+                  <button 
+                    type="button"
                     onClick={() => { setActiveTab('emergency-support'); setEmergencySubTab('feed'); }}
                     className={`${styles.sidebarItem} ${activeTab === 'emergency-support' ? styles.sidebarItemActive : ''}`}
                     style={{ borderLeftColor: activeTab === 'emergency-support' ? '#ef4444' : 'transparent' }}
