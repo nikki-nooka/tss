@@ -141,18 +141,23 @@ export default function AdminDashboard() {
 
         setAdminUser({ email: 'contact.thestudentspot@gmail.com', role: 'Admin' });
 
+        // Only block initial loading state on essential stats and candidates data
         await Promise.all([
           loadStats(),
-          loadCandidates(),
+          loadCandidates()
+        ]);
+        
+        setIsLoading(false);
+
+        // Fetch secondary dashboard tab data in background without blocking the UI
+        Promise.all([
           loadSettings(),
           loadMessages(),
           loadLogs(),
           loadOpportunities(),
           loadEmergencies(),
           fetchAdminJobsData()
-        ]);
-        
-        setIsLoading(false);
+        ]).catch(err => console.error("Background data fetch error:", err));
       } catch (err) {
         console.error(err);
         router.push('/admin');
