@@ -144,7 +144,17 @@
 
 @media (max-width: 768px) {
   .container {
-    padding: 0 2.75rem;
+    padding: 1.5rem 1rem;
+  }
+  .card {
+    padding: 1.5rem;
+  }
+  .stepper {
+    gap: 1.25rem;
+    margin-bottom: 2rem;
+  }
+  .stepNode span {
+    display: none;
   }
 }
 
