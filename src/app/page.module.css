@@ -330,7 +330,8 @@
 }
 
 .memberCard {
-  width: 340px;
+  width: 100%;
+  max-width: 340px;
   height: 200px;
   background: #1d1d1f;
   border-radius: 15px;
@@ -997,11 +998,15 @@
     font-size: clamp(2rem, 8vw, 2.5rem);
   }
 
+  .floatingShareBar {
+    display: none;
+  }
+
   .section {
     padding: 3rem 0;
   }
 
-  .sectionHeader h2 {
+  .sectionHeader h2, .sectionHeading {
     font-size: 1.75rem;
   }
 }
