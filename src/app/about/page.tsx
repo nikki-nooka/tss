@@ -183,46 +183,6 @@ export default function About() {
         </div>
       </section>
 
-      {/* SECTION 4: PLATFORM INTERFACE SHOWCASE */}
-      <section className={styles.showcaseSection}>
-        <div className={styles.container}>
-          <div className={styles.showcaseHeading}>
-            <ScrollReveal direction="up" delay={0}>
-              <span className={styles.label}>OUR INTERFACE</span>
-            </ScrollReveal>
-            <ScrollReveal direction="up" delay={100}>
-              <h2>A Glimpse Into the Spot</h2>
-            </ScrollReveal>
-            <ScrollReveal direction="up" delay={200}>
-              <p className={styles.description} style={{ color: 'var(--text-muted)' }}>
-                Clean, verified, outcome-focused. We've built the space where students showcase their projects, recruiters discover vetted candidates, and builders connect.
-              </p>
-            </ScrollReveal>
-          </div>
-          
-          <div className={styles.showcaseGrid}>
-             <ScrollReveal direction="pop" delay={0} className={styles.showcaseCard}>
-              <div className={styles.imageContainer}>
-                <img src="/showcase_web.jpg" alt="TSS Web Workspace Dashboard" className={styles.showcaseImg} />
-              </div>
-              <div className={styles.showcaseMeta}>
-                <h4>The Web Portal Workspace</h4>
-                <p>Recruiters search profiles, candidates view verified opportunity listings, and members download credentials cards.</p>
-              </div>
-            </ScrollReveal>
-
-            <ScrollReveal direction="pop" delay={200} className={styles.showcaseCard}>
-              <div className={styles.imageContainer} style={{ maxHeight: '350px', overflow: 'hidden' }}>
-                <img src="/showcase_mobile.jpg" alt="TSS Mobile Verification App" className={styles.showcaseImg} style={{ objectPosition: 'top' }} />
-              </div>
-              <div className={styles.showcaseMeta}>
-                <h4>Mobile First Verification</h4>
-                <p>Accessible student validation, instant QR checks, and automated digital member cards formatted for all displays.</p>
-              </div>
-            </ScrollReveal>
-          </div>
-        </div>
-      </section>
 
       {/* SECTION 5: MEET OUR LEADERSHIP */}
       <section className={styles.teamSection} style={{ backgroundColor: 'var(--bg-card-2)' }}>
