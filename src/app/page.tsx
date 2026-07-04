@@ -43,6 +43,8 @@ export default function Home() {
   const [isUnlocked, setIsUnlocked] = useState(false);
   const [isLoadingStats, setIsLoadingStats] = useState(true);
 
+  const [activeSession, setActiveSession] = useState<any>(null);
+
   // Fetch dynamic stats from settings API
   useEffect(() => {
     fetch('/api/settings')
@@ -68,6 +70,16 @@ export default function Home() {
     const unlocked = localStorage.getItem('tss_community_unlocked') === 'true';
     if (unlocked) {
       setIsUnlocked(true);
+    }
+
+    // Check for active candidate session to populate hero card
+    try {
+      const saved = localStorage.getItem('tss_candidate_session');
+      if (saved) {
+        setActiveSession(JSON.parse(saved));
+      }
+    } catch (e) {
+      console.error('Error reading candidate session:', e);
     }
   }, []);
 
@@ -207,20 +219,25 @@ export default function Home() {
           <ScrollReveal direction="pop" delay={150} className={styles.heroVisualGrid}>
             <div className={styles.scanWrapper} style={{ marginBottom: 0 }}>
               <div className={styles.scanLine}></div>
-              <Link href="/status?memberId=TSS-ST-260618001" style={{ textDecoration: 'none', display: 'block', width: 'fit-content', margin: '0 auto' }}>
+              <Link 
+                href={`/status?memberId=${activeSession?.memberId || activeSession?.id || 'TSS-ST-260618001'}`} 
+                style={{ textDecoration: 'none', display: 'block', width: 'fit-content', margin: '0 auto' }}
+              >
                 <div className={styles.memberCard} style={{ opacity: 0.85, cursor: 'pointer' }}>
                   <div className={styles.cardHeader}>
                     <span className={styles.cardLogo}>TSS ⚡</span>
-                    <span className={styles.cardBadge}>VERIFIED</span>
+                    <span className={`${styles.cardBadge} ${activeSession?.status === 'Verified' ? styles.badgeVerified : ''}`}>
+                      {activeSession?.status === 'Verified' ? 'VERIFIED' : (activeSession ? 'UNDER AUDIT' : 'VERIFIED')}
+                    </span>
                   </div>
                   <div className={styles.cardCenter}>
-                    <div className={styles.cardId}>TSS-ST-260618001</div>
+                    <div className={styles.cardId}>{activeSession?.memberId || (activeSession ? 'PENDING AUDIT' : 'TSS-ST-260618001')}</div>
                     <div className={styles.cardSubtitle}>The Student Spot Ecosystem</div>
                   </div>
                   <div className={styles.cardFooter}>
                     <div className={styles.cardHolder}>
-                      <span className={styles.holderName}>Rajkamal Panthagani</span>
-                      <span className={styles.holderRole}>Student · Software</span>
+                      <span className={styles.holderName}>{activeSession?.fullName || 'Rajkamal Panthagani'}</span>
+                      <span className={styles.holderRole}>{activeSession?.role || 'Student · Software'}</span>
                     </div>
                     <span className={styles.cardMark}>⚡</span>
                   </div>
