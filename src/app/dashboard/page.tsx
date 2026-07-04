@@ -1979,19 +1979,19 @@ export default function CandidateDashboard() {
                         <h3>🚀 Unlocked Ecosystem Connections</h3>
                         <p>As a verified talent, you have immediate access to regional cohorts:</p>
                       <div className={styles.linkButtonsGrid}>
-                        <a href="https://whatsapp.com" target="_blank" rel="noreferrer" className={styles.linkBox}>
+                        <a href="https://chat.whatsapp.com/LxA5xaAdlKp3nvZmIGxLcp" target="_blank" rel="noreferrer" className={styles.linkBox}>
                           <strong>WhatsApp Group</strong>
                           <span>Official verified announcements chat</span>
                         </a>
-                        <a href="https://telegram.org" target="_blank" rel="noreferrer" className={styles.linkBox}>
+                        <a href="https://t.me/thestudentspot" target="_blank" rel="noreferrer" className={styles.linkBox}>
                           <strong>Telegram Lounge</strong>
                           <span>Collaborate with co-founders and freshers</span>
                         </a>
-                        <a href="https://linkedin.com" target="_blank" rel="noreferrer" className={styles.linkBox}>
+                        <a href="https://www.linkedin.com/company/thestudentspot" target="_blank" rel="noreferrer" className={styles.linkBox}>
                           <strong>LinkedIn Directory</strong>
                           <span>Fast-track hiring recommendations list</span>
                         </a>
-                        <a href="https://instagram.com" target="_blank" rel="noreferrer" className={styles.linkBox}>
+                        <a href="https://www.instagram.com/the_studentspot" target="_blank" rel="noreferrer" className={styles.linkBox}>
                           <strong>Instagram Network</strong>
                           <span>Event stories and build sandbox announcements</span>
                         </a>
@@ -4507,19 +4507,37 @@ export default function CandidateDashboard() {
                       <div style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '12px', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                         <strong style={{ fontSize: '1.1rem', color: 'var(--text-primary)' }}>🟢 WhatsApp Official Lounge</strong>
                         <p style={{ fontSize: '0.825rem', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.5 }}>Directly interact with student builders and core community mentors.</p>
-                        <a href="https://chat.whatsapp.com/tss" target="_blank" rel="noreferrer" className="btn btn-outline" style={{ marginTop: 'auto', textAlign: 'center', borderColor: 'var(--green-light)', color: 'var(--green-light)' }}>Join WhatsApp Lounge</a>
+                        <a href="https://chat.whatsapp.com/LxA5xaAdlKp3nvZmIGxLcp" target="_blank" rel="noreferrer" className="btn btn-outline" style={{ marginTop: 'auto', textAlign: 'center', borderColor: 'var(--green-light)', color: 'var(--green-light)' }}>Join WhatsApp Lounge</a>
+                      </div>
+
+                      <div style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '12px', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                        <strong style={{ fontSize: '1.1rem', color: 'var(--text-primary)' }}>💻 Codeva Community</strong>
+                        <p style={{ fontSize: '0.825rem', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.5 }}>Join Codeva, our developer and tech builder circle.</p>
+                        <a href="https://chat.whatsapp.com/Lvwv6z3Hrp634P7llhQ6En" target="_blank" rel="noreferrer" className="btn btn-outline" style={{ marginTop: 'auto', textAlign: 'center', borderColor: 'var(--primary)', color: 'var(--primary)' }}>Join Codeva</a>
+                      </div>
+
+                      <div style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '12px', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                        <strong style={{ fontSize: '1.1rem', color: 'var(--text-primary)' }}>📚 Materials & Resources</strong>
+                        <p style={{ fontSize: '0.825rem', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.5 }}>Access study materials, project templates, placement sheets, and syllabus guides.</p>
+                        <a href="https://chat.whatsapp.com/JJVHPMzmGvmC2FMU1w706o" target="_blank" rel="noreferrer" className="btn btn-outline" style={{ marginTop: 'auto', textAlign: 'center', borderColor: 'var(--primary)', color: 'var(--primary)' }}>Access Resources</a>
+                      </div>
+
+                      <div style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '12px', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                        <strong style={{ fontSize: '1.1rem', color: 'var(--text-primary)' }}>🏥 Health & Emergency Support</strong>
+                        <p style={{ fontSize: '0.825rem', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.5 }}>Get prompt support, blood donor matches, and quick assistance in health crises.</p>
+                        <a href="https://chat.whatsapp.com/I5OT95lbZeo1yraUKyPUjP" target="_blank" rel="noreferrer" className="btn btn-outline" style={{ marginTop: 'auto', textAlign: 'center', borderColor: '#ef4444', color: '#ef4444' }}>Join Support Group</a>
                       </div>
                       
                       <div style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '12px', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                         <strong style={{ fontSize: '1.1rem', color: 'var(--text-primary)' }}>🔵 Telegram Resource Channel</strong>
                         <p style={{ fontSize: '0.825rem', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.5 }}>Access hackathon sheets, placement sheets, templates, and sandbox docs.</p>
-                        <a href="https://t.me/tss" target="_blank" rel="noreferrer" className="btn btn-outline" style={{ marginTop: 'auto', textAlign: 'center', borderColor: '#3b82f6', color: '#3b82f6' }}>Join Telegram Channel</a>
+                        <a href="https://t.me/thestudentspot" target="_blank" rel="noreferrer" className="btn btn-outline" style={{ marginTop: 'auto', textAlign: 'center', borderColor: '#3b82f6', color: '#3b82f6' }}>Join Telegram Channel</a>
                       </div>
 
                       <div style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '12px', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                         <strong style={{ fontSize: '1.1rem', color: 'var(--text-primary)' }}>💼 LinkedIn Directory</strong>
                         <p style={{ fontSize: '0.825rem', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.5 }}>View placement directories, verified profile shares, and recruiter recommendations.</p>
-                        <a href="https://linkedin.com/company/thestudentsspot" target="_blank" rel="noreferrer" className="btn btn-outline" style={{ marginTop: 'auto', textAlign: 'center' }}>Follow Directory</a>
+                        <a href="https://www.linkedin.com/company/thestudentspot" target="_blank" rel="noreferrer" className="btn btn-outline" style={{ marginTop: 'auto', textAlign: 'center' }}>Follow Directory</a>
                       </div>
                     </div>
                   </div>
