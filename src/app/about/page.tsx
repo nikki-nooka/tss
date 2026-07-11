@@ -184,15 +184,15 @@ export default function About() {
       </section>
 
 
-      {/* SECTION 5: MEET OUR LEADERSHIP */}
+      {/* SECTION 5: MEET OUR FOUNDER */}
       <section className={styles.teamSection} style={{ backgroundColor: 'var(--bg-card-2)' }}>
         <div className={styles.container}>
           <div className={styles.teamHeadingBlock}>
             <ScrollReveal direction="up" delay={0}>
-              <span className={styles.label}>LEADERSHIP</span>
+              <span className={styles.label}>FOUNDER</span>
             </ScrollReveal>
             <ScrollReveal direction="up" delay={100}>
-              <h2>Meet Our Team</h2>
+              <h2>Meet Our Founder</h2>
             </ScrollReveal>
           </div>
 
@@ -229,108 +229,6 @@ export default function About() {
               </p>
               <p className={styles.founderBio} style={{ fontStyle: 'italic', color: '#64748b' }}>
                 Today, The Student Spot empowers thousands of students across India with real exposure, structured growth, and outcome-driven opportunities.
-              </p>
-            </div>
-          </ScrollReveal>
-
-          {/* Card 2: Growth & Partnership Lead */}
-          <ScrollReveal direction="pop" delay={250} className={styles.founderFeaturedCard} style={{ marginTop: '3rem' }}>
-            {/* Translucent quote mark overlay */}
-            <div className={styles.quoteIconWrapper}>
-              <span className={styles.quoteMark}>””</span>
-            </div>
-
-            <div className={styles.founderAvatarCol}>
-              <div className={styles.photoContainer}>
-                <img src="/priya.png" alt="Priya - Growth & Partnership Lead" className={styles.founderPhoto} style={{ objectPosition: 'center 15%' }} />
-                <div className={styles.floatingSocials}>
-                  <a href="https://www.linkedin.com/in/lakshmipp1" target="_blank" rel="noopener noreferrer" className={styles.floatingSocialBtn} title="LinkedIn">
-                    <LinkedInIcon style={{ width: '16px', height: '16px' }} />
-                  </a>
-                </div>
-              </div>
-              <div className={styles.founderMeta}>
-                <h3>Priya</h3>
-                <span>Growth & Partnership Lead</span>
-              </div>
-            </div>
-            <div className={styles.founderDesc}>
-              <p className={styles.founderBio}>
-                <strong>Priya</strong> leads Growth & Partnerships at The Student Spot, expanding ecosystem alliances and strategic relations with corporate partners and universities.
-              </p>
-              <p className={styles.founderBio}>
-                She focuses on creating sustainable pathways for students by building corporate partnerships, placement channels, and industry sponsorship collaborations.
-              </p>
-              <p className={styles.founderBio} style={{ fontStyle: 'italic', color: '#64748b' }}>
-                "Building a bridge between campuses and corporations is key to unlocking student potential. We are securing high-impact opportunities and industry alignments to accelerate student careers."
-              </p>
-            </div>
-          </ScrollReveal>
-
-          {/* Card 3: Tech Lead */}
-          <ScrollReveal direction="pop" delay={300} className={styles.founderFeaturedCard} style={{ marginTop: '3rem' }}>
-            {/* Translucent quote mark overlay */}
-            <div className={styles.quoteIconWrapper}>
-              <span className={styles.quoteMark}>””</span>
-            </div>
-
-            <div className={styles.founderAvatarCol}>
-              <div className={styles.photoContainer}>
-                <img src="/nikshith.png" alt="Nikshith Nooka - Tech Lead" className={styles.founderPhoto} style={{ objectPosition: 'center 20%' }} />
-                <div className={styles.floatingSocials}>
-                  <a href="https://www.linkedin.com/in/nikshith-nooka-2580302a7/" target="_blank" rel="noopener noreferrer" className={styles.floatingSocialBtn} title="LinkedIn">
-                    <LinkedInIcon style={{ width: '16px', height: '16px' }} />
-                  </a>
-                </div>
-              </div>
-              <div className={styles.founderMeta}>
-                <h3>Nikshith Nooka</h3>
-                <span>Tech Lead</span>
-              </div>
-            </div>
-            <div className={styles.founderDesc}>
-              <p className={styles.founderBio}>
-                <strong>Nikshith Nooka</strong> is the Tech Lead at The Student Spot, spearheading the engineering, system architecture, and development of the web portal and mobile app verification platforms.
-              </p>
-              <p className={styles.founderBio}>
-                He is passionate about creating clean, scalable interfaces and robust developer tooling that empowers students and simplifies candidate discovery for recruiters.
-              </p>
-              <p className={styles.founderBio} style={{ fontStyle: 'italic', color: '#64748b' }}>
-                "We are engineering a high-performance verification engine that makes credential checks and profile discovery seamless. Our codebase is built to scale alongside India's largest student-to-founder ecosystem."
-              </p>
-            </div>
-          </ScrollReveal>
-
-          {/* Card 4: Operations & Community Lead */}
-          <ScrollReveal direction="pop" delay={350} className={styles.founderFeaturedCard} style={{ marginTop: '3rem' }}>
-            {/* Translucent quote mark overlay */}
-            <div className={styles.quoteIconWrapper}>
-              <span className={styles.quoteMark}>””</span>
-            </div>
-
-            <div className={styles.founderAvatarCol}>
-              <div className={styles.photoContainer}>
-                <img src="/vaishnavi.jpg" alt="Vaishnavi - Operations & Community Lead" className={styles.founderPhoto} />
-                <div className={styles.floatingSocials}>
-                  <a href="https://www.linkedin.com/in/vaishnavi-g-98a8332a9" target="_blank" rel="noopener noreferrer" className={styles.floatingSocialBtn} title="LinkedIn">
-                    <LinkedInIcon style={{ width: '16px', height: '16px' }} />
-                  </a>
-                </div>
-              </div>
-              <div className={styles.founderMeta}>
-                <h3>Vaishnavi</h3>
-                <span>Operations & Community Lead</span>
-              </div>
-            </div>
-            <div className={styles.founderDesc}>
-              <p className={styles.founderBio}>
-                <strong>Vaishnavi</strong> serves as the Operations & Community Lead at The Student Spot, managing operations, community connections, and student partnerships across campuses.
-              </p>
-              <p className={styles.founderBio}>
-                She believes in the power of peer learning and structured execution. She works directly with student chapters, mentors, and corporate partners to streamline onboarding, event pipelines, and program activities.
-              </p>
-              <p className={styles.founderBio} style={{ fontStyle: 'italic', color: '#64748b' }}>
-                "Our community doesn't just discuss concepts—we focus on building proof-of-work. We want every student in India to have a launchpad that makes high-growth career paths and startup incubation accessible to everyone."
               </p>
             </div>
           </ScrollReveal>
