@@ -75,7 +75,7 @@ export default function AdminLogin() {
               <Mail className={styles.inputIcon} size={18} />
               <input
                 type="email"
-                placeholder="contact.thestudentspot@gmail.com"
+                placeholder="admin@thestudentspot.app"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="form-input"
@@ -106,14 +106,6 @@ export default function AdminLogin() {
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
             </div>
-          </div>
-
-          <div className={styles.roleTip}>
-            <span>Available Roles for evaluation:</span>
-            <ul>
-              <li><strong>Admin:</strong> contact.thestudentspot@gmail.com / Rajkamal@TSS</li>
-              <li><strong>HR:</strong> hr@thestudentspot.com / TssHr2026!</li>
-            </ul>
           </div>
 
           <button
