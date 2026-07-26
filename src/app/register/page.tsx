@@ -178,19 +178,78 @@ export default function Register() {
     }
   };
 
-  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const compressImage = (file: File, maxWidth = 180, maxHeight = 180, quality = 0.7): Promise<File> => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = (event) => {
+        const img = new Image();
+        img.src = event.target?.result as string;
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > maxWidth) {
+              height = Math.round((height * maxWidth) / width);
+              width = maxWidth;
+            }
+          } else {
+            if (height > maxHeight) {
+              width = Math.round((width * maxHeight) / height);
+              height = maxHeight;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          if (!ctx) {
+            resolve(file);
+            return;
+          }
+
+          ctx.drawImage(img, 0, 0, width, height);
+          canvas.toBlob(
+            (blob) => {
+              if (blob) {
+                const compressedFile = new File([blob], file.name, {
+                  type: 'image/jpeg',
+                  lastModified: Date.now()
+                });
+                resolve(compressedFile);
+              } else {
+                resolve(file);
+              }
+            },
+            'image/jpeg',
+            quality
+          );
+        };
+        img.onerror = () => resolve(file);
+      };
+      reader.onerror = () => resolve(file);
+    });
+  };
+
+  const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       if (!['image/jpeg', 'image/png', 'image/jpg'].includes(file.type)) {
         toast.error('Invalid photo format. Only JPG, JPEG, and PNG are allowed.');
         return;
       }
-      if (file.size > 2 * 1024 * 1024) {
-        toast.error('Photo size exceeds 2MB limit.');
-        return;
+      try {
+        const compressed = await compressImage(file);
+        setPhotoFile(compressed);
+        setPhotoPreview(URL.createObjectURL(compressed));
+        toast.success(`Photo optimized successfully (${(compressed.size / 1024).toFixed(1)} KB)`);
+      } catch (err) {
+        console.error('Image compression failed:', err);
+        setPhotoFile(file);
+        setPhotoPreview(URL.createObjectURL(file));
       }
-      setPhotoFile(file);
-      setPhotoPreview(URL.createObjectURL(file));
     }
   };
 
