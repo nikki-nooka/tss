@@ -2,7 +2,16 @@ import { NextResponse } from 'next/server';
 import { getCandidates, getOpportunities, getApplications, getEmergencies } from '@/lib/db';
 import { getSessionUser } from '@/lib/auth';
 
+// 5-minute server-side memory cache
+let cachedStats: any = null;
+let cacheExpiry = 0;
+
 export async function GET() {
+  const now = Date.now();
+  if (cachedStats && now < cacheExpiry) {
+    return NextResponse.json(cachedStats);
+  }
+
   try {
     const candidates = await getCandidates();
     const opportunities = await getOpportunities();
@@ -20,7 +29,7 @@ export async function GET() {
     const emergencyRequests = emergencies.length;
     const buildProjects = 12; 
 
-    return NextResponse.json({
+    cachedStats = {
       communityMembers,
       verifiedMembers,
       recruiterNetwork,
@@ -30,7 +39,10 @@ export async function GET() {
       events,
       emergencyRequests,
       buildProjects
-    });
+    };
+    cacheExpiry = now + 5 * 60 * 1000; // 5 minutes cache duration
+
+    return NextResponse.json(cachedStats);
   } catch (error) {
     console.error('Failed to calculate stats:', error);
     return NextResponse.json({ error: 'Failed to fetch settings' }, { status: 500 });
@@ -47,6 +59,10 @@ export async function POST(request: Request) {
     if (admin.role !== 'Admin') {
       return NextResponse.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
     }
+
+    // Invalidate cached stats
+    cachedStats = null;
+    cacheExpiry = 0;
 
     // Since stats are now computed automatically, POST simply acknowledges and returns the live computed stats
     const candidates = await getCandidates();
