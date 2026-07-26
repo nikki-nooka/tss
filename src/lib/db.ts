@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js';
+import { Client } from '@neondatabase/serverless';
 import fs from 'fs';
 import path from 'path';
 
@@ -103,38 +103,220 @@ export interface SystemSettings {
   eventsConducted: number;
 }
 
-// Initialize Supabase Client
+const connectionString = process.env.DATABASE_URL || '';
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+class PostgresQueryBuilder {
+  constructor(private tableName: string) {}
+
+  select(fields = '*', options?: any) {
+    return new PostgresRequest(this.tableName, 'select', null, fields);
+  }
+
+  insert(values: any[]) {
+    return new PostgresRequest(this.tableName, 'insert', values);
+  }
+
+  update(values: any) {
+    return new PostgresRequest(this.tableName, 'update', values);
+  }
+
+  delete() {
+    return new PostgresRequest(this.tableName, 'delete');
+  }
+
+  upsert(values: any[]) {
+    return new PostgresRequest(this.tableName, 'upsert', values);
+  }
+}
+
+class PostgresRequest implements PromiseLike<any> {
+  private filters: { col: string; val: any }[] = [];
+  private orderCol: string | null = null;
+  private orderAsc = true;
+  private isSingle = false;
+
+  constructor(
+    private tableName: string,
+    private action: 'select' | 'insert' | 'update' | 'delete' | 'upsert',
+    private payload: any = null,
+    private fields = '*'
+  ) {}
+
+  eq(col: string, val: any) {
+    this.filters.push({ col, val });
+    return this;
+  }
+
+  order(col: string, options?: { ascending: boolean }) {
+    this.orderCol = col;
+    this.orderAsc = options?.ascending !== false;
+    return this;
+  }
+
+  single() {
+    this.isSingle = true;
+    return this;
+  }
+
+  async execute(): Promise<{ data: any; count: number; error: any }> {
+    try {
+      const client = new Client({ connectionString });
+      await client.connect();
+
+      let queryText = '';
+      let values: any[] = [];
+
+      if (this.action === 'select') {
+        queryText = `SELECT ${this.fields} FROM "${this.tableName}"`;
+        if (this.filters.length > 0) {
+          const clauses = this.filters.map((f, idx) => `"${f.col}" = $${idx + 1}`);
+          queryText += ` WHERE ${clauses.join(' AND ')}`;
+          values = this.filters.map(f => f.val);
+        }
+        if (this.orderCol) {
+          queryText += ` ORDER BY "${this.orderCol}" ${this.orderAsc ? 'ASC' : 'DESC'}`;
+        }
+        if (this.isSingle) {
+          queryText += ' LIMIT 1';
+        }
+      } 
+      else if (this.action === 'insert') {
+        const rows = this.payload || [];
+        if (rows.length === 0) {
+          await client.end();
+          return { data: null, count: 0, error: null };
+        }
+        const keys = Object.keys(rows[0]);
+        const cols = keys.map(k => `"${k}"`).join(', ');
+        
+        const valueClauses: string[] = [];
+        let valCounter = 1;
+        for (const row of rows) {
+          const rowVals = keys.map(k => {
+            let val = row[k];
+            if (val !== null && typeof val === 'object') {
+              val = JSON.stringify(val);
+            }
+            values.push(val);
+            return `$${valCounter++}`;
+          });
+          valueClauses.push(`(${rowVals.join(', ')})`);
+        }
+        queryText = `INSERT INTO "${this.tableName}" (${cols}) VALUES ${valueClauses.join(', ')} RETURNING *`;
+      }
+      else if (this.action === 'update') {
+        const updates = this.payload || {};
+        const keys = Object.keys(updates);
+        if (keys.length === 0) {
+          await client.end();
+          return { data: null, count: 0, error: null };
+        }
+        
+        let valCounter = 1;
+        const setClauses = keys.map(k => {
+          let val = updates[k];
+          if (val !== null && typeof val === 'object') {
+            val = JSON.stringify(val);
+          }
+          values.push(val);
+          return `"${k}" = $${valCounter++}`;
+        });
+
+        queryText = `UPDATE "${this.tableName}" SET ${setClauses.join(', ')}`;
+        if (this.filters.length > 0) {
+          const whereClauses = this.filters.map(f => {
+            values.push(f.val);
+            return `"${f.col}" = $${valCounter++}`;
+          });
+          queryText += ` WHERE ${whereClauses.join(' AND ')}`;
+        }
+        queryText += ' RETURNING *';
+      }
+      else if (this.action === 'delete') {
+        queryText = `DELETE FROM "${this.tableName}"`;
+        if (this.filters.length > 0) {
+          const clauses = this.filters.map((f, idx) => `"${f.col}" = $${idx + 1}`);
+          queryText += ` WHERE ${clauses.join(' AND ')}`;
+          values = this.filters.map(f => f.val);
+        }
+        queryText += ' RETURNING *';
+      }
+      else if (this.action === 'upsert') {
+        const rows = this.payload || [];
+        if (rows.length === 0) {
+          await client.end();
+          return { data: null, count: 0, error: null };
+        }
+        const keys = Object.keys(rows[0]);
+        const cols = keys.map(k => `"${k}"`).join(', ');
+        
+        const valueClauses: string[] = [];
+        let valCounter = 1;
+        for (const row of rows) {
+          const rowVals = keys.map(k => {
+            let val = row[k];
+            if (val !== null && typeof val === 'object') {
+              val = JSON.stringify(val);
+            }
+            values.push(val);
+            return `$${valCounter++}`;
+          });
+          valueClauses.push(`(${rowVals.join(', ')})`);
+        }
+        
+        const updateClauses = keys.filter(k => k !== 'id').map(k => `"${k}" = EXCLUDED."${k}"`).join(', ');
+        queryText = `INSERT INTO "${this.tableName}" (${cols}) VALUES ${valueClauses.join(', ')}`;
+        queryText += ` ON CONFLICT (id) DO UPDATE SET ${updateClauses} RETURNING *`;
+      }
+
+      const res = await client.query(queryText, values);
+      await client.end();
+
+      let resData: any = res.rows;
+      if (this.isSingle) {
+        resData = res.rows[0] || null;
+      }
+
+      const countVal = Array.isArray(resData) ? resData.length : (resData ? 1 : 0);
+      return { data: resData, count: countVal, error: null };
+    } catch (err: any) {
+      console.error(`Postgres error on table ${this.tableName} action ${this.action}:`, err);
+      return { data: null, count: 0, error: err };
+    }
+  }
+
+  then<TResult1 = any, TResult2 = never>(
+    onfulfilled?: ((value: any) => TResult1 | PromiseLike<TResult1>) | undefined | null,
+    onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null
+  ): Promise<TResult1 | TResult2> {
+    return this.execute().then(onfulfilled, onrejected);
+  }
+}
+
+export const supabase = {
+  from(tableName: string) {
+    return new PostgresQueryBuilder(tableName);
+  }
+};
 
 let isSupabaseOffline = false;
 let connectionChecked = false;
 
 export async function isDbOffline(): Promise<boolean> {
   if (connectionChecked) return isSupabaseOffline;
-  if (!supabaseUrl || !supabaseAnonKey) {
+  if (!connectionString) {
     isSupabaseOffline = true;
     connectionChecked = true;
     return true;
   }
   try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 1200); // 1.2s timeout
-    const res = await fetch(`${supabaseUrl}/rest/v1/candidates?select=id&limit=1`, {
-      headers: {
-        apikey: supabaseAnonKey,
-        Authorization: `Bearer ${supabaseAnonKey}`
-      },
-      signal: controller.signal
-    });
-    clearTimeout(timeoutId);
-    if (!res.ok && res.status !== 406) {
-      isSupabaseOffline = true;
-    }
+    const client = new Client({ connectionString });
+    await client.connect();
+    await client.end();
   } catch (e) {
-    console.warn('Supabase database connection timed out or is offline. App will use local fallback JSON database.');
+    console.warn('Neon database connection timed out or is offline. App will use local fallback JSON database.');
     isSupabaseOffline = true;
   }
   connectionChecked = true;
@@ -441,7 +623,7 @@ export async function getCandidates(): Promise<Candidate[]> {
 
     if (error) throw error;
     
-    return (data || []).map(c => {
+    return (data || []).map((c: any) => {
       const roleDetails = c.roleDetails ? (typeof c.roleDetails === 'object' ? c.roleDetails : JSON.parse(c.roleDetails || '{}')) : {};
       return {
         ...c,
@@ -983,7 +1165,7 @@ export async function getJobs(): Promise<Job[]> {
       .order('postedAt', { ascending: false });
     
     if (error) throw error;
-    return (data || []).map(j => ({
+    return (data || []).map((j: any) => ({
       ...j,
       requirements: Array.isArray(j.requirements) ? j.requirements : JSON.parse(j.requirements || '[]')
     })) as Job[];
