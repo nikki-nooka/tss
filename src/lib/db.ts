@@ -1,4 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
+import fs from 'fs';
+import path from 'path';
 
 // Define TS Interfaces (aligned with Phase 1 updates)
 export interface Candidate {
@@ -107,7 +109,204 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
+let isSupabaseOffline = false;
+let connectionChecked = false;
+
+export async function isDbOffline(): Promise<boolean> {
+  if (connectionChecked) return isSupabaseOffline;
+  if (!supabaseUrl || !supabaseAnonKey) {
+    isSupabaseOffline = true;
+    connectionChecked = true;
+    return true;
+  }
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 1200); // 1.2s timeout
+    const res = await fetch(`${supabaseUrl}/rest/v1/candidates?select=id&limit=1`, {
+      headers: {
+        apikey: supabaseAnonKey,
+        Authorization: `Bearer ${supabaseAnonKey}`
+      },
+      signal: controller.signal
+    });
+    clearTimeout(timeoutId);
+    if (!res.ok && res.status !== 406) {
+      isSupabaseOffline = true;
+    }
+  } catch (e) {
+    console.warn('Supabase database connection timed out or is offline. App will use local fallback JSON database.');
+    isSupabaseOffline = true;
+  }
+  connectionChecked = true;
+  return isSupabaseOffline;
+}
+
+function getLocalCandidates(): Candidate[] {
+  const local = readExtendedLocalDb();
+  if (!local.candidates || local.candidates.length === 0) {
+    local.candidates = globalCandidates.length > 0 ? globalCandidates : [];
+    writeLocalDb(local);
+  }
+  return (local.candidates || []).map(c => {
+    const roleDetails = c.roleDetails ? (typeof c.roleDetails === 'object' ? c.roleDetails : JSON.parse(c.roleDetails || '{}')) : {};
+    return {
+      ...c,
+      preferredRoles: c.preferredRoles ? (Array.isArray(c.preferredRoles) ? c.preferredRoles : JSON.parse(c.preferredRoles || '[]')) : [],
+      skills: c.skills ? (Array.isArray(c.skills) ? c.skills : JSON.parse(c.skills || '[]')) : [],
+      roleDetails,
+      username: roleDetails.username || '',
+      communityScore: roleDetails.communityScore !== undefined ? roleDetails.communityScore : 20,
+      level: roleDetails.level || 'Explorer',
+      memberSince: roleDetails.memberSince || new Date(c.registrationDate || Date.now()).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
+      loginDays: roleDetails.loginDays !== undefined ? roleDetails.loginDays : 1,
+      streak: roleDetails.streak !== undefined ? roleDetails.streak : 1,
+      lastCheckinDate: roleDetails.lastCheckinDate || '',
+      bloodGroup: roleDetails.bloodGroup || '',
+      willingToDonate: roleDetails.willingToDonate !== undefined ? roleDetails.willingToDonate : false,
+      availableForEmergency: roleDetails.availableForEmergency !== undefined ? roleDetails.availableForEmergency : false,
+      lastDonationDate: roleDetails.lastDonationDate || '',
+      emergencyContact: roleDetails.emergencyContact || '',
+      achievements: roleDetails.achievements || [],
+      certificates: roleDetails.certificates || [],
+      coverImage: roleDetails.coverImage || '',
+      bio: roleDetails.bio || '',
+      timeline: roleDetails.timeline || [],
+      experience: roleDetails.experience || [],
+      education: roleDetails.education || [],
+      draftProfileDetails: roleDetails.draftProfileDetails || null
+    };
+  }) as Candidate[];
+}
+
+function getLocalCandidateById(id: string): Candidate | null {
+  const list = getLocalCandidates();
+  return list.find(c => c.id === id) || null;
+}
+
+function insertLocalCandidate(candidate: Candidate): void {
+  const local = readExtendedLocalDb();
+  local.candidates = local.candidates || [];
+  
+  const roleDetails = candidate.roleDetails || {};
+  roleDetails.username = candidate.username || '';
+  roleDetails.communityScore = candidate.communityScore !== undefined ? candidate.communityScore : 20;
+  roleDetails.level = candidate.level || 'Explorer';
+  roleDetails.memberSince = candidate.memberSince || new Date(candidate.registrationDate || Date.now()).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+  roleDetails.loginDays = candidate.loginDays !== undefined ? candidate.loginDays : 1;
+  roleDetails.streak = candidate.streak !== undefined ? candidate.streak : 1;
+  roleDetails.lastCheckinDate = candidate.lastCheckinDate || '';
+  
+  roleDetails.bloodGroup = candidate.bloodGroup || '';
+  roleDetails.willingToDonate = candidate.willingToDonate !== undefined ? candidate.willingToDonate : false;
+  roleDetails.availableForEmergency = candidate.availableForEmergency !== undefined ? candidate.availableForEmergency : false;
+  roleDetails.lastDonationDate = candidate.lastDonationDate || '';
+  roleDetails.emergencyContact = candidate.emergencyContact || '';
+  roleDetails.achievements = candidate.achievements || [];
+  roleDetails.certificates = candidate.certificates || [];
+  roleDetails.coverImage = candidate.coverImage || '';
+  roleDetails.bio = candidate.bio || '';
+  roleDetails.timeline = candidate.timeline || [];
+  roleDetails.experience = candidate.experience || [];
+  roleDetails.education = candidate.education || [];
+
+  const dbCandidate = {
+    ...candidate,
+    preferredRoles: candidate.preferredRoles || [],
+    skills: candidate.skills || [],
+    roleDetails: roleDetails
+  };
+  
+  local.candidates.push(dbCandidate);
+  writeLocalDb(local);
+}
+
+function updateLocalCandidate(id: string, updates: Partial<Candidate>): void {
+  const local = readExtendedLocalDb();
+  local.candidates = local.candidates || [];
+  const idx = local.candidates.findIndex(c => c.id === id);
+  if (idx !== -1) {
+    const dbUpdates = { ...updates };
+    if ((updates as any).resumeLink !== undefined) {
+      (dbUpdates as any).resumePath = (updates as any).resumeLink;
+    }
+    local.candidates[idx] = { ...local.candidates[idx], ...dbUpdates };
+    writeLocalDb(local);
+  }
+}
+
+function deleteLocalCandidate(id: string): void {
+  const local = readExtendedLocalDb();
+  local.candidates = (local.candidates || []).filter(c => c.id !== id);
+  writeLocalDb(local);
+}
+
+function getLocalSettings(): SystemSettings {
+  const local = readExtendedLocalDb();
+  if (!local.settings) {
+    local.settings = {
+      communityMembers: 20000,
+      recruiterNetwork: 100,
+      opportunitiesShared: 800,
+      eventsConducted: 40
+    };
+    writeLocalDb(local);
+  }
+  return local.settings;
+}
+
+function getLocalMessages(): ContactMessage[] {
+  const local = readExtendedLocalDb();
+  if (!local.messages || local.messages.length === 0) {
+    local.messages = globalMessage ? [globalMessage] : [];
+    writeLocalDb(local);
+  }
+  return local.messages;
+}
+
+function insertLocalMessage(msg: ContactMessage): void {
+  const local = readExtendedLocalDb();
+  local.messages = local.messages || [];
+  local.messages.push(msg);
+  writeLocalDb(local);
+}
+
+function getLocalLogs(): AdminActivityLog[] {
+  const local = readExtendedLocalDb();
+  if (!local.activityLogs || local.activityLogs.length === 0) {
+    local.activityLogs = globalLog ? [globalLog] : [];
+    writeLocalDb(local);
+  }
+  return local.activityLogs;
+}
+
+function logLocalAdminAction(adminUser: string, action: string, details: string): void {
+  const local = readExtendedLocalDb();
+  local.activityLogs = local.activityLogs || [];
+  const newLog: AdminActivityLog = {
+    id: `log-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+    adminUser,
+    action,
+    details,
+    timestamp: new Date().toISOString()
+  };
+  local.activityLogs.push(newLog);
+  writeLocalDb(local);
+}
+
+function getLocalForwards(candidateId?: string): ForwardLog[] {
+  const local = readExtendedLocalDb();
+  const list = local.forwards || [];
+  if (candidateId) {
+    return list.filter(f => f.candidateId === candidateId);
+  }
+  return list;
+}
+
 // --- DB Seeder (Self-contained) ---
+let globalCandidates: Candidate[] = [];
+let globalMessage: any = null;
+let globalLog: any = null;
+
 const seedMockData = async () => {
   const initialCandidates: Candidate[] = [
     {
@@ -206,6 +405,10 @@ const seedMockData = async () => {
     timestamp: new Date().toISOString()
   };
 
+  globalCandidates = initialCandidates;
+  globalMessage = initialMessage;
+  globalLog = initialLog;
+
   try {
     // Check if we can seed Candidates
     const { count } = await supabase.from('candidates').select('*', { count: 'exact', head: true });
@@ -229,24 +432,75 @@ if (supabaseUrl && supabaseAnonKey) {
 
 // 1. Candidates Queries
 export async function getCandidates(): Promise<Candidate[]> {
-  const { data, error } = await supabase
-    .from('candidates')
-    .select('*')
-    .order('registrationDate', { ascending: false });
+  if (await isDbOffline()) return getLocalCandidates();
+  try {
+    const { data, error } = await supabase
+      .from('candidates')
+      .select('*')
+      .order('registrationDate', { ascending: false });
 
-  if (error) throw error;
-  
-  return (data || []).map(c => {
-    const roleDetails = c.roleDetails ? (typeof c.roleDetails === 'object' ? c.roleDetails : JSON.parse(c.roleDetails || '{}')) : {};
+    if (error) throw error;
+    
+    return (data || []).map(c => {
+      const roleDetails = c.roleDetails ? (typeof c.roleDetails === 'object' ? c.roleDetails : JSON.parse(c.roleDetails || '{}')) : {};
+      return {
+        ...c,
+        preferredRoles: c.preferredRoles ? (Array.isArray(c.preferredRoles) ? c.preferredRoles : JSON.parse(c.preferredRoles || '[]')) : [],
+        skills: c.skills ? (Array.isArray(c.skills) ? c.skills : JSON.parse(c.skills || '[]')) : [],
+        roleDetails,
+        username: roleDetails.username || '',
+        communityScore: roleDetails.communityScore !== undefined ? roleDetails.communityScore : 20,
+        level: roleDetails.level || 'Explorer',
+        memberSince: roleDetails.memberSince || new Date(c.registrationDate || Date.now()).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
+        loginDays: roleDetails.loginDays !== undefined ? roleDetails.loginDays : 1,
+        streak: roleDetails.streak !== undefined ? roleDetails.streak : 1,
+        lastCheckinDate: roleDetails.lastCheckinDate || '',
+        bloodGroup: roleDetails.bloodGroup || '',
+        willingToDonate: roleDetails.willingToDonate !== undefined ? roleDetails.willingToDonate : false,
+        availableForEmergency: roleDetails.availableForEmergency !== undefined ? roleDetails.availableForEmergency : false,
+        lastDonationDate: roleDetails.lastDonationDate || '',
+        emergencyContact: roleDetails.emergencyContact || '',
+        achievements: roleDetails.achievements || [],
+        certificates: roleDetails.certificates || [],
+        coverImage: roleDetails.coverImage || '',
+        bio: roleDetails.bio || '',
+        timeline: roleDetails.timeline || [],
+        experience: roleDetails.experience || [],
+        education: roleDetails.education || [],
+        draftProfileDetails: roleDetails.draftProfileDetails || null
+      };
+    }) as Candidate[];
+  } catch (err) {
+    console.warn('Supabase getCandidates failed, using local storage:', err);
+    isSupabaseOffline = true;
+    return getLocalCandidates();
+  }
+}
+
+export async function getCandidateById(id: string): Promise<Candidate | null> {
+  if (await isDbOffline()) return getLocalCandidateById(id);
+  try {
+    const { data, error } = await supabase
+      .from('candidates')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error) {
+      if (error.code === 'PGRST116') return null; // Not found code
+      throw error;
+    }
+    
+    const roleDetails = data.roleDetails ? (typeof data.roleDetails === 'object' ? data.roleDetails : JSON.parse(data.roleDetails || '{}')) : {};
     return {
-      ...c,
-      preferredRoles: c.preferredRoles ? (Array.isArray(c.preferredRoles) ? c.preferredRoles : JSON.parse(c.preferredRoles || '[]')) : [],
-      skills: c.skills ? (Array.isArray(c.skills) ? c.skills : JSON.parse(c.skills || '[]')) : [],
+      ...data,
+      preferredRoles: data.preferredRoles ? (Array.isArray(data.preferredRoles) ? data.preferredRoles : JSON.parse(data.preferredRoles || '[]')) : [],
+      skills: data.skills ? (Array.isArray(data.skills) ? data.skills : JSON.parse(data.skills || '[]')) : [],
       roleDetails,
       username: roleDetails.username || '',
       communityScore: roleDetails.communityScore !== undefined ? roleDetails.communityScore : 20,
       level: roleDetails.level || 'Explorer',
-      memberSince: roleDetails.memberSince || new Date(c.registrationDate || Date.now()).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
+      memberSince: roleDetails.memberSince || new Date(data.registrationDate || Date.now()).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
       loginDays: roleDetails.loginDays !== undefined ? roleDetails.loginDays : 1,
       streak: roleDetails.streak !== undefined ? roleDetails.streak : 1,
       lastCheckinDate: roleDetails.lastCheckinDate || '',
@@ -263,52 +517,17 @@ export async function getCandidates(): Promise<Candidate[]> {
       experience: roleDetails.experience || [],
       education: roleDetails.education || [],
       draftProfileDetails: roleDetails.draftProfileDetails || null
-    };
-  }) as Candidate[];
-}
-
-export async function getCandidateById(id: string): Promise<Candidate | null> {
-  const { data, error } = await supabase
-    .from('candidates')
-    .select('*')
-    .eq('id', id)
-    .single();
-
-  if (error) {
-    if (error.code === 'PGRST116') return null; // Not found code
-    throw error;
+    } as Candidate;
+  } catch (err) {
+    console.warn('Supabase getCandidateById failed, using local storage:', err);
+    isSupabaseOffline = true;
+    return getLocalCandidateById(id);
   }
-  
-  const roleDetails = data.roleDetails ? (typeof data.roleDetails === 'object' ? data.roleDetails : JSON.parse(data.roleDetails || '{}')) : {};
-  return {
-    ...data,
-    preferredRoles: data.preferredRoles ? (Array.isArray(data.preferredRoles) ? data.preferredRoles : JSON.parse(data.preferredRoles || '[]')) : [],
-    skills: data.skills ? (Array.isArray(data.skills) ? data.skills : JSON.parse(data.skills || '[]')) : [],
-    roleDetails,
-    username: roleDetails.username || '',
-    communityScore: roleDetails.communityScore !== undefined ? roleDetails.communityScore : 20,
-    level: roleDetails.level || 'Explorer',
-    memberSince: roleDetails.memberSince || new Date(data.registrationDate || Date.now()).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
-    loginDays: roleDetails.loginDays !== undefined ? roleDetails.loginDays : 1,
-    streak: roleDetails.streak !== undefined ? roleDetails.streak : 1,
-    lastCheckinDate: roleDetails.lastCheckinDate || '',
-    bloodGroup: roleDetails.bloodGroup || '',
-    willingToDonate: roleDetails.willingToDonate !== undefined ? roleDetails.willingToDonate : false,
-    availableForEmergency: roleDetails.availableForEmergency !== undefined ? roleDetails.availableForEmergency : false,
-    lastDonationDate: roleDetails.lastDonationDate || '',
-    emergencyContact: roleDetails.emergencyContact || '',
-    achievements: roleDetails.achievements || [],
-    certificates: roleDetails.certificates || [],
-    coverImage: roleDetails.coverImage || '',
-    bio: roleDetails.bio || '',
-    timeline: roleDetails.timeline || [],
-    experience: roleDetails.experience || [],
-    education: roleDetails.education || [],
-    draftProfileDetails: roleDetails.draftProfileDetails || null
-  } as Candidate;
 }
 
 export async function insertCandidate(candidate: Candidate): Promise<void> {
+  if (await isDbOffline()) return insertLocalCandidate(candidate);
+  
   const roleDetails = candidate.roleDetails || {};
   roleDetails.username = candidate.username || '';
   roleDetails.communityScore = candidate.communityScore !== undefined ? candidate.communityScore : 20;
@@ -346,159 +565,216 @@ export async function insertCandidate(candidate: Candidate): Promise<void> {
   delete (dbCandidate as any).streak;
   delete (dbCandidate as any).lastCheckinDate;
 
-  const { error } = await supabase
-    .from('candidates')
-    .insert([dbCandidate]);
+  try {
+    const { error } = await supabase
+      .from('candidates')
+      .insert([dbCandidate]);
 
-  if (error) throw error;
+    if (error) throw error;
+  } catch (err) {
+    console.warn('Supabase insertCandidate failed, using local storage:', err);
+    isSupabaseOffline = true;
+    insertLocalCandidate(candidate);
+  }
 }
 
 export async function updateCandidate(id: string, updates: Partial<Candidate>): Promise<void> {
-  const current = await getCandidateById(id);
-  if (!current) throw new Error('Candidate not found');
+  if (await isDbOffline()) return updateLocalCandidate(id, updates);
+  try {
+    const current = await getCandidateById(id);
+    if (!current) throw new Error('Candidate not found');
 
-  const roleDetails = { ...current.roleDetails, ...updates.roleDetails };
-  if (updates.username !== undefined) roleDetails.username = updates.username;
-  
-  if (updates.communityScore !== undefined) {
-    roleDetails.communityScore = updates.communityScore;
-    if (updates.communityScore < 50) {
-      roleDetails.level = 'Explorer';
-    } else if (updates.communityScore < 150) {
-      roleDetails.level = 'Builder';
-    } else if (updates.communityScore < 300) {
-      roleDetails.level = 'Contributor';
-    } else if (updates.communityScore < 500) {
-      roleDetails.level = 'Leader';
-    } else {
-      roleDetails.level = 'Legend';
+    const roleDetails = { ...current.roleDetails, ...updates.roleDetails };
+    if (updates.username !== undefined) roleDetails.username = updates.username;
+    
+    if (updates.communityScore !== undefined) {
+      roleDetails.communityScore = updates.communityScore;
+      if (updates.communityScore < 50) {
+        roleDetails.level = 'Explorer';
+      } else if (updates.communityScore < 150) {
+        roleDetails.level = 'Builder';
+      } else if (updates.communityScore < 300) {
+        roleDetails.level = 'Contributor';
+      } else if (updates.communityScore < 500) {
+        roleDetails.level = 'Leader';
+      } else {
+        roleDetails.level = 'Legend';
+      }
+      updates.level = roleDetails.level;
+    } else if (updates.level !== undefined) {
+      roleDetails.level = updates.level;
     }
-    updates.level = roleDetails.level;
-  } else if (updates.level !== undefined) {
-    roleDetails.level = updates.level;
-  }
 
-  if (updates.memberSince !== undefined) roleDetails.memberSince = updates.memberSince;
-  if (updates.loginDays !== undefined) roleDetails.loginDays = updates.loginDays;
-  if (updates.streak !== undefined) roleDetails.streak = updates.streak;
-  if (updates.lastCheckinDate !== undefined) roleDetails.lastCheckinDate = updates.lastCheckinDate;
+    if (updates.memberSince !== undefined) roleDetails.memberSince = updates.memberSince;
+    if (updates.loginDays !== undefined) roleDetails.loginDays = updates.loginDays;
+    if (updates.streak !== undefined) roleDetails.streak = updates.streak;
+    if (updates.lastCheckinDate !== undefined) roleDetails.lastCheckinDate = updates.lastCheckinDate;
 
-  // Sync trust-based ecosystem details into roleDetails JSON
-  if (updates.bloodGroup !== undefined) roleDetails.bloodGroup = updates.bloodGroup;
-  if (updates.willingToDonate !== undefined) roleDetails.willingToDonate = updates.willingToDonate;
-  if (updates.availableForEmergency !== undefined) roleDetails.availableForEmergency = updates.availableForEmergency;
-  if (updates.lastDonationDate !== undefined) roleDetails.lastDonationDate = updates.lastDonationDate;
-  if (updates.emergencyContact !== undefined) roleDetails.emergencyContact = updates.emergencyContact;
-  if (updates.achievements !== undefined) roleDetails.achievements = updates.achievements;
-  if (updates.certificates !== undefined) roleDetails.certificates = updates.certificates;
-  if (updates.coverImage !== undefined) roleDetails.coverImage = updates.coverImage;
-  if (updates.bio !== undefined) roleDetails.bio = updates.bio;
-  if (updates.timeline !== undefined) roleDetails.timeline = updates.timeline;
-  if (updates.experience !== undefined) roleDetails.experience = updates.experience;
-  if (updates.education !== undefined) roleDetails.education = updates.education;
-  if (updates.draftProfileDetails !== undefined) roleDetails.draftProfileDetails = updates.draftProfileDetails;
+    // Sync trust-based ecosystem details into roleDetails JSON
+    if (updates.bloodGroup !== undefined) roleDetails.bloodGroup = updates.bloodGroup;
+    if (updates.willingToDonate !== undefined) roleDetails.willingToDonate = updates.willingToDonate;
+    if (updates.availableForEmergency !== undefined) roleDetails.availableForEmergency = updates.availableForEmergency;
+    if (updates.lastDonationDate !== undefined) roleDetails.lastDonationDate = updates.lastDonationDate;
+    if (updates.emergencyContact !== undefined) roleDetails.emergencyContact = updates.emergencyContact;
+    if (updates.achievements !== undefined) roleDetails.achievements = updates.achievements;
+    if (updates.certificates !== undefined) roleDetails.certificates = updates.certificates;
+    if (updates.coverImage !== undefined) roleDetails.coverImage = updates.coverImage;
+    if (updates.bio !== undefined) roleDetails.bio = updates.bio;
+    if (updates.timeline !== undefined) roleDetails.timeline = updates.timeline;
+    if (updates.experience !== undefined) roleDetails.experience = updates.experience;
+    if (updates.education !== undefined) roleDetails.education = updates.education;
+    if (updates.draftProfileDetails !== undefined) roleDetails.draftProfileDetails = updates.draftProfileDetails;
 
-  const dbUpdates = {
-    ...updates,
-    roleDetails
-  };
+    const dbUpdates = {
+      ...updates,
+      roleDetails
+    };
 
-  // Map resumeLink to resumePath column
-  if ((updates as any).resumeLink !== undefined) {
-    (dbUpdates as any).resumePath = (updates as any).resumeLink;
-  }
-
-  // Whitelist candidates table columns to prevent Supabase query failure on non-column updates
-  const allowedColumns = [
-    'id', 'role', 'fullName', 'gender', 'dob', 'mobile', 'email', 'city', 'state', 'country',
-    'highestQualification', 'currentStatus', 'college', 'graduationYear', 'currentRole',
-    'preferredRoles', 'skills', 'experienceLevel', 'resumePath', 'resumeName',
-    'photoPath', 'photoName', 'roleDetails', 'linkedin', 'github', 'portfolio',
-    'instagram', 'xTwitter', 'status', 'memberId', 'registrationDate', 'notes'
-  ];
-
-  Object.keys(dbUpdates).forEach(key => {
-    if (!allowedColumns.includes(key)) {
-      delete (dbUpdates as any)[key];
+    // Map resumeLink to resumePath column
+    if ((updates as any).resumeLink !== undefined) {
+      (dbUpdates as any).resumePath = (updates as any).resumeLink;
     }
-  });
 
-  const { error } = await supabase
-    .from('candidates')
-    .update(dbUpdates)
-    .eq('id', id);
+    // Whitelist candidates table columns to prevent Supabase query failure on non-column updates
+    const allowedColumns = [
+      'id', 'role', 'fullName', 'gender', 'dob', 'mobile', 'email', 'city', 'state', 'country',
+      'highestQualification', 'currentStatus', 'college', 'graduationYear', 'currentRole',
+      'preferredRoles', 'skills', 'experienceLevel', 'resumePath', 'resumeName',
+      'photoPath', 'photoName', 'roleDetails', 'linkedin', 'github', 'portfolio',
+      'instagram', 'xTwitter', 'status', 'memberId', 'registrationDate', 'notes'
+    ];
 
-  if (error) throw error;
+    Object.keys(dbUpdates).forEach(key => {
+      if (!allowedColumns.includes(key)) {
+        delete (dbUpdates as any)[key];
+      }
+    });
+
+    const { error } = await supabase
+      .from('candidates')
+      .update(dbUpdates)
+      .eq('id', id);
+
+    if (error) throw error;
+  } catch (err) {
+    console.warn('Supabase updateCandidate failed, using local storage:', err);
+    isSupabaseOffline = true;
+    updateLocalCandidate(id, updates);
+  }
 }
 
 export async function deleteCandidate(id: string): Promise<void> {
-  const { error } = await supabase
-    .from('candidates')
-    .delete()
-    .eq('id', id);
+  if (await isDbOffline()) return deleteLocalCandidate(id);
+  try {
+    const { error } = await supabase
+      .from('candidates')
+      .delete()
+      .eq('id', id);
 
-  if (error) throw error;
+    if (error) throw error;
+  } catch (err) {
+    console.warn('Supabase deleteCandidate failed, using local storage:', err);
+    isSupabaseOffline = true;
+    deleteLocalCandidate(id);
+  }
 }
 
 // 2. Settings Queries
 export async function getSettings(): Promise<SystemSettings> {
-  const { data, error } = await supabase
-    .from('settings')
-    .select('*')
-    .eq('id', 'homepage_stats')
-    .single();
+  if (await isDbOffline()) return getLocalSettings();
+  try {
+    const { data, error } = await supabase
+      .from('settings')
+      .select('*')
+      .eq('id', 'homepage_stats')
+      .single();
 
-  if (error) {
-    // If not found, return default settings
-    return {
-      communityMembers: 500,
-      recruiterNetwork: 100,
-      opportunitiesShared: 30,
-      eventsConducted: 20
-    };
+    if (error) {
+      return getLocalSettings();
+    }
+    return data as SystemSettings;
+  } catch (err) {
+    console.warn('Supabase getSettings failed, using local storage:', err);
+    isSupabaseOffline = true;
+    return getLocalSettings();
   }
-  return data as SystemSettings;
 }
 
 export async function updateSettings(settings: SystemSettings): Promise<void> {
-  const { error } = await supabase
-    .from('settings')
-    .upsert([{ id: 'homepage_stats', ...settings }]);
+  if (await isDbOffline()) {
+    const local = readExtendedLocalDb();
+    local.settings = settings;
+    writeLocalDb(local);
+    return;
+  }
+  try {
+    const { error } = await supabase
+      .from('settings')
+      .upsert([{ id: 'homepage_stats', ...settings }]);
 
-  if (error) throw error;
+    if (error) throw error;
+  } catch (err) {
+    console.warn('Supabase updateSettings failed, using local storage:', err);
+    isSupabaseOffline = true;
+    const local = readExtendedLocalDb();
+    local.settings = settings;
+    writeLocalDb(local);
+  }
 }
 
 // 3. Contact Messages Queries
 export async function getMessages(): Promise<ContactMessage[]> {
-  const { data, error } = await supabase
-    .from('messages')
-    .select('*')
-    .order('submittedAt', { ascending: false });
+  if (await isDbOffline()) return getLocalMessages();
+  try {
+    const { data, error } = await supabase
+      .from('messages')
+      .select('*')
+      .order('submittedAt', { ascending: false });
 
-  if (error) throw error;
-  return data as ContactMessage[];
+    if (error) throw error;
+    return data as ContactMessage[];
+  } catch (err) {
+    console.warn('Supabase getMessages failed, using local storage:', err);
+    isSupabaseOffline = true;
+    return getLocalMessages();
+  }
 }
 
 export async function insertMessage(msg: ContactMessage): Promise<void> {
-  const { error } = await supabase
-    .from('messages')
-    .insert([msg]);
+  if (await isDbOffline()) return insertLocalMessage(msg);
+  try {
+    const { error } = await supabase
+      .from('messages')
+      .insert([msg]);
 
-  if (error) throw error;
+    if (error) throw error;
+  } catch (err) {
+    console.warn('Supabase insertMessage failed, using local storage:', err);
+    isSupabaseOffline = true;
+    insertLocalMessage(msg);
+  }
 }
 
 // 4. Activity Logs Queries
 export async function getActivityLogs(): Promise<AdminActivityLog[]> {
-  const { data, error } = await supabase
-    .from('activity_logs')
-    .select('*')
-    .order('timestamp', { ascending: false });
+  if (await isDbOffline()) return getLocalLogs();
+  try {
+    const { data, error } = await supabase
+      .from('activity_logs')
+      .select('*')
+      .order('timestamp', { ascending: false });
 
-  if (error) throw error;
-  return data as AdminActivityLog[];
+    if (error) throw error;
+    return data as AdminActivityLog[];
+  } catch (err) {
+    console.warn('Supabase getActivityLogs failed, using local storage:', err);
+    isSupabaseOffline = true;
+    return getLocalLogs();
+  }
 }
 
 export async function logAdminAction(adminUser: string, action: string, details: string): Promise<void> {
+  if (await isDbOffline()) return logLocalAdminAction(adminUser, action, details);
   const newLog: AdminActivityLog = {
     id: `log-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
     adminUser,
@@ -506,34 +782,59 @@ export async function logAdminAction(adminUser: string, action: string, details:
     details,
     timestamp: new Date().toISOString()
   };
-  const { error } = await supabase
-    .from('activity_logs')
-    .insert([newLog]);
+  try {
+    const { error } = await supabase
+      .from('activity_logs')
+      .insert([newLog]);
 
-  if (error) {
-    console.error('Failed to log admin action to Supabase:', error);
+    if (error) throw error;
+  } catch (err) {
+    console.warn('Supabase logAdminAction failed, using local storage:', err);
+    isSupabaseOffline = true;
+    logLocalAdminAction(adminUser, action, details);
   }
 }
 
 // 5. Recruiter Forwarding Queries
 export async function getForwards(candidateId?: string): Promise<ForwardLog[]> {
-  let query = supabase.from('forwards').select('*');
-  
-  if (candidateId) {
-    query = query.eq('candidateId', candidateId);
+  if (await isDbOffline()) return getLocalForwards(candidateId);
+  try {
+    let query = supabase.from('forwards').select('*');
+    if (candidateId) {
+      query = query.eq('candidateId', candidateId);
+    }
+    const { data, error } = await query.order('sentDate', { ascending: false });
+    if (error) throw error;
+    return data as ForwardLog[];
+  } catch (err) {
+    console.warn('Supabase getForwards failed, using local storage:', err);
+    isSupabaseOffline = true;
+    return getLocalForwards(candidateId);
   }
-
-  const { data, error } = await query.order('sentDate', { ascending: false });
-  if (error) throw error;
-  return data as ForwardLog[];
 }
 
 export async function insertForward(log: ForwardLog): Promise<void> {
-  const { error } = await supabase
-    .from('forwards')
-    .insert([log]);
+  if (await isDbOffline()) {
+    const local = readExtendedLocalDb();
+    local.forwards = local.forwards || [];
+    local.forwards.push(log);
+    writeLocalDb(local);
+    return;
+  }
+  try {
+    const { error } = await supabase
+      .from('forwards')
+      .insert([log]);
 
-  if (error) throw error;
+    if (error) throw error;
+  } catch (err) {
+    console.warn('Supabase insertForward failed, using local storage:', err);
+    isSupabaseOffline = true;
+    const local = readExtendedLocalDb();
+    local.forwards = local.forwards || [];
+    local.forwards.push(log);
+    writeLocalDb(local);
+  }
 }
 
 export async function updateForward(id: string, updates: Partial<ForwardLog>): Promise<void> {
@@ -546,8 +847,8 @@ export async function updateForward(id: string, updates: Partial<ForwardLog>): P
 }
 
 // 6. Job Board Support & Helpers
-import fs from 'fs';
-import path from 'path';
+
+
 
 export interface Job {
   id: string;
@@ -590,13 +891,33 @@ interface FallbackStore {
   applications: JobApplication[];
   opportunities?: Opportunity[];
   emergencies?: EmergencyRequest[];
+  candidates?: Candidate[];
+  messages?: ContactMessage[];
+  activityLogs?: AdminActivityLog[];
+  settings?: SystemSettings;
+  forwards?: ForwardLog[];
 }
 
 function readLocalDb(): FallbackStore {
   try {
     if (fs.existsSync(LOCAL_DB_PATH)) {
       const content = fs.readFileSync(LOCAL_DB_PATH, 'utf-8');
-      return JSON.parse(content);
+      const data = JSON.parse(content);
+      if (!data.jobs) data.jobs = [];
+      if (!data.applications) data.applications = [];
+      if (!data.candidates) data.candidates = [];
+      if (!data.messages) data.messages = [];
+      if (!data.activityLogs) data.activityLogs = [];
+      if (!data.opportunities) data.opportunities = [];
+      if (!data.emergencies) data.emergencies = [];
+      if (!data.settings) data.settings = {
+        communityMembers: 20000,
+        recruiterNetwork: 100,
+        opportunitiesShared: 800,
+        eventsConducted: 40
+      };
+      if (!data.forwards) data.forwards = [];
+      return data;
     }
   } catch (e) {
     console.error('Error reading fallback DB:', e);
@@ -851,6 +1172,15 @@ export interface EmergencyRequest {
 // Extends FallbackStore inside writeLocalDb/readLocalDb
 function readExtendedLocalDb() {
   const local = readLocalDb();
+  if (!local.candidates || local.candidates.length === 0) {
+    local.candidates = globalCandidates.length > 0 ? globalCandidates : [];
+  }
+  if (!local.messages || local.messages.length === 0) {
+    local.messages = globalMessage ? [globalMessage] : [];
+  }
+  if (!local.activityLogs || local.activityLogs.length === 0) {
+    local.activityLogs = globalLog ? [globalLog] : [];
+  }
   if (!local.opportunities) {
     // Seed initial mock opportunities
     local.opportunities = [
